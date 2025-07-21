@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.0.1
+
+### Patch Changes
+
+- fix(createApp): one command for standtard project init
+
 ## 2.0.0
 
 ### Major Changes
