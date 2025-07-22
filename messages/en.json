@@ -13,7 +13,8 @@
     "description": "Transform your ideas into breathtaking visuals with Reve Image's AI-powered image generation. Unleash your creativity with the cutting-edge technology.",
     "button": "Get Started",
     "about": "Enjoy 20 free images daily with Reve Image",
-    "heroImageAlt": "Reve Image AI-generated artwork showcasing the power of the platform"
+    "heroImageAlt": "Reve Image AI-generated artwork showcasing the power of the platform",
+    "heroImageUrl": "https://r2.d8ger.com/default.webp"
   },
   "usage": {
     "title": "How to use",

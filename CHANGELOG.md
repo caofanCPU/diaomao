@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.0.2
+
+### Patch Changes
+
+- fix(createApp): light
+
 ## 2.0.1
 
 ### Patch Changes
