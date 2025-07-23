@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.1.0
+
+### Minor Changes
+
+- fix(section): style fix
+
 ## 2.0.3
 
 ### Patch Changes
