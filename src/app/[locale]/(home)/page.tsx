@@ -6,7 +6,7 @@ import { CTA, FAQ, Features, PricePlan, SeoContent, Tips, Usage } from "@windrun
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300">
+    <>
       <Hero />
       <Usage />
       <Features />
@@ -15,7 +15,7 @@ export default function Home() {
       <PricePlan pricePlanConfig={pricePlanConfig} currency="￥" />
       <SeoContent />
       <CTA />
-    </main>
+    </>
   )
 }
 

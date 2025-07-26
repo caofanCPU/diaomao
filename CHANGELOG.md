@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.2.0
+
+### Minor Changes
+
+- feat(banner): depend-off fumadocs-banner
+
 ## 2.1.2
 
 ### Patch Changes
