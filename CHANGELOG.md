@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.3.1
+
+### Patch Changes
+
+- feat(main): gallery use R2
+
 ## 2.3.0
 
 ### Minor Changes
