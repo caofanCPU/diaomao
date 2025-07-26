@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.3.0
+
+### Minor Changes
+
+- fix(style): hero text style
+
 ## 2.2.0
 
 ### Minor Changes
