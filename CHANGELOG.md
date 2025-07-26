@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.1.2
+
+### Patch Changes
+
+- fix(mdx): remove unuse mdx blog
+
 ## 2.1.1
 
 ### Patch Changes
