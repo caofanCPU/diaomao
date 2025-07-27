@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.3.2
+
+### Patch Changes
+
+- fix(main): gallery hotfix
+
 ## 2.3.1
 
 ### Patch Changes
