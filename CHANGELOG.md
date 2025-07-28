@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.3.3
+
+### Patch Changes
+
+- feat(style): i18n translation now support rich text by origin html tag
+
 ## 2.3.2
 
 ### Patch Changes
