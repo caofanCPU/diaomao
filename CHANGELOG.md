@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.3.4
+
+### Patch Changes
+
+- feat(style): price-plan now use new UI
+
 ## 2.3.3
 
 ### Patch Changes
