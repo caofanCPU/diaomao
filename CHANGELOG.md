@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.3.5
+
+### Patch Changes
+
+- feat(update): SEO use base component
+
 ## 2.3.4
 
 ### Patch Changes

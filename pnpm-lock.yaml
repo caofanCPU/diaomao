@@ -54,11 +54,11 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(@types/react-dom@19.1.3(@types/react@19.1.2))(@types/react@19.1.2)(clsx@2.1.1)(next-intl@3.26.5(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(next-themes@0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)(tailwindcss@4.1.11)
       '@windrun-huaiin/lib':
-        specifier: ^6.1.1
-        version: 6.1.1(clsx@2.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)
+        specifier: ^6.1.2
+        version: 6.1.2(clsx@2.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)
       '@windrun-huaiin/third-ui':
-        specifier: ^5.12.3
-        version: 5.12.3(@types/react-dom@19.1.3(@types/react@19.1.2))(@types/react@19.1.2)(acorn@8.15.0)(clsx@2.1.1)(next-intl@3.26.5(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(next-themes@0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(nprogress@0.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)(tailwindcss@4.1.11)(typescript@5.8.3)
+        specifier: ^5.12.4
+        version: 5.12.4(@types/react-dom@19.1.3(@types/react@19.1.2))(@types/react@19.1.2)(acorn@8.15.0)(clsx@2.1.1)(next-intl@3.26.5(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(next-themes@0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(nprogress@0.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)(tailwindcss@4.1.11)(typescript@5.8.3)
       autoprefixer:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.6)
@@ -166,8 +166,8 @@ importers:
         specifier: ^8.32.1
         version: 8.38.0(eslint@9.32.0(jiti@2.5.1))(typescript@5.8.3)
       '@windrun-huaiin/dev-scripts':
-        specifier: ^6.8.0
-        version: 6.8.0(typescript@5.8.3)
+        specifier: ^6.8.1
+        version: 6.8.1(typescript@5.8.3)
       eslint:
         specifier: ^9.27.0
         version: 9.32.0(jiti@2.5.1)
@@ -1817,22 +1817,22 @@ packages:
       tailwind-merge: ^3.0.0
       tailwindcss: ^4.1.7
 
-  '@windrun-huaiin/dev-scripts@6.8.0':
-    resolution: {integrity: sha512-6d5JkYCUS0UFfZI04vQQ5SmxjNJBMzBGChKlvw+oesq3say0OpCRGa8zDbrMozfIuZmbPyOPauBm+pyWKqqIkg==}
+  '@windrun-huaiin/dev-scripts@6.8.1':
+    resolution: {integrity: sha512-hT9bYKMIh2vqq1Otz6vJA+MmF9z1UjI3zalKjHgYonF3wTG1oiVXa0US8Xy2/W5r5vKH0r/eGZ4YAXerWk5nQg==}
     hasBin: true
     peerDependencies:
       typescript: '>=4.0.0'
 
-  '@windrun-huaiin/lib@6.1.1':
-    resolution: {integrity: sha512-VV6d8L8Fu7iUWig8BfVC9W5avy4AQF4G3pu/D+m1W8bhmGxghkAwa8dND5r3v0zpTODfrX40OxDZtljsfnFEzg==}
+  '@windrun-huaiin/lib@6.1.2':
+    resolution: {integrity: sha512-1DLLBWw7jdJJPMxvcLh1nYA2txbxnxTkkPbMK4Grt2PTejBT9irWpAzrpJ2yrDU70o077faPujLQxWxulqPZ6g==}
     peerDependencies:
       clsx: ^2.1.1
       react: 19.1.0
       react-dom: 19.1.0
       tailwind-merge: ^3.3.0
 
-  '@windrun-huaiin/third-ui@5.12.3':
-    resolution: {integrity: sha512-OSqkqLZzcys8XTRRAKGUYz/2zXDPdc2P4L4ASHDXIm1yplrUFkVl2Pfcm83X7W2vRzr3nxc+2YgeZe32fFTv8g==}
+  '@windrun-huaiin/third-ui@5.12.4':
+    resolution: {integrity: sha512-TPJ6KPsvj6mTHY5lxBRNj9k/FRTztrP+1VIUH8oCGazJPO85BC4s+KtY11RezgC0+brKC7oGkW9CPScBAaepaw==}
     peerDependencies:
       clsx: ^2.0.0
       next: 15.3.2
@@ -6066,7 +6066,7 @@ snapshots:
       '@radix-ui/react-dropdown-menu': 2.1.15(@types/react-dom@19.1.3(@types/react@19.1.2))(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-label': 2.1.7(@types/react-dom@19.1.3(@types/react@19.1.2))(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-slot': 1.2.3(@types/react@19.1.2)(react@19.1.0)
-      '@windrun-huaiin/lib': 6.1.1(clsx@2.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)
+      '@windrun-huaiin/lib': 6.1.2(clsx@2.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       lucide-react: 0.525.0(react@19.1.0)
@@ -6082,7 +6082,7 @@ snapshots:
       - '@types/react-dom'
       - supports-color
 
-  '@windrun-huaiin/dev-scripts@6.8.0(typescript@5.8.3)':
+  '@windrun-huaiin/dev-scripts@6.8.1(typescript@5.8.3)':
     dependencies:
       commander: 12.1.0
       fast-glob: 3.3.3
@@ -6090,7 +6090,7 @@ snapshots:
       picocolors: 1.1.1
       typescript: 5.8.3
 
-  '@windrun-huaiin/lib@6.1.1(clsx@2.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)':
+  '@windrun-huaiin/lib@6.1.2(clsx@2.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)':
     dependencies:
       clsx: 2.1.1
       date-fns: 2.30.0
@@ -6105,7 +6105,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@windrun-huaiin/third-ui@5.12.3(@types/react-dom@19.1.3(@types/react@19.1.2))(@types/react@19.1.2)(acorn@8.15.0)(clsx@2.1.1)(next-intl@3.26.5(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(next-themes@0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(nprogress@0.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)(tailwindcss@4.1.11)(typescript@5.8.3)':
+  '@windrun-huaiin/third-ui@5.12.4(@types/react-dom@19.1.3(@types/react@19.1.2))(@types/react@19.1.2)(acorn@8.15.0)(clsx@2.1.1)(next-intl@3.26.5(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0))(next-themes@0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(nprogress@0.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)(tailwindcss@4.1.11)(typescript@5.8.3)':
     dependencies:
       '@clerk/localizations': 3.20.4
       '@clerk/nextjs': 6.27.1(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
