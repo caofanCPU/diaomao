@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.3.6
+
+### Patch Changes
+
+- fix(app): SEO config hotfix
+
 ## 2.3.5
 
 ### Patch Changes
