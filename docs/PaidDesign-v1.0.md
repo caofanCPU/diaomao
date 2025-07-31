@@ -206,6 +206,7 @@
 | `user_id`           | UUID         | 用户ID，唯一用户标识符，用于关联其他表   |
 | `fingerprint_id`    | String       | 匿名用户的Fingerprint标识符            |
 | `email`             | String       | 用户电子邮件（匿名用户可为空）         |
+| `status`            | Enum         | 状态： anonymous、registered、frozen、deleted等             |
 | `created_at`        | Timestamp    | 账户创建时间戳                        |
 | `updated_at`        | Timestamp    | 最后更新时间戳                        |
 
@@ -253,7 +254,7 @@
 | `order_created_at`        | Timestamp    | 订单创建时间戳                        |
 | `order_expired_at`        | Timestamp    | 订单过期时间戳                        |
 | `order_updated_at`        | Timestamp    | 订单最后更新时间戳                        |
-| `transaction_id`    | String       | Stripe交易ID，唯一交易标识符                 |
+| `stripe_transaction_id`    | String       | Stripe交易ID，唯一交易标识符                 |
 | `stripe_subscription_id` | String   | Stripe订阅ID (sub_xxx)                |
 | `stripe_session_id` | String       | Stripe Checkout Session ID (cs_xxx)    |
 | `stripe_invoice_id` | String       | Stripe发票ID (in_xxx)                 |
@@ -282,6 +283,7 @@
 | `id`                | BigInt       | 主键，唯一使用记录ID                   |
 | `user_id`           | UUID         | 外键，引用`Users`表                     |
 | `feature`           | String       | 使用的功能（例如，API调用、工具）      |
+| `order_id`          | String       | 订单ID，订单标识符可为null                 |
 | `credit_type`       | Enum         | 积分类型：free、paid                    |
 | `operation_type`    | Enum         | 操作类型：consume、recharge、freeze、unfreeze                |
 | `credits_used`      | Integer      | 消耗的积分数量                        |
@@ -378,6 +380,7 @@ classDiagram
         string user_id FK
         string fingerprint_id
         string email
+        <<enumeration>> status
         string created_at
         string updated_at
     }
@@ -416,7 +419,7 @@ classDiagram
         string order_created_at
         string order_expired_at
         string order_updated_at
-        string transaction_id
+        string stripe_transaction_id
         string stripe_subscription_id
         string stripe_session_id
         string stripe_invoice_id
@@ -442,6 +445,7 @@ classDiagram
         number id PK
         string user_id
         string feature
+        string order_id
         <<enumeration>> credit_type
         <<enumeration>> operation_type
         int credits_used
