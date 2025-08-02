@@ -516,7 +516,7 @@ classDiagram
 #### 3.5.1 核心业务流程架构
 
 ```mermaid
-graph TB
+flowchart LR
     subgraph "用户身份层"
         U[Users表<br/>用户身份管理]
         U --> |fingerprint_id| A[匿名用户识别]
@@ -610,25 +610,34 @@ sequenceDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> 用户注册: 创建Users记录
-    用户注册 --> 积分初始化: 创建Credits记录
-    积分初始化 --> 订阅购买: 用户选择订阅计划
-    订阅购买 --> 订单创建: 创建Transactions记录
-    订单创建 --> 支付处理: order_status=created
-    支付处理 --> 积分充值: order_status=success
-    积分充值 --> 积分使用: 用户使用功能
-    积分使用 --> 积分使用: 继续使用功能
-    积分使用 --> 订阅续费: 订阅周期结束
-    订阅续费 --> 积分充值: 自动续费成功
-    积分充值 --> 积分使用: 继续使用功能
-    积分使用 --> [*]: 用户注销
+    direction TB  % 整体纵向布局，让初始流程和积分操作上下排列
     
-    state 积分操作 {
+    % 定义初始流程状态，内部用LR横向布局
+    state "基础操作" as InitialFlow {
+        direction LR  
+        [*] --> 创建Users记录
+        创建Users记录 --> 创建Credits记录
+        创建Credits记录 --> 用户选择订阅计划
+        用户选择订阅计划 --> 创建Transactions记录
+        创建Transactions记录 --> 订单创建初始化: order_status=created
+    }
+
+    % 定义积分操作状态，内部可根据需求调整布局，这里也用LR示例
+    state "积分操作" as CreditOps {
+        direction LR  
+        [*] --> 积分消耗: 用户注销
+        积分充值 --> 积分消耗: 继续使用功能
         积分充值 --> 积分消耗: 用户使用功能
+        订阅续费 --> 积分充值: 自动续费成功
         积分消耗 --> 积分充值: 新订阅/购买
         积分消耗 --> 积分不足: 余额耗尽
         积分不足 --> 积分充值: 用户购买积分
+        积分消耗 --> 积分消耗: 继续使用功能
+        积分消耗 --> 订阅续费: 订阅周期结束
     }
+
+    % 从初始流程指向积分操作，实现上下并列结构衔接
+    InitialFlow --> CreditOps: order_status=success
 ```
 
 
@@ -763,88 +772,142 @@ stateDiagram-v2
 以下是匿名用户到注册用户、注销、再次注册的综合数据流程图，展示数据如何在系统中流动。
 
 ```mermaid
-graph TD
-    A[用户访问平台] --> B{检查Fingerprint ID}
-    B -->|无记录| C[生成user_id和fingerprint_id]
-    C --> D[插入Users表: user_id, fingerprint_id]
-    D --> E[分配50免费积分]
-    E --> F[记录到Credits表]
-    F --> G[匿名用户使用功能]
-    G --> H[记录到Credit_Usage表]
-    H --> I{积分是否足够?}
-    I -->|是| G
-    I -->|否| J[提示注册或购买]
-    B -->|有记录| K{用户状态?}
-    K -->|匿名| G
-    K -->|注册| L[验证登录凭证]
-    L -->|成功| M[访问Subscriptions/Credits]
-    M --> N[注册用户操作: 订阅/购买/使用]
-    N --> O{用户注销?}
-    O -->|是| P[验证身份]
-    P --> Q[备份用户数据到UserBackup]
-    Q --> R[硬删除Users及关联表记录]
-    R --> S[生成新user_id和fingerprint_id]
-    S --> T[恢复匿名用户]
-    T --> G
-    O -->|否| N
-    J --> U{用户注册?}
-    U -->|是| V[提交注册信息]
-    V --> W[更新Users表: email, password]
-    W --> L
-    U -->|否| G
+flowchart LR
+
+    %% ========== 模块1：匿名用户初始化（内部强制横向） ==========
+    subgraph 匿名用户初始化
+        direction LR  % 模块内横向
+        A[用户访问平台] --> B{检查Fingerprint ID}
+        B -->|无记录| C[生成user_id/fingerprint_id]
+        C --> D[插入Users表]
+        D --> E[分配50免费积分]
+        E --> F[记录到Credits表]
+    end
+
+    %% ========== 模块2：已有指纹ID处理（内部强制横向） ==========
+    subgraph 已有指纹ID处理
+        direction LR  % 模块内横向
+        B -->|有记录| G{用户状态?}
+        G -->|匿名| H[进入匿名流程]
+        G -->|注册| I[验证登录凭证]
+        I --> J[访问Subscriptions/Credits]
+    end
+
+    %% ========== 模块3：匿名用户功能使用（内部强制横向） ==========
+    subgraph 匿名用户功能使用
+        direction LR  % 模块内横向
+        H --> K[匿名用户使用功能]
+        K --> L[记录Credit_Usage表]
+        L --> M{积分是否足够?}
+        M -->|是| K
+        M -->|否| N[提示注册/购买]
+    end
+
+    %% ========== 模块4：注册用户操作（内部强制横向） ==========
+    subgraph 注册用户操作
+        direction LR  % 模块内横向
+        J --> O[注册用户操作: 订阅/购买/使用]
+        O --> P{用户注销?}
+        P -->|是| Q[备份UserBackup表]
+        Q --> R[硬删除关联表]
+        R --> S[恢复匿名用户]
+        S --> H
+        P -->|否| O
+    end
+
+    %% ========== 模块5：注册引导（内部强制横向） ==========
+    subgraph 注册引导
+        direction LR  % 模块内横向
+        N --> U{用户注册?}
+        U -->|是| V[提交注册信息]
+        V --> W[更新Users表]
+        W --> I
+        U -->|否| H
+    end
 ```
 
 ### 5.2 匿名用户积分使用流程图
 
 ```mermaid
-graph TD
-    A[用户访问平台] --> B{分配Fingerprint ID}
-    B --> C[分配50个免费积分]
-    C --> D[更新Credits表: balance_free=50, total_free_limit=50]
-    D --> E[插入Credit_Usage: recharge, free]
-    E --> F[用户尝试使用功能]
-    F --> G{检查免费积分余额}
-    G -->|足够| H[扣除free积分]
-    H --> I[更新Credits表: 减少balance_free]
-    I --> J[插入Credit_Usage: consume, free]
-    J --> K[功能访问授权]
-    G -->|不足| L[提示注册或购买]
-    L --> M{用户注册？}
-    M -->|是| N[将Fingerprint关联到用户ID]
-    M -->|否| O[结束会话]
-    N --> P[重定向到订阅/购买]
+flowchart  LR
+    %% 模块1：初始分配流程（内部横向）
+    subgraph 初始分配流程
+        direction LR
+        A[用户访问平台] --> B{分配Fingerprint ID}
+        B --> C[分配50个免费积分]
+        C --> D[更新Credits表: balance_free=50, total_free_limit=50]
+        D --> E[插入Credit_Usage: recharge, free]
+    end
+    
+    %% 模块2：功能使用流程（内部横向）
+    subgraph 功能使用流程
+        direction TB
+        H[扣除free积分] --> I[更新Credits表: 减少balance_free]
+        I --> J[插入Credit_Usage: consume, free]
+        J --> K[功能访问授权]
+    end
+    
+    %% 模块3：积分不足处理（内部横向）
+    subgraph 积分不足处理
+        direction TB
+        L[提示注册或购买] --> M{用户注册？}
+        M -->|是| N[将Fingerprint关联到用户ID]
+        M -->|否| O[结束会话]
+        N --> P[重定向到订阅/购买]
+    end
+    
+    %% 模块间连接
+    初始分配流程 -->|使用功能| G{检查免费积分余额}
+    G{检查免费积分余额} -->|足够| 功能使用流程
+    G{检查免费积分余额} --->|不足| 积分不足处理
+    功能使用流程 ---> 积分不足处理
 ```
 
 ### 5.3 登录用户订阅流程图
 
 ```mermaid
-graph TD
-    A[用户登录] --> B[导航到订阅界面]
-    B --> C{选择操作}
-    C -->|订阅| D[选择计划]
-    D --> E[创建Stripe Checkout Session]
-    E --> F[重定向到Stripe]
-    F --> G[用户完成支付]
-    G --> H[Stripe Webhook: 支付成功]
-    H --> I[更新Subscriptions表]
-    I --> J[创建Transactions记录]
-    J --> K[从credits_granted获取积分数量]
-    K --> L[更新Credits表: 增加balance_paid, total_paid_limit]
-    L --> M[插入Credit_Usage: recharge, paid]
-    M --> N[记录交易完成]
-    C -->|升级/降级| O[选择新计划]
-    O --> P[计算按比例分配费用]
-    P --> E
-    C -->|取消| Q[向Stripe发送取消请求]
-    Q --> R[更新订阅状态: 已取消]
-    C -->|附加包| S[选择积分包]
-    S --> E
+flowchart LR
+    %% ========== 子图1：核心操作与分支（内部横向布局） ==========
+    subgraph 操作与分支
+        direction LR  %% 子图内节点横向排列
+        A[用户登录] --> B[导航到订阅界面]
+        B --> C{选择操作}
+        %% 所有分支都在第一个子图内
+        C -->|订阅| D[选择计划]
+        C -->|升级/降级| E[选择新计划]
+        C -->|取消| F[向Stripe发送取消请求]
+        C -->|附加包| G[选择积分包]
+        %% 汇聚到统一节点，进入支付流程
+        D & E & G --> H[创建Stripe Checkout Session]
+        F --> I[更新订阅状态: 已取消]
+        H --> J[重定向到Stripe]
+    end
+
+    %% ========== 子图2：支付与订阅更新（内部横向布局） ==========
+    subgraph 支付与更新
+        direction LR  %% 子图内节点横向排列
+        J --> K[用户完成支付]
+        K --> L[Stripe Webhook: 支付成功]
+        L --> M[更新Subscriptions表]
+        M --> N[创建Transactions记录]
+    end
+
+    %% ========== 子图3：积分与交易收尾（内部横向布局） ==========
+    subgraph 积分与收尾
+        direction LR  %% 子图内节点横向排列
+        N --> O[从credits_granted获取积分数量]
+        O --> P[更新Credits表: 增加balance_paid, total_paid_limit]
+        P --> Q[插入Credit_Usage: recharge, paid]
+        Q --> R[记录交易完成]
+    end
+
+    
 ```
 
 ### 5.4 积分操作流程图
 
 ```mermaid
-graph TD
+flowchart LR
     A[积分操作请求] --> B{操作类型}
     
     B -->|消耗| C[检查积分余额]
