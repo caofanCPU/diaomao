@@ -1,4 +1,4 @@
-# 订阅与积分系统产品设计文档 v1.0
+# 订阅与积分系统产研设计文档 v1.0
 
 ## 1. 概述
 
@@ -1098,24 +1098,26 @@ sequenceDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Anonymous : 用户访问平台
-    state Anonymous
-    Anonymous --> Registering : 用户选择注册
-    state Registering
-    Registering --> Registered : 提交注册信息
-    state Registered
-    Registered --> LoggedIn : 登录成功
-    state LoggedIn
-    LoggedIn --> LoggedIn : 用户操作(订阅/使用)
-    LoggedIn --> Deleting : 用户请求注销
-    state Deleting
-    Deleting --> Backup : 备份数据
-    state Backup
-    Backup --> Deleted : 硬删除
-    state Deleted
-    Deleted --> Anonymous : 新访问
+    direction TB
+    
+    [*] --> Anonymous
+    
+    Anonymous --> Registering : 选择注册
     Anonymous --> [*] : 离开平台
-    LoggedIn --> [*] : 登出
+    
+    Registering --> Registered : 提交信息完成注册
+    
+    Registered --> LoggedIn : 登录成功
+    
+    LoggedIn --> LoggedIn : 进行操作(订阅/使用)
+    LoggedIn --> Anonymous : 登出
+    LoggedIn --> Deleting : 发起注销请求
+    
+    Deleting --> Backup : 执行数据备份
+    
+    Backup --> Deleted : 备份完成，执行硬删除
+    
+    Deleted --> Anonymous : 重新访问平台
 ```
 
 ### 7.2 订阅状态机
@@ -1124,20 +1126,44 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> 无订阅: 新用户
-    无订阅 --> 待处理: 用户发起订阅
-    待处理 --> 活跃: Stripe Webhook (支付成功)
-    待处理 --> 失败: Stripe Webhook (支付失败)
-    失败 --> 无订阅: 重试或取消
-    活跃 --> 活跃: 自动续费 (发票已支付)
-    活跃 --> 逾期: 支付失败
-    逾期 --> 活跃: 支付重试成功
-    逾期 --> 已取消: 超过最大重试次数
-    活跃 --> 已取消: 用户取消
-    已取消 --> 无订阅: 计费周期结束
-    活跃 --> 活跃: 升级/降级
-    活跃 --> 活跃: 附加包购买
-    已取消 --> [*]: 账户删除
+    direction TB
+    
+    [*] --> 订单创建: 用户发起支付
+    订单创建 --> 支付成功: Stripe支付完成
+    订单创建 --> 支付失败: 支付被拒/取消/超时
+    支付失败 --> 订单创建: 用户重试支付
+    支付失败 --> 订单失败: 用户放弃支付
+    支付成功 --> 订单完成: 积分充值成功
+    支付成功 --> 订单失败: 积分充值失败
+        
+    state 订单终态 {
+       direction TB
+       订单完成 --> 退款: 用户申请退款
+       订单完成 --> 冻结: 风控介入
+       退款 --> 订单完成: 人工成功
+       退款 --> 订单失败: 人工失败
+       冻结 --> 订单完成: 风控解除
+       冻结 --> 订单失败: 风控取消
+   }
+    
+    %% 状态说明
+    note right of 订单创建
+        订单状态：
+        - created: 订单已创建
+        - success: 支付成功
+        - failed: 支付失败
+        - completed: 订单完成
+        - refunded: 订单退款
+        - frozen: 订单冻结
+        - failed: 订单失败
+    end note
+    
+    note right of 订单终态
+        终态特性：
+        - 订单完成：不可逆转，可退款
+        - 订单失败：不可逆转，可人工重试
+        - 订单退款：不可逆转
+    end note
 ```
 
 ### 7.3 积分使用状态机
@@ -1146,22 +1172,23 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> 初始余额: 分配免费积分 (匿名用户) 或付费积分 (订阅用户)
-    初始余额 --> 足够: 检查余额
-    足够 --> 已扣除: 扣除积分 (优先free积分，再paid积分)
-    已扣除 --> 足够: 仍有积分可用
-    已扣除 --> 不足: 积分耗尽
-    不足 --> 初始余额: 购买附加包或续订订阅
-    不足 --> 提示: 提示购买
-    提示 --> 初始余额: 用户购买积分
-    提示 --> 无操作: 用户拒绝
-    无操作 --> [*]: 会话结束
-    
-    state 积分操作 {
-        充值 --> 初始余额: 系统授予free积分
-        充值 --> 初始余额: 用户支付后充值paid积分
-        消耗 --> 已扣除: 使用功能消耗积分
-    }
+    direction TB
+        [*] --> 余额 : 分配免费/付费积分
+        
+        余额 --> 检查余额 : 触发消耗
+        检查余额 --> 足够 : 余额够
+        检查余额 --> 不足 : 余额不够
+        
+        足够 --> 扣除 : 扣 free→paid
+        扣除 --> 已扣 : 扣除完成
+        已扣 --> 足够 : 有剩余
+        
+        不足 --> 提示 : 提醒购买
+        提示 --> 无操作 : 拒绝
+        无操作 --> [*] : 结束
+        提示 --> 充值 : 购买积分
+        充值 --> 余额 : 补充积分
+        
 ```
 
 ### 7.4 订单状态流转架构
@@ -1213,7 +1240,7 @@ stateDiagram-v2
         终态特性：
         - 订单完成：不可逆转，可退款
         - 订单失败：不可逆转，可人工重试
-        - 退款refunded：不可逆转
+        - 订单退款：不可逆转
     end note
 ```
 
@@ -1227,7 +1254,7 @@ stateDiagram-v2
 | 支付成功 | `success` | Stripe支付成功 | ❌ | ✅ 可失败 |
 | 支付失败 | `failed` | 支付被拒绝/取消/超时 | ❌ | ✅ 可重试 |
 | 订单完成 | `completed` | 订单成功完成，积分已充值 | ✅ | ❌ 不可逆转 |
-| 退款refunded | `refunded` | 订单已退款（部分或全额） | ✅ | ❌ 不可逆转 |
+| 订单退款 | `refunded` | 订单已退款（部分或全额） | ✅ | ❌ 不可逆转 |
 | 订单冻结 | `frozen` | 风控或合规介入冻结 | ❌ | ✅ 可解除 |
 | 订单失败 | `failed` | 最终失败状态 | ✅ | ❌ 不可逆转 |
 
