@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.4.0
+
+### Minor Changes
+
+- feat(app): env config comment
+
 ## 2.3.6
 
 ### Patch Changes
