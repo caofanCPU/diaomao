@@ -556,8 +556,8 @@ classDiagram
 <Mermaid
 title="核心业务流程架构"
 chart={`
-flowchart TB
-    %% 自上而下布局, 使用入口/出口汇聚点, 减少跨层直连
+flowchart LR
+    %% 使用入口/出口汇聚点, 减少跨层直连
 
     classDef entry fill:#fff,stroke:#bbb,stroke-dasharray:3 3,color:#666;
     classDef core fill:#f7faff,stroke:#7aa7e0,color:#1f2937;
@@ -919,7 +919,7 @@ stateDiagram-v2
 title="匿名用户与注册用户数据流程图"
 chart={`
 flowchart TB
-    %% 自上而下布局, 模块内顺序化; 使用入口/出口汇聚节点减少跨模块交叉
+    %% 模块内顺序化; 使用入口/出口汇聚节点减少跨模块交叉
     classDef entry fill:#fff,stroke:#bbb,stroke-dasharray:3 3,color:#666;
     classDef core fill:#f7faff,stroke:#7aa7e0,color:#1f2937;
 
