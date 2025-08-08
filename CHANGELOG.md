@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.6.0
+
+### Minor Changes
+
+- fix(mdx): mermaid now support preview with zoom-out dialog model!
+
 ## 2.5.1
 
 ### Patch Changes
