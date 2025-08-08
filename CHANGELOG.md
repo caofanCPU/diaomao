@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.5.1
+
+### Patch Changes
+
+- fix(env): url config
+
 ## 2.5.0
 
 ### Minor Changes
