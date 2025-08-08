@@ -26,7 +26,7 @@ gantt
     title 订阅与积分系统开发计划
     dateFormat  YYYY-MM-DD
     section 第一阶段: 基础设施
-    环境搭建           :done, env, 2024-01-01, 3d
+    环境搭建           :done, env, 2025-08-08, 3d
     数据库设计         :done, db, after env, 5d
     基础架构           :done, arch, after db, 5d
     
