@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.5.0
+
+### Minor Changes
+
+- feat(mdx): update fuma patch
+
 ## 2.4.0
 
 ### Minor Changes
