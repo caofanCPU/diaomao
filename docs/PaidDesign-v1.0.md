@@ -198,14 +198,15 @@
 ### 3.1 核心数据表
 
 #### 用户表 (Users)
-存储用户信息，包括通过Fingerprint识别的匿名用户。
+存储用户信息，包括通过Fingerprint识别的匿名用户和Clerk注册用户。
 
 | 列名                | 类型         | 描述                                    |
 |---------------------|--------------|----------------------------------------|
 | `id`                | BigInt       | 主键                                    |
 | `user_id`           | UUID         | 用户ID，唯一用户标识符，用于关联其他表   |
 | `fingerprint_id`    | String       | 匿名用户的Fingerprint标识符            |
-| `email`             | String       | 用户电子邮件（匿名用户可为空）         |
+| `clerk_user_id`     | String       | Clerk用户ID，注册用户必填，匿名用户为空 |
+| `email`             | String       | 用户电子邮件（注册用户必填，匿名用户为空） |
 | `status`            | Enum         | 状态： anonymous、registered、frozen、deleted等             |
 | `created_at`        | Timestamp    | 账户创建时间戳                        |
 | `updated_at`        | Timestamp    | 最后更新时间戳                        |
@@ -289,12 +290,28 @@
 | `credits_used`      | Integer      | 消耗的积分数量                        |
 | `created_at`        | Timestamp    | 使用时间戳                            |
 
+#### 用户备份表 (UserBackup)
+存储用户注销时的备份数据，用于数据恢复和审计。
+
+| 列名                | 类型         | 描述                                    |
+|---------------------|--------------|----------------------------------------|
+| `id`                | BigInt       | 主键，唯一备份记录ID                   |
+| `original_user_id`  | UUID         | 原始用户ID                             |
+| `fingerprint_id`    | String       | 设备指纹ID                             |
+| `clerk_user_id`     | String       | Clerk用户ID                            |
+| `email`             | String       | 用户邮箱                               |
+| `status`            | String       | 用户状态                               |
+| `backup_data`       | JSON         | 完整的用户数据备份（包括积分、订阅等） |
+| `deleted_at`        | Timestamp    | 删除时间戳                            |
+| `created_at`        | Timestamp    | 备份创建时间戳                        |
+
 ### 3.2 索引
-- **用户表**：主键 (`id`)，`user_id` 唯一索引，`fingerprint_id` 唯一索引，`email` 索引。
+- **用户表**：主键 (`id`)，`user_id` 唯一索引，`fingerprint_id` 唯一索引，`clerk_user_id` 唯一索引，`email` 索引。
 - **订阅表**：主键 (`id`)，`subscription_id` 唯一索引，`user_id` 索引。
 - **积分表**：主键 (`id`)，`user_id` 索引。
 - **交易表**：主键 (`id`)，`user_id`、`stripe_session_id`、`stripe_invoice_id` 索引。
 - **积分使用表**：主键 (`id`)，`user_id`索引。
+- **用户备份表**：主键 (`id`)，`original_user_id` 索引，`fingerprint_id` 索引，`clerk_user_id` 索引。
 
 ### 3.3 数据表关联关系
 
@@ -379,6 +396,7 @@ classDiagram
         number id PK
         string user_id FK
         string fingerprint_id
+        string clerk_user_id
         string email
         <<enumeration>> status
         string created_at
@@ -452,10 +470,23 @@ classDiagram
         string created_at
     }
 
+    class UserBackup {
+        number id PK
+        string original_user_id
+        string fingerprint_id
+        string clerk_user_id
+        string email
+        string status
+        string backup_data
+        string deleted_at
+        string created_at
+    }
+
     Users "1" --o "N" Subscriptions : user_id
     Users "1" --> "1" Credits : user_id
     Users "1" --o "N" Transactions : user_id
     Users "1" --* "N" Credit_Usage : user_id
+    Users "1" --> "1" UserBackup : user_id (backup)
     Subscriptions "1" --* "N" Transactions : stripe_subscription_id
     Transactions "1" --* "N" Credit_Usage : credits_granted
 ```
@@ -762,6 +793,66 @@ stateDiagram-v2
    - 从`Transactions`表的`credits_granted`字段获取需要扣除的积分数量。
    - 更新`Credits`表的`balance_paid`和`total_paid_limit`（减少积分）。
    - 在`Credit_Usage`表中插入扣除记录，`operation_type`为`consume`，`credit_type`为`paid`。
+
+### 4.5 Clerk用户认证流程
+
+#### 4.5.1 匿名用户初始化
+1. **前端处理**：
+   - 用户访问平台时，前端生成Fingerprint ID。
+   - 调用Clerk创建匿名会话，获取`clerk_user_id`。
+   - 向后端发送初始化请求，包含`fingerprint_id`和`clerk_user_id`。
+2. **后端处理**：
+   - 查询Redis缓存，检查是否已有用户记录。
+   - 缓存未命中时，查询数据库`Users`表。
+   - 用户不存在时，创建新的匿名用户记录。
+   - 分配50个免费积分，创建`Credits`和`Credit_Usage`记录。
+   - 将用户信息缓存到Redis，TTL设置为24小时。
+3. **返回结果**：
+   - 返回用户信息和积分余额给前端。
+   - 前端显示平台界面和积分余额。
+
+#### 4.5.2 用户注册/登录
+1. **Clerk认证**：
+   - 用户通过Clerk界面完成注册或登录。
+   - Clerk验证用户信息，返回`clerk_user_id`和`email`。
+   - 前端将认证结果发送给后端。
+2. **后端处理**：
+   - 查询Redis缓存，检查用户状态。
+   - **匿名用户升级**：更新`Users`表，设置`email`和`clerk_user_id`，状态改为`registered`。
+   - **新注册用户**：创建完整的用户记录，包括积分初始化。
+   - 更新Redis缓存，包含新的用户信息。
+3. **数据一致性**：
+   - 确保`fingerprint_id`和`clerk_user_id`的关联关系正确。
+   - 维护用户从匿名到注册的完整数据连续性。
+
+#### 4.5.3 用户注销
+1. **Clerk注销**：
+   - 用户通过Clerk完成注销操作。
+   - 前端向后端发送注销请求。
+2. **数据备份**：
+   - 将用户数据备份到`UserBackup`表。
+   - 硬删除`Users`及关联表记录。
+3. **缓存清理**：
+   - 删除Redis中所有相关的用户缓存。
+   - 包括`fingerprint_id`、`email`、`user_id`相关的缓存。
+4. **状态重置**：
+   - 用户重新访问时，重新开始匿名用户流程。
+
+#### 4.5.4 Redis缓存策略
+1. **缓存键设计**：
+   - `fingerprint_id:user_info`：用户身份信息
+   - `email:user_info`：邮箱关联的用户信息
+   - `clerk_user_id:user_info`：Clerk用户关联信息
+   - `user_id:credits`：用户积分余额
+   - `user_id:session`：用户会话状态
+2. **缓存更新策略**：
+   - 用户信息变更时主动更新缓存。
+   - 积分操作时更新积分缓存。
+   - 用户注销时清理所有相关缓存。
+3. **缓存一致性**：
+   - 采用Cache-Aside模式，先更新数据库再更新缓存。
+   - 缓存失效时从数据库重新加载。
+   - 监控缓存命中率和响应时间。
 
 ---
 
@@ -1087,6 +1178,248 @@ sequenceDiagram
     B->>F: 返回完整积分信息
     F->>U: 显示积分余额和使用历史
 ```
+
+### 6.7 Clerk用户登录时序图
+
+#### 6.7.1 匿名用户首次访问时序图
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant F as 前端
+    participant R as Redis
+    participant B as 后端
+    participant C as Clerk
+    participant DB as 数据库
+
+    U->>F: 访问平台
+    F->>F: 生成Fingerprint ID
+    F->>R: 查询缓存: fingerprint_id
+    R-->>F: 缓存未命中
+    
+    F->>C: 创建匿名会话
+    C-->>F: 返回clerk_user_id
+    
+    F->>B: 匿名用户初始化请求
+    Note over B: 包含fingerprint_id和clerk_user_id
+    
+    B->>R: 查询缓存: fingerprint_id
+    R-->>B: 缓存未命中
+    
+    B->>DB: 查询Users表: fingerprint_id
+    DB-->>B: 用户不存在
+    
+    B->>DB: 创建Users记录
+    Note over B: user_id=UUID, fingerprint_id, status=anonymous
+    DB-->>B: 创建成功
+    
+    B->>DB: 创建Credits记录
+    Note over B: balance_free=50, total_free_limit=50
+    DB-->>B: 创建成功
+    
+    B->>DB: 插入Credit_Usage记录
+    Note over B: operation_type=recharge, credit_type=free, credits_used=50
+    DB-->>B: 插入成功
+    
+    B->>R: 缓存用户信息
+    Note over B: key: fingerprint_id, value: {user_id, status, balance_free}
+    R-->>B: 缓存成功
+    
+    B-->>F: 返回用户信息和积分余额
+    F-->>U: 显示平台界面和积分余额
+```
+
+#### 6.7.2 匿名用户注册登录时序图
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant F as 前端
+    participant C as Clerk
+    participant R as Redis
+    participant B as 后端
+    participant DB as 数据库
+
+    U->>F: 点击注册/登录
+    F->>C: 打开Clerk注册界面
+    U->>C: 填写邮箱/密码
+    C->>C: 验证用户信息
+    C-->>F: 注册/登录成功
+    Note over C: 返回clerk_user_id和email
+    
+    F->>B: 用户注册/登录完成通知
+    Note over B: 包含clerk_user_id, email, fingerprint_id
+    
+    B->>R: 查询缓存: fingerprint_id
+    R-->>B: 返回用户信息
+    
+    alt 匿名用户升级为注册用户
+        B->>DB: 更新Users表
+        Note over B: 设置email, status=registered
+        DB-->>B: 更新成功
+        
+        B->>R: 更新缓存
+        Note over B: 更新status和email信息
+        R-->>B: 更新成功
+        
+        B-->>F: 返回升级成功信息
+    else 新注册用户
+        B->>DB: 创建Users记录
+        Note over B: user_id=UUID, email, status=registered
+        DB-->>B: 创建成功
+        
+        B->>DB: 创建Credits记录
+        Note over B: balance_free=50, total_free_limit=50
+        DB-->>B: 创建成功
+        
+        B->>DB: 插入Credit_Usage记录
+        Note over B: operation_type=recharge, credit_type=free
+        DB-->>B: 插入成功
+        
+        B->>R: 缓存用户信息
+        R-->>B: 缓存成功
+        
+        B-->>F: 返回新用户信息
+    end
+    
+    F-->>U: 显示用户仪表板
+```
+
+#### 6.7.3 注册用户登录时序图
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant F as 前端
+    participant C as Clerk
+    participant R as Redis
+    participant B as 后端
+    participant DB as 数据库
+
+    U->>F: 点击登录
+    F->>C: 打开Clerk登录界面
+    U->>C: 输入邮箱/密码
+    C->>C: 验证用户凭证
+    C-->>F: 登录成功
+    Note over C: 返回clerk_user_id和email
+    
+    F->>B: 用户登录请求
+    Note over B: 包含clerk_user_id和email
+    
+    B->>R: 查询缓存: email
+    R-->>B: 缓存命中，返回用户信息
+    
+    B->>R: 查询缓存: user_id积分信息
+    R-->>B: 返回积分余额
+    
+    B-->>F: 返回用户信息和积分余额
+    F-->>U: 显示用户仪表板
+    
+    Note over B: 异步更新缓存
+    B->>DB: 查询最新用户信息
+    DB-->>B: 返回用户数据
+    B->>R: 更新缓存
+    R-->>B: 更新成功
+```
+
+#### 6.7.4 用户注销时序图
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant F as 前端
+    participant C as Clerk
+    participant R as Redis
+    participant B as 后端
+    participant DB as 数据库
+
+    U->>F: 点击注销
+    F->>C: 调用Clerk注销
+    C-->>F: 注销成功
+    
+    F->>B: 用户注销请求
+    Note over B: 包含user_id和fingerprint_id
+    
+    B->>DB: 备份用户数据到UserBackup表
+    DB-->>B: 备份成功
+    
+    B->>DB: 硬删除Users及关联表记录
+    DB-->>B: 删除成功
+    
+    B->>R: 删除缓存: user_id相关数据
+    R-->>B: 删除成功
+    
+    B->>R: 删除缓存: fingerprint_id相关数据
+    R-->>B: 删除成功
+    
+    B-->>F: 注销完成
+    F-->>U: 重定向到首页
+```
+
+#### 6.7.5 Redis缓存设计
+
+##### 6.7.5.1 缓存键设计
+
+```mermaid
+graph TD
+    A[Redis缓存键设计] --> B[用户身份缓存]
+    A --> C[积分余额缓存]
+    A --> D[会话状态缓存]
+    
+    B --> B1[fingerprint_id:user_info]
+    B --> B2[email:user_info]
+    B --> B3[clerk_user_id:user_info]
+    
+    C --> C1[user_id:credits]
+    C --> C2[user_id:credit_usage]
+    
+    D --> D1[user_id:session]
+    D --> D2[fingerprint_id:session]
+```
+
+##### 6.7.5.2 缓存数据结构
+
+```json
+{
+  "fingerprint_id:user_info": {
+    "user_id": "uuid",
+    "fingerprint_id": "fp_xxx",
+    "email": "user@example.com",
+    "status": "anonymous|registered",
+    "created_at": "timestamp"
+  },
+  "user_id:credits": {
+    "balance_free": 50,
+    "total_free_limit": 50,
+    "balance_paid": 100,
+    "total_paid_limit": 100,
+    "updated_at": "timestamp"
+  },
+  "user_id:session": {
+    "clerk_user_id": "clerk_xxx",
+    "last_active": "timestamp",
+    "fingerprint_id": "fp_xxx"
+  }
+}
+```
+
+##### 6.7.5.3 缓存策略
+
+| 缓存类型 | 键格式 | TTL | 更新策略 | 失效策略 |
+|---------|--------|-----|----------|----------|
+| 用户身份 | `fingerprint_id:user_info` | 24小时 | 用户信息变更时 | 用户注销时 |
+| 用户身份 | `email:user_info` | 24小时 | 用户信息变更时 | 用户注销时 |
+| 积分余额 | `user_id:credits` | 1小时 | 积分操作时 | 定时刷新 |
+| 会话状态 | `user_id:session` | 30分钟 | 用户活动时 | 会话超时 |
+| 积分使用记录 | `user_id:credit_usage` | 30分钟 | 积分操作时 | 定时刷新 |
+
+##### 6.7.5.4 缓存一致性保证
+
+1. **写入策略**：先更新数据库，再更新缓存
+2. **读取策略**：先查缓存，缓存未命中则查数据库并更新缓存
+3. **失效策略**：数据变更时主动失效相关缓存
+4. **降级策略**：缓存服务不可用时直接访问数据库
+5. **监控策略**：监控缓存命中率和响应时间
 
 ---
 
