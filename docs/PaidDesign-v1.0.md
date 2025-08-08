@@ -547,59 +547,99 @@ classDiagram
 #### 3.5.1 核心业务流程架构
 
 ```mermaid
-flowchart LR
-    subgraph "用户身份层"
-        U[Users表<br/>用户身份管理]
-        U --> |fingerprint_id| A[匿名用户识别]
-        U --> |email| R[注册用户管理]
+flowchart TB
+    %% 自上而下布局，使用入口/出口汇聚点，减少跨层直连
+
+    classDef entry fill:#fff,stroke:#bbb,stroke-dasharray:3 3,color:#666;
+    classDef core fill:#f7faff,stroke:#7aa7e0,color:#1f2937;
+
+    %% 用户身份层
+    subgraph L1[用户身份层]
+      direction TB
+      U[Users表<br/>用户身份管理]:::core
+      A[匿名用户识别]:::core
+      R[注册用户管理]:::core
+      U --> |fingerprint_id| A
+      U --> |email| R
+      L1_OUT((身份→)):::entry
+      U --> L1_OUT
     end
-    
-    subgraph "订阅服务层"
-        S[Subscriptions表<br/>订阅服务管理]
-        S --> |price_id| P[订阅计划管理]
-        S --> |sub_period_*| C[计费周期管理]
-        S --> |credits_allocated| I[积分分配管理]
+
+    %% 订阅服务层
+    subgraph L2[订阅服务层]
+      direction TB
+      L2_IN((←身份)):::entry
+      S[Subscriptions表<br/>订阅服务管理]:::core
+      P[订阅计划管理]:::core
+      C[计费周期管理]:::core
+      I[积分分配管理]:::core
+      L2_IN --> S
+      S --> |price_id| P
+      S --> |sub_period_*| C
+      S --> |credits_allocated| I
+      L2_OUT((订阅→)):::entry
+      S --> L2_OUT
     end
-    
-    subgraph "订单交易层"
-        T[Transactions表<br/>订单交易记录]
-        T --> |order_status| OS[订单状态管理]
-        T --> |stripe_*| SP[Stripe支付集成]
-        T --> |credits_granted| CG[积分授予管理]
+
+    %% 订单交易层
+    subgraph L3[订单交易层]
+      direction TB
+      L3_IN((←订阅)):::entry
+      T[Transactions表<br/>订单交易记录]:::core
+      OS[订单状态管理]:::core
+      SP[Stripe支付集成]:::core
+      CG[积分授予管理]:::core
+      L3_IN --> T
+      T --> |order_status| OS
+      T --> |stripe_*| SP
+      T --> |credits_granted| CG
+      L3_OUT((交易→)):::entry
+      T --> L3_OUT
     end
-    
-    subgraph "积分资产层"
-        CR[Credits表<br/>积分余额管理]
-        CR --> |balance_free| F[免费积分管理]
-        CR --> |balance_paid| PD[付费积分管理]
-        CR --> |total_*_limit| L[积分限制管理]
+
+    %% 积分资产层
+    subgraph L4[积分资产层]
+      direction TB
+      L4_IN((←交易/身份)):::entry
+      CR[Credits表<br/>积分余额管理]:::core
+      F[免费积分管理]:::core
+      PD[付费积分管理]:::core
+      L[积分限制管理]:::core
+      L4_IN --> CR
+      CR --> |balance_free| F
+      CR --> |balance_paid| PD
+      CR --> |total_*_limit| L
+      L4_OUT((积分→)):::entry
+      CR --> L4_OUT
     end
-    
-    subgraph "积分操作层"
-        CU[Credit_Usage表<br/>积分操作审计]
-        CU --> |operation_type| OT[操作类型管理]
-        CU --> |credit_type| CT[积分类型管理]
-        CU --> |feature| FE[功能使用追踪]
+
+    %% 积分操作层
+    subgraph L5[积分操作层]
+      direction TB
+      L5_IN((←积分)):::entry
+      CU[Credit_Usage表<br/>积分操作审计]:::core
+      OT[操作类型管理]:::core
+      CT[积分类型管理]:::core
+      FE[功能使用追踪]:::core
+      L5_IN --> CU
+      CU --> |operation_type| OT
+      CU --> |credit_type| CT
+      CU --> |feature| FE
     end
-    
-    %% 数据流转关系
-    U --> S
-    U --> T
-    U --> CR
-    U --> CU
-    
-    S --> T
-    T --> CR
-    CR --> CU
-    
-    %% 业务事件触发
-    A --> |新用户注册| F
-    R --> |用户登录| CR
-    P --> |订阅创建| OS
+
+    %% 层级衔接（仅入口/出口连接，避免交叉）
+    L1_OUT --> L2_IN
+    L2_OUT --> L3_IN
+    L3_OUT --> L4_IN
+    L4_OUT --> L5_IN
+
+    %% 业务事件通过入口路由到目标层，减少跨层线段
+    A --> |新用户注册| L4_IN
+    R --> |用户登录| L4_IN
+    P --> |订阅创建| L3_IN
     OS --> |支付成功| CG
-    CG --> |积分充值| PD
-    PD --> |积分使用| OT
-    OT --> |功能访问| FE
+    CG --> |积分充值| L4_IN
+    PD --> |积分使用| L5_IN
 ```
 
 #### 3.5.2 数据流转时序架构
@@ -863,95 +903,103 @@ stateDiagram-v2
 以下是匿名用户到注册用户、注销、再次注册的综合数据流程图，展示数据如何在系统中流动。
 
 ```mermaid
-flowchart LR
+flowchart TB
+    %% 自上而下布局，模块内顺序化；使用入口/出口汇聚节点减少跨模块交叉
+    classDef entry fill:#fff,stroke:#bbb,stroke-dasharray:3 3,color:#666;
+    classDef core fill:#f7faff,stroke:#7aa7e0,color:#1f2937;
 
-    %% ========== 模块1：匿名用户初始化（内部强制横向） ==========
-    subgraph 匿名用户初始化
-        direction LR  % 模块内横向
-        A[用户访问平台] --> B{检查Fingerprint ID}
-        B -->|无记录| C[生成user_id/fingerprint_id]
-        C --> D[插入Users表]
-        D --> E[分配50免费积分]
-        E --> F[记录到Credits表]
+    %% 模块1：匿名用户初始化
+    subgraph M1[匿名用户初始化]
+      direction LR
+      A[用户访问平台]:::core --> B{检查 Fingerprint ID}:::core
+      B -->|无记录| C[生成 user_id / fingerprint_id]:::core
+      C --> D[插入 Users 表]:::core --> E[分配 50 免费积分]:::core --> F[记录到 Credits 表]:::core
+      B -->|有记录| M1_OUT((→ 已有指纹ID处理)):::entry
+      F --> M1_OUT
     end
 
-    %% ========== 模块2：已有指纹ID处理（内部强制横向） ==========
-    subgraph 已有指纹ID处理
-        direction LR  % 模块内横向
-        B -->|有记录| G{用户状态?}
-        G -->|匿名| H[进入匿名流程]
-        G -->|注册| I[验证登录凭证]
-        I --> J[访问Subscriptions/Credits]
+    %% 模块2：已有指纹ID处理
+    subgraph M2[已有指纹ID处理]
+      direction LR
+      M2_IN((← 匿名初始化)):::entry
+      M2_IN --> G{用户状态?}:::core
+      G -->|匿名| M2_OUT_ANON((→ 匿名功能)):::entry
+      G -->|注册| I[验证登录凭证]:::core --> J[访问 Subscriptions/Credits]:::core --> M2_OUT_REG((→ 注册用户操作)):::entry
     end
 
-    %% ========== 模块3：匿名用户功能使用（内部强制横向） ==========
-    subgraph 匿名用户功能使用
-        direction LR  % 模块内横向
-        H --> K[匿名用户使用功能]
-        K --> L[记录Credit_Usage表]
-        L --> M{积分是否足够?}
-        M -->|是| K
-        M -->|否| N[提示注册/购买]
+    %% 模块3：匿名用户功能使用
+    subgraph M3[匿名用户功能使用]
+      direction LR
+      M3_IN((← 匿名功能)):::entry
+      M3_IN --> K[匿名用户使用功能]:::core --> L[记录 Credit_Usage 表]:::core --> M{积分是否足够?}:::core
+      M -->|是| K
+      M -->|否| M3_OUT_NEEDREG((→ 注册引导)):::entry
     end
 
-    %% ========== 模块4：注册用户操作（内部强制横向） ==========
-    subgraph 注册用户操作
-        direction LR  % 模块内横向
-        J --> O[注册用户操作: 订阅/购买/使用]
-        O --> P{用户注销?}
-        P -->|是| Q[备份UserBackup表]
-        Q --> R[硬删除关联表]
-        R --> S[恢复匿名用户]
-        S --> H
-        P -->|否| O
+    %% 模块4：注册用户操作
+    subgraph M4[注册用户操作]
+      direction LR
+      M4_IN((← 已有指纹ID/注册完成)):::entry
+      M4_IN --> O[注册用户操作: 订阅/购买/使用]:::core --> P{用户注销?}:::core
+      P -->|是| Q[备份 UserBackup 表]:::core --> R[硬删除关联表]:::core --> S[恢复匿名用户]:::core --> M3_IN
+      P -->|否| O
+      O --> M4_OUT((→ 完)):::entry
     end
 
-    %% ========== 模块5：注册引导（内部强制横向） ==========
-    subgraph 注册引导
-        direction LR  % 模块内横向
-        N --> U{用户注册?}
-        U -->|是| V[提交注册信息]
-        V --> W[更新Users表]
-        W --> I
-        U -->|否| H
+    %% 模块5：注册引导
+    subgraph M5[注册引导]
+      direction LR
+      M5_IN((← 积分不足)):::entry
+      M5_IN --> U{用户注册?}:::core
+      U -->|是| V[提交注册信息]:::core --> W[更新 Users 表]:::core --> M4_IN
+      U -->|否| M3_IN
     end
+
+    %% 模块衔接（仅入口/出口连接，减少交叉）
+    M1_OUT --> M2_IN
+    M2_OUT_ANON --> M3_IN
+    M2_OUT_REG --> M4_IN
+    M3_OUT_NEEDREG --> M5_IN
 ```
 
 ### 5.2 匿名用户积分使用流程图
 
 ```mermaid
-flowchart  LR
-    %% 模块1：初始分配流程（内部横向）
+flowchart LR
+    classDef entry fill:#fff,stroke:#bbb,stroke-dasharray:3 3,color:#666;
+
+    %% 模块1：初始分配流程（子图横向）
     subgraph 初始分配流程
         direction LR
-        A[用户访问平台] --> B{分配Fingerprint ID}
-        B --> C[分配50个免费积分]
-        C --> D[更新Credits表: balance_free=50, total_free_limit=50]
-        D --> E[插入Credit_Usage: recharge, free]
+        A[用户访问平台] --> B{分配 Fingerprint ID}
+        B --> C[分配 50 个免费积分]
+        C --> D[更新 Credits 表: balance_free=50, total_free_limit=50]
+        D --> E[插入 Credit_Usage: recharge, free]
+        E --> OUT_INIT((→ 判断余额)):::entry
     end
-    
-    %% 模块2：功能使用流程（内部横向）
+
+    %% 中央判断
+    G{检查免费积分余额}
+
+    OUT_INIT --> G
+
+    %% 模块2：功能使用流程（子图横向）
     subgraph 功能使用流程
-        direction TB
-        H[扣除free积分] --> I[更新Credits表: 减少balance_free]
-        I --> J[插入Credit_Usage: consume, free]
-        J --> K[功能访问授权]
+        direction LR
+        IN_USE((入口)):::entry --> H[扣除 free 积分] --> I[更新 Credits 表: 减少 balance_free] --> J[插入 Credit_Usage: consume, free] --> K[功能访问授权]
     end
-    
-    %% 模块3：积分不足处理（内部横向）
+
+    %% 模块3：积分不足处理（子图横向）
     subgraph 积分不足处理
-        direction TB
-        L[提示注册或购买] --> M{用户注册？}
-        M -->|是| N[将Fingerprint关联到用户ID]
+        direction LR
+        IN_LOW((入口)):::entry --> L[提示注册或购买] --> M{用户注册？}
+        M -->|是| N[将 Fingerprint 关联到用户 ID] --> P[重定向到订阅/购买]
         M -->|否| O[结束会话]
-        N --> P[重定向到订阅/购买]
     end
-    
-    %% 模块间连接
-    初始分配流程 -->|使用功能| G{检查免费积分余额}
-    G{检查免费积分余额} -->|足够| 功能使用流程
-    G{检查免费积分余额} --->|不足| 积分不足处理
-    功能使用流程 ---> 积分不足处理
+
+    %% 模块间连接（仅通过入口/出口）
+    G -->|足够| IN_USE
+    G -->|不足| IN_LOW
 ```
 
 ### 5.3 登录用户订阅流程图

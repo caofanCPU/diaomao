@@ -46,6 +46,108 @@ gantt
     部署上线           :deploy, after perf, 5d
 ```
 
+### 1.5 代码实施计划图
+
+```mermaid
+flowchart TB
+    %% 自上而下布局 + 阶段入口/出口汇聚，减少跨阶段交叉连线
+
+    %% 第一阶段
+    subgraph P1[第一阶段 · 基础设施]
+      direction TB
+      A1[Prisma Schema 设计\nUsers/Subscriptions/Credits/Transactions/Credit_Usage/UserBackup]
+      A2[数据库迁移与环境配置\n本地/云PG + 连接池]
+      A3[Prisma Client 初始化\n类型生成/仓储封装]
+      A4[基础设施基建\nEnv/日志/错误处理/配置管理]
+      A1 --> A2 --> A3 --> A4 --> P1_OUT((P1 出口))
+    end
+
+    %% 第二阶段
+    subgraph P2[第二阶段 · 核心后端能力]
+      direction TB
+      P2_IN((P2 入口))
+      B4[认证与会话 ·Clerk·\n后端校验/中间件/安全策略]
+      B1[用户服务\n匿名初始化/注册升级/用户CRUD]
+      B2[积分服务\n余额查询/优先扣减/充值/使用记录]
+      B3[缓存层 ·Redis·\n键空间设计/Cache-Aside/一致性]
+      P2_IN --> B4 --> B1 --> B3
+      P2_IN --> B2 --> B3
+      B3 --> P2_OUT((P2 出口))
+    end
+
+    %% 第三阶段
+    subgraph P3[第三阶段 · 支付与订阅]
+      direction TB
+      P3_IN((P3 入口))
+      C1[Stripe SDK 初始化\n密钥/产品与价格映射]
+      C2[Checkout Session 接口\n订阅/一次性购买]
+      C3[Stripe Webhook 处理\ncheckout.session.completed / invoice.paid / charge.refunded]
+      C4[订阅服务\n状态管理/升降级/取消/续费]
+      C5[交易服务\n订单状态流转/审计/对账]
+      P3_IN --> C1 --> C2 --> C3
+      C3 --> C4
+      C3 --> C5
+      %% Webhook 内部负责触发积分充值/使用记录的写入（避免跨阶段连线）
+      C5 --> P3_OUT((P3 出口))
+    end
+
+    %% 第四阶段
+    subgraph P4[第四阶段 · 前端界面]
+      direction TB
+      P4_IN((P4 入口))
+      D1[订阅页面\n计划展示/结账触发/客户门户]
+      D2[积分组件\n余额/使用历史/低余额提示]
+      D3[用户中心\n订阅管理/交易与使用记录]
+      P4_IN --> D1 --> D3
+      P4_IN --> D2
+      D1 --> P4_OUT((P4 出口))
+      D2 --> P4_OUT
+      D3 --> P4_OUT
+    end
+
+    %% 横切能力
+    subgraph P5[横切能力 · 异步与监控]
+      direction TB
+      P5_IN((P5 入口))
+      E1[异步队列\nQStash / Redis Bull（初期可 EventEmitter）]
+      E2[幂等与重试\nWebhook/任务处理]
+      E3[监控与告警\n日志/指标/失败重试与告警]
+      P5_IN --> E1 --> E2 --> E3 --> P5_OUT((P5 出口))
+    end
+
+    %% 测试与部署
+    subgraph P6[测试与部署]
+      direction TB
+      P6_IN((P6 入口))
+      T1[单元测试\n服务与仓储 >=80% 覆盖]
+      T2[集成测试\n注册→订阅→充值→消费→退款（端到端）]
+      T3[CI/CD 流水线\nLint/Build/Test → Vercel 部署]
+      T4[验收与回滚\n运行手册/回滚策略]
+      P6_IN --> T1 --> T2 --> T3 --> T4 --> P6_OUT((P6 出口))
+    end
+
+    %% 阶段衔接（仅相邻连接，减少跨越）
+    P1_OUT --> P2_IN
+    P2_OUT --> P3_IN
+    P3_OUT --> P4_IN
+    P2_OUT --> P4_IN
+    P2_OUT --> P5_IN
+    P3_OUT --> P5_IN
+    P5_OUT --> P6_IN
+    P4_OUT --> P6_IN
+
+    %% 外部依赖（置于右侧，虚线连接）
+    subgraph EXT[外部依赖]
+      direction TB
+      X1[Stripe]
+      X2[Clerk]
+      X3[Redis]
+    end
+    C1 -.-> X1
+    B4 -.-> X2
+    B3 -.-> X3
+```
+
 ## 2. 开发阶段规划
 
 ### 2.1 第一阶段：基础设施搭建 (第1-3周)
