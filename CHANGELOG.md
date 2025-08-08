@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.6.1
+
+### Patch Changes
+
+- fix(font): repair font export issue in vercel deployment, sometimes could cause build error
+
 ## 2.6.0
 
 ### Minor Changes

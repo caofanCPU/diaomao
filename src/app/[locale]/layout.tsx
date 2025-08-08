@@ -1,20 +1,14 @@
 import { appConfig, generatedLocales } from "@/lib/appConfig";
+import { montserrat } from '@/lib/fonts';
+import { GoogleAnalyticsScript, MicrosoftClarityScript } from "@windrun-huaiin/base-ui/components";
+import { cn } from '@windrun-huaiin/lib/utils';
 import { fumaI18nCn } from '@windrun-huaiin/third-ui/lib/server';
 import { NProgressBar } from '@windrun-huaiin/third-ui/main';
 import { RootProvider } from "fumadocs-ui/provider";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
-import { Montserrat } from "next/font/google";
-import './globals.css';
 import React from 'react';
-import { GoogleAnalyticsScript } from "@windrun-huaiin/base-ui/components";
-import { MicrosoftClarityScript } from "@windrun-huaiin/base-ui/components";
-
-export const montserrat = Montserrat({
-  weight: ['400'],
-  subsets: ['latin'],
-  display: 'swap',
-});
+import './globals.css';
 
 export const dynamic = 'force-dynamic'
 
@@ -60,7 +54,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <NextIntlClientProvider messages={messages}>
-        <body>
+        <body className={cn(montserrat.className)}>
           <NProgressBar />
           <RootProvider
             i18n={{
