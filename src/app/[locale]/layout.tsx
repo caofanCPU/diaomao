@@ -1,6 +1,6 @@
 import { appConfig, generatedLocales } from "@/lib/appConfig";
 import { montserrat } from '@/lib/fonts';
-import { GoogleAnalyticsScript, MicrosoftClarityScript } from "@windrun-huaiin/base-ui/components";
+import { GoogleAnalyticsScript, MicrosoftClarityScript } from "@windrun-huaiin/base-ui/components/server";
 import { cn } from '@windrun-huaiin/lib/utils';
 import { fumaI18nCn } from '@windrun-huaiin/third-ui/lib/server';
 import { NProgressBar } from '@windrun-huaiin/third-ui/main';
