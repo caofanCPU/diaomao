@@ -334,9 +334,9 @@ flowchart TB
 | `id`                | BigInt       | 主键                                   |
 | `subscription_id`   | UUID         | 订阅ID，唯一订阅ID                      |
 | `user_id`           | UUID         | 外键，引用`Users`表                     |
-| `stripe_subscription_id` | String   | Stripe订阅ID (sub_xxx)                |
-| `price_id`          | String       | Stripe价格ID (price_xxx)               |
-| `price_name`        | String       | 价格名称（例如，Basic、Pro）           |
+| `pay_subscription_id` | String   | 交易厂商订阅ID (sub_xxx)                |
+| `price_id`          | String       | 交易厂商价格ID (price_xxx)               |
+| `price_name`        | String       | 交易厂商价格名称（例如，Basic、Pro）           |
 | `status`            | Enum         | 状态：活跃、已取消、逾期等             |
 | `credits_allocated` | Integer      | 每个计费周期分配的积分                 |
 | `sub_period_start`  | Timestamp    | 订阅周期开始时间戳                    |
@@ -370,11 +370,12 @@ flowchart TB
 | `order_created_at`        | Timestamp    | 订单创建时间戳                        |
 | `order_expired_at`        | Timestamp    | 订单过期时间戳                        |
 | `order_updated_at`        | Timestamp    | 订单最后更新时间戳                        |
-| `stripe_transaction_id`    | String       | Stripe交易ID，唯一交易标识符                 |
-| `stripe_subscription_id` | String   | Stripe订阅ID (sub_xxx)                |
-| `stripe_session_id` | String       | Stripe Checkout Session ID (cs_xxx)    |
-| `stripe_invoice_id` | String       | Stripe发票ID (in_xxx)                 |
-| `price_id`          | String       | Stripe价格ID (price_xxx)               |
+| `pay_supplier`    | Enum       | 交易厂商类型：Stripe、Apple、Paypal                |
+| `pay_transaction_id`    | String       | 交易ID，唯一交易标识符                 |
+| `pay_subscription_id` | String   | 交易厂商订阅ID (sub_xxx)                |
+| `pay_session_id` | String       | 交易厂商Checkout Session ID (cs_xxx)    |
+| `pay_invoice_id` | String       | 交易厂商发票ID (in_xxx)                 |
+| `price_id`          | String       | 交易厂商价格ID (price_xxx)               |
 | `price_name`        | String       | 价格名称（例如，Basic、Pro）           |
 | `sub_interval_count`| Integer      | 订阅间隔计数（例如，1、3、6、12个月）     |
 | `sub_cycle_anchor`  | Timestamp       | 订阅周期锚点（例如，start_of_period） |
@@ -388,8 +389,8 @@ flowchart TB
 | `paid_at`           | Timestamp    | 支付时间戳                            |
 | `paid_email`        | String       | 支付邮箱                            |
 | `paid_detail`       | String       | 支付详情（例如，订阅、一次性购买）     |
-| `stripe_created_at`        | Timestamp    | Stripe交易创建时间戳                        |
-| `stripe_updated_at`        | Timestamp    | Stripe交易最后更新时间戳                        |
+| `pay_created_at`        | Timestamp    | 交易创建时间戳                        |
+| `pay_updated_at`        | Timestamp    | 交易最后更新时间戳                        |
 
 #### 积分使用表 (Credit Usage)
 跟踪积分的消耗情况。
@@ -424,7 +425,7 @@ flowchart TB
 - **用户表**：主键 (`id`)，`user_id` 唯一索引，`fingerprint_id` 唯一索引，`clerk_user_id` 唯一索引，`email` 索引。
 - **订阅表**：主键 (`id`)，`subscription_id` 唯一索引，`user_id` 索引。
 - **积分表**：主键 (`id`)，`user_id` 索引。
-- **交易表**：主键 (`id`)，`user_id`、`stripe_session_id`、`stripe_invoice_id` 索引。
+- **交易表**：主键 (`id`)，`user_id`、`pay_session_id`、`pay_invoice_id` 索引。
 - **积分使用表**：主键 (`id`)，`user_id`索引。
 - **用户备份表**：主键 (`id`)，`original_user_id` 索引，`fingerprint_id` 索引，`clerk_user_id` 索引。
 
@@ -455,8 +456,8 @@ flowchart TB
        - 每个订阅属于一个用户。
        - **关联字段**: `Subscriptions.user_id` (外键) 与 `Users.user_id` (主键)。
      - **与交易表 (Transactions)**: 一对多（间接关联）
-       - 订阅可能涉及多个交易（例如，续费、升级等），但这种关联通常通过 Stripe 的 `stripe_subscription_id` 间接建立，`Transactions` 表记录与订阅相关的支付。
-       - **关联字段**: `Subscriptions.stripe_subscription_id` 与 `Transactions.stripe_subscription_id`。
+       - 订阅可能涉及多个交易（例如，续费、升级等），但这种关联通常通过 Stripe 的 `pay_subscription_id` 间接建立，`Transactions` 表记录与订阅相关的支付。
+       - **关联字段**: `Subscriptions.pay_subscription_id` 与 `Transactions.pay_subscription_id`。
 
 3. **积分表 (Credits)**
    - **描述**: 管理用户的积分余额。
@@ -476,7 +477,7 @@ flowchart TB
        - **关联字段**: `Transactions.user_id` (外键) 与 `Users.user_id` (主键)。
      - **与订阅表 (Subscriptions)**: 多对一（间接）
        - 交易可能与订阅相关，记录订阅的支付或续费。
-       - **关联字段**: `Transactions.stripe_subscription_id` 与 `Subscriptions.stripe_subscription_id`。
+       - **关联字段**: `Transactions.pay_subscription_id` 与 `Subscriptions.pay_subscription_id`。
 
 5. **积分使用表 (Credit Usage)**
    - **描述**: 跟踪用户如何消耗和充值积分。
@@ -497,7 +498,7 @@ flowchart TB
 | Users               | Transactions        | 一对多     | `Users.user_id` -> `Transactions.user_id` |
 | Users               | Credit Usage        | 一对多     | `Users.user_id` -> `Credit Usage.user_id` |
 | Subscriptions       | Users               | 多对一     | `Subscriptions.user_id` -> `Users.user_id` |
-| Subscriptions       | Transactions        | 一对多（间接） | `Subscriptions.stripe_subscription_id` -> `Transactions.stripe_subscription_id`  |
+| Subscriptions       | Transactions        | 一对多（间接） | `Subscriptions.pay_subscription_id` -> `Transactions.pay_subscription_id`  |
 | Credits             | Users               | 一对一     | `Credits.user_id` -> `Users.user_id`   |
 | Transactions        | Users               | 多对一     | `Transactions.user_id` -> `Users.user_id` |
 | Credit Usage        | Users               | 多对一     | `Credit Usage.user_id` -> `Users.user_id` |
@@ -522,7 +523,7 @@ classDiagram
         number id PK
         string subscription_id FK
         string user_id
-        string stripe_subscription_id
+        string pay_subscription_id
         string price_id
         string price_name
         <<enumeration>> status
@@ -552,10 +553,11 @@ classDiagram
         string order_created_at
         string order_expired_at
         string order_updated_at
-        string stripe_transaction_id
-        string stripe_subscription_id
-        string stripe_session_id
-        string stripe_invoice_id
+        <<enumeration>> pay_supplier
+        string pay_transaction_id
+        string pay_subscription_id
+        string pay_session_id
+        string pay_invoice_id
         string price_id
         string price_name
         int sub_interval_count
@@ -570,8 +572,8 @@ classDiagram
         string paid_at
         string paid_email
         string paid_detail
-        string stripe_created_at
-        string stripe_updated_at
+        string pay_created_at
+        string pay_updated_at
     }
 
     class Credit_Usage {
@@ -602,7 +604,7 @@ classDiagram
     Users "1" --o "N" Transactions : user_id
     Users "1" --* "N" Credit_Usage : user_id
     Users "1" --> "1" UserBackup : user_id (backup)
-    Subscriptions "1" --* "N" Transactions : stripe_subscription_id
+    Subscriptions "1" --* "N" Transactions : pay_subscription_id
     Transactions "1" --* "N" Credit_Usage : credits_granted
 ```
 
@@ -706,7 +708,7 @@ flowchart TB
       CG[积分授予管理]:::core
       L3_IN --> T
       T --> |order_status| OS
-      T --> |stripe_*| SP
+      T --> |pay_*| SP
       T --> |credits_granted| CG
       L3_OUT((交易→)):::entry
       T --> L3_OUT
@@ -826,8 +828,6 @@ stateDiagram-v2
     InitialFlow --> CreditOps: order_status=success
 ```
 
-
-
 ### 3.6 潜在改进建议与总结
 
 #### 3.6.1 潜在改进建议
@@ -872,12 +872,12 @@ stateDiagram-v2
    - 用户在订阅管理界面选择计划。
    - 前端向后端发送请求，包含`plan_id`和`user_id`（或匿名用户的`fingerprint_id`）。
 2. **创建Stripe会话**：
-   - 后端为选定的计划创建Stripe Checkout Session (`stripe_session_id`)。
+   - 后端为选定的计划创建Stripe Checkout Session (`pay_session_id`)。
    - 用户被重定向到Stripe的结账页面。
 3. **支付完成**：
    - 支付成功后，Stripe向后端发送Webhook (`checkout.session.completed`)。
    - 后端更新`Subscriptions`表，创建订阅记录。
-   - 在`Transactions`表中创建记录，包含`stripe_session_id`、`amount`和`credits_granted`。
+   - 在`Transactions`表中创建记录，包含`pay_session_id`、`amount`和`credits_granted`。
 4. **积分充值**：
    - 从`Transactions`表的`credits_granted`字段获取积分数量。
    - 更新`Credits`表的`balance_paid`和`total_paid_limit`。
@@ -942,7 +942,7 @@ stateDiagram-v2
    - 用户通过界面发起退款请求。
    - 后端验证退款资格（例如，7天内，基于`Transactions`表）。
 2. **处理退款**：
-   - 后端使用`stripe_session_id`向Stripe发送退款请求。
+   - 后端使用`pay_session_id`向Stripe发送退款请求。
    - Stripe处理退款并发送Webhook (`charge.refunded`)。
    - 后端更新`Transactions`表（`status` = refunded）。
    - 从`Transactions`表的`credits_granted`字段获取需要扣除的积分数量。
@@ -1857,12 +1857,12 @@ stateDiagram-v2
 ### 9.3 安全性
 - **Fingerprint**：通过限制每设备积分分配，防止免费积分滥用。
 - **Stripe Webhook**：验证签名以确保真实性。
-- **数据隐私**：加密敏感数据（例如，`stripe_session_id`）并符合GDPR。
+- **数据隐私**：加密敏感数据（例如，`pay_session_id`）并符合GDPR。
 - 使用 `fingerprint_id` 防止匿名用户滥用免费积分。
 - 注销时需身份验证（密码或 SSO），防止恶意操作。
 
 ### 9.4 可扩展性
-- **数据库索引**：优化`user_id`、`fingerprint_id`和`stripe_session_id`的查询。
+- **数据库索引**：优化`user_id`、`fingerprint_id`和`pay_session_id`的查询。
 - **缓存**：使用Redis缓存积分余额和订阅状态。
 - **异步处理**：异步处理Stripe Webhook，避免用户操作延迟。
 - **负载均衡**：使用负载均衡器将流量分配到多个后端服务器。
