@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "${env("DATABASE_BASE_URL")}/${env("DATABASE_NAME")}?schema=${env("DATABASE_SCHEMA")}"
+}
+
+// 用户表
+model User {
+  id            BigInt         @id @default(autoincrement())
+  userId        String         @unique @default(uuid()) @map("user_id") @db.Uuid
+  fingerprintId String?        @unique @map("fingerprint_id") @db.VarChar(255)
+  clerkUserId   String?        @unique @map("clerk_user_id") @db.VarChar(255)
+  email         String?        @db.VarChar(255)
+  status        String         @default("anonymous") @db.VarChar(20)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  subscriptions Subscription[]
+  credits       Credit?
+  transactions  Transaction[]
+  creditUsage   CreditUsage[]
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// 订阅表
+model Subscription {
+  id                   BigInt             @id @default(autoincrement())
+  subscriptionId       String             @unique @default(uuid()) @map("subscription_id") @db.Uuid
+  userId               String             @map("user_id") @db.Uuid
+  paySubscriptionId String?            @unique @map("pay_subscription_id") @db.VarChar(255)
+  priceId              String?            @map("price_id") @db.VarChar(255)
+  priceName            String?            @map("price_name") @db.VarChar(255)
+  status               String             @default("incomplete") @db.VarChar(20)
+  creditsAllocated     Int                @default(0) @map("credits_allocated")
+  subPeriodStart       DateTime?          @map("sub_period_start") @db.Timestamptz
+  subPeriodEnd         DateTime?          @map("sub_period_end") @db.Timestamptz
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([paySubscriptionId])
+  @@index([status])
+  @@index([subPeriodEnd])
+  @@map("subscriptions")
+}
+
+// 积分表
+model Credit {
+  id             BigInt   @id @default(autoincrement())
+  userId         String   @unique @map("user_id") @db.Uuid
+  balanceFree    Int      @default(0) @map("balance_free")
+  totalFreeLimit Int      @default(0) @map("total_free_limit")
+  balancePaid    Int      @default(0) @map("balance_paid")
+  totalPaidLimit Int      @default(0) @map("total_paid_limit")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("credits")
+}
+
+// 订单交易表
+model Transaction {
+  id                     BigInt          @id @default(autoincrement())
+  userId                 String          @map("user_id") @db.Uuid
+  orderId                String          @unique @map("order_id") @db.VarChar(255)
+  orderStatus            String          @default("created") @map("order_status") @db.VarChar(20)
+  orderCreatedAt         DateTime        @default(now()) @map("order_created_at") @db.Timestamptz
+  orderExpiredAt         DateTime?       @map("order_expired_at") @db.Timestamptz
+  orderUpdatedAt         DateTime        @updatedAt @map("order_updated_at") @db.Timestamptz
+  paySupplier             String?         @db.VarChar(50) @map("pay_supplier")
+  payTransactionId    String?         @unique @map("pay_transaction_id") @db.VarChar(255)
+  paySubscriptionId   String?         @map("pay_subscription_id") @db.VarChar(255)
+  paySessionId        String?         @map("pay_session_id") @db.VarChar(255)
+  payInvoiceId        String?         @map("pay_invoice_id") @db.VarChar(255)
+  priceId                String?         @map("price_id") @db.VarChar(255)
+  priceName              String?         @map("price_name") @db.VarChar(255)
+  subIntervalCount       Int?            @map("sub_interval_count")
+  subCycleAnchor         DateTime?       @map("sub_cycle_anchor") @db.Timestamptz
+  amount                 Decimal?        @db.Decimal(10, 2)
+  currency               String?         @db.VarChar(10)
+  type                   String?         @db.VarChar(20)
+  creditsGranted         Int             @default(0) @map("credits_granted")
+  subPeriodStart         DateTime?       @map("sub_period_start") @db.Timestamptz
+  subPeriodEnd           DateTime?       @map("sub_period_end") @db.Timestamptz
+  orderDetail            String?         @map("order_detail") @db.Text
+  paidAt                 DateTime?       @map("paid_at") @db.Timestamptz
+  paidEmail              String?         @map("paid_email") @db.VarChar(255)
+  paidDetail             String?         @map("paid_detail") @db.Text
+  payCreatedAt        DateTime?       @map("pay_created_at") @db.Timestamptz
+  payUpdatedAt        DateTime?       @map("pay_updated_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([paySessionId])
+  @@index([payInvoiceId])
+  @@index([paySubscriptionId])
+  @@index([orderStatus])
+  @@index([orderCreatedAt])
+  @@map("transactions")
+}
+
+// 积分使用表
+model CreditUsage {
+  id            BigInt        @id @default(autoincrement())
+  userId        String        @map("user_id") @db.Uuid
+  feature       String?       @db.VarChar(255)
+  orderId       String?       @map("order_id") @db.VarChar(255)
+  creditType    String        @map("credit_type") @db.VarChar(10)
+  operationType String        @map("operation_type") @db.VarChar(20)
+  creditsUsed   Int           @map("credits_used")
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([creditType])
+  @@index([operationType])
+  @@index([createdAt])
+  @@map("credit_usage")
+}
+
+// 用户备份表
+model UserBackup {
+  id             BigInt   @id @default(autoincrement())
+  originalUserId String   @map("original_user_id") @db.Uuid
+  fingerprintId  String?  @map("fingerprint_id") @db.VarChar(255)
+  clerkUserId    String?  @map("clerk_user_id") @db.VarChar(255)
+  email          String?  @db.VarChar(255)
+  status         String?  @db.VarChar(50)
+  backupData     Json?    @map("backup_data") @db.JsonB
+  deletedAt      DateTime @default(now()) @map("deleted_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([originalUserId])
+  @@index([fingerprintId])
+  @@index([clerkUserId])
+  @@index([email])
+  @@index([deletedAt])
+  @@map("user_backup")
+}

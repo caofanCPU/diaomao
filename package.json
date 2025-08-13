@@ -78,6 +78,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.5",
+    "@prisma/client": "^6.13.0",
     "@tailwindcss/cli": "^4.1.11",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/hast": "^3.0.4",
@@ -94,6 +95,7 @@
     "fast-glob": "^3.3.3",
     "nprogress": "^0.2.0",
     "postcss": "^8.5.3",
+    "prisma": "^6.13.0",
     "remark-frontmatter": "^5.0.0",
     "tailwindcss": "^4.1.7",
     "ts-morph": "25.0.1",
@@ -105,9 +107,12 @@
     "onlyBuiltDependencies": [
       "@clerk/shared",
       "@parcel/watcher",
+      "@prisma/client",
+      "@prisma/engines",
       "@tailwindcss/oxide",
       "core-js",
       "esbuild",
+      "prisma",
       "sharp",
       "unrs-resolver"
     ],
