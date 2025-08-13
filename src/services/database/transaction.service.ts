@@ -7,7 +7,7 @@ import { OrderStatus, TransactionType, PaySupplier } from '@/db/constants';
 const prisma = new PrismaClient();
 
 export class TransactionService {
-  // 创建交易订单
+  // Create transaction order
   async createTransaction(data: {
     userId: string;
     orderId: string;
@@ -60,7 +60,7 @@ export class TransactionService {
     });
   }
 
-  // 通过订单ID查找
+  // Find transaction by order ID
   async findByOrderId(orderId: string): Promise<Transaction | null> {
     return await prisma.transaction.findUnique({
       where: { orderId },
@@ -70,7 +70,7 @@ export class TransactionService {
     });
   }
 
-  // 通过支付Session ID查找
+  // Find transaction by pay session ID
   async findByPaySessionId(
     paySessionId: string
   ): Promise<Transaction | null> {
@@ -82,7 +82,7 @@ export class TransactionService {
     });
   }
 
-  // 通过支付Transaction ID查找
+  // Find transaction by pay transaction ID
   async findByPayTransactionId(
     payTransactionId: string
   ): Promise<Transaction | null> {
@@ -91,7 +91,7 @@ export class TransactionService {
     });
   }
 
-  // 获取用户交易列表
+  // Find transactions by user ID
   async findByUserId(
     userId: string,
     params?: {
@@ -125,7 +125,7 @@ export class TransactionService {
     return { transactions, total };
   }
 
-  // 更新交易状态
+  // Update transaction status
   async updateStatus(
     orderId: string,
     orderStatus: string,
@@ -147,7 +147,7 @@ export class TransactionService {
     });
   }
 
-  // 完成支付
+  // Complete payment
   async completePayment(
     orderId: string,
     paymentData: {
@@ -173,7 +173,7 @@ export class TransactionService {
     });
   }
 
-  // 处理退款
+  // Process refund
   async processRefund(
     orderId: string,
     refundData: {
@@ -203,7 +203,7 @@ export class TransactionService {
     });
   }
 
-  // 取消订单
+  // Cancel order
   async cancelOrder(orderId: string, reason?: string): Promise<Transaction> {
     return await prisma.transaction.update({
       where: { orderId },
@@ -214,7 +214,7 @@ export class TransactionService {
     });
   }
 
-  // 获取过期订单
+  // Get expired orders
   async getExpiredOrders(): Promise<Transaction[]> {
     return await prisma.transaction.findMany({
       where: {
@@ -226,7 +226,7 @@ export class TransactionService {
     });
   }
 
-  // 批量更新过期订单
+  // Update expired orders status
   async updateExpiredOrders(): Promise<number> {
     const result = await prisma.transaction.updateMany({
       where: {
@@ -244,7 +244,7 @@ export class TransactionService {
     return result.count;
   }
 
-  // 获取订阅相关交易
+  // Get subscription related transactions
   async getSubscriptionTransactions(
     paySubscriptionId: string
   ): Promise<Transaction[]> {
@@ -254,7 +254,7 @@ export class TransactionService {
     });
   }
 
-  // 获取成功交易统计
+  // Get revenue statistics
   async getRevenueStats(
     startDate?: Date,
     endDate?: Date
@@ -276,7 +276,7 @@ export class TransactionService {
       if (endDate) where.paidAt.lte = endDate;
     }
 
-    // 获取成功交易
+    // Get successful transactions
     const successfulTransactions = await prisma.transaction.findMany({
       where,
       select: {
@@ -285,7 +285,7 @@ export class TransactionService {
       },
     });
 
-    // 获取退款交易
+    // Get refund transactions
     const refundWhere: Prisma.TransactionWhereInput = {
       orderStatus: OrderStatus.REFUNDED,
     };
@@ -301,7 +301,7 @@ export class TransactionService {
       select: { amount: true },
     });
 
-    // 计算统计数据
+    // Calculate statistics
     const totalRevenue = successfulTransactions.reduce(
       (sum, t) => sum + (t.amount ? parseFloat(t.amount.toString()) : 0),
       0
@@ -323,8 +323,8 @@ export class TransactionService {
     return {
       totalRevenue,
       totalTransactions: successfulTransactions.length,
-      averageOrderValue: successfulTransactions.length > 0 
-        ? totalRevenue / successfulTransactions.length 
+      averageOrderValue: successfulTransactions.length > 0
+        ? totalRevenue / successfulTransactions.length
         : 0,
       subscriptionRevenue,
       oneTimeRevenue,
@@ -332,7 +332,7 @@ export class TransactionService {
     };
   }
 
-  // 获取每日收入
+  // Get daily revenue
   async getDailyRevenue(days: number = 30): Promise<any[]> {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -354,14 +354,14 @@ export class TransactionService {
     return result as any[];
   }
 
-  // 删除交易记录（谨慎使用）
+  // Delete transaction
   async deleteTransaction(orderId: string): Promise<void> {
     await prisma.transaction.delete({
       where: { orderId },
     });
   }
 
-  // 批量创建交易（用于导入历史数据）
+  // Create batch transactions
   async createBatchTransactions(
     transactions: Prisma.TransactionCreateManyInput[]
   ): Promise<number> {

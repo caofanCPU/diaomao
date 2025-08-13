@@ -7,7 +7,7 @@ import { CreditType, OperationType } from '@/db/constants';
 const prisma = new PrismaClient();
 
 export class CreditUsageService {
-  // 记录积分使用
+  // Record Credit Usage
   async recordUsage(data: {
     userId: string;
     feature?: string;
@@ -28,7 +28,7 @@ export class CreditUsageService {
     });
   }
 
-  // 批量记录积分使用
+  // Batch Record Credit Usage
   async recordBatchUsage(
     usages: Prisma.CreditUsageCreateManyInput[]
   ): Promise<number> {
@@ -38,7 +38,7 @@ export class CreditUsageService {
     return result.count;
   }
 
-  // 获取用户积分使用历史
+  // Get User Credit Usage History
   async getUserUsageHistory(
     userId: string,
     params?: {
@@ -85,7 +85,7 @@ export class CreditUsageService {
     return { usage, total };
   }
 
-  // 获取订单相关的积分使用记录
+  // Get Credit Usage Record by Order ID
   async getOrderUsage(orderId: string): Promise<CreditUsage[]> {
     return await prisma.creditUsage.findMany({
       where: { orderId },
@@ -93,7 +93,7 @@ export class CreditUsageService {
     });
   }
 
-  // 获取用户积分使用统计
+  // Get User Credit Usage Statistics
   async getUserUsageStats(
     userId: string,
     startDate?: Date,
@@ -115,7 +115,7 @@ export class CreditUsageService {
       if (endDate) where.createdAt.lte = endDate;
     }
 
-    // 获取所有使用记录
+    // Get all usage records
     const allUsage = await prisma.creditUsage.findMany({
       where,
       select: {
@@ -126,7 +126,7 @@ export class CreditUsageService {
       },
     });
 
-    // 计算统计数据
+    // Calculate statistics
     const stats = {
       totalConsumed: 0,
       totalRecharged: 0,
@@ -137,7 +137,7 @@ export class CreditUsageService {
       featureUsage: [] as any[],
     };
 
-    // 按功能统计使用量
+    // Calculate usage statistics by feature
     const featureMap = new Map<string, number>();
 
     allUsage.forEach((usage) => {
@@ -165,7 +165,7 @@ export class CreditUsageService {
       }
     });
 
-    // 转换功能使用统计为数组
+    // Convert feature usage statistics to array
     stats.featureUsage = Array.from(featureMap.entries())
       .map(([feature, credits]) => ({ feature, credits }))
       .sort((a, b) => b.credits - a.credits);
@@ -173,7 +173,7 @@ export class CreditUsageService {
     return stats;
   }
 
-  // 获取热门功能使用统计
+  // Get Popular Features
   async getPopularFeatures(
     limit: number = 10,
     startDate?: Date,
@@ -212,7 +212,7 @@ export class CreditUsageService {
     }));
   }
 
-  // 获取每日积分使用趋势
+  // Get Daily Credit Usage Trend
   async getDailyUsageTrend(
     days: number = 30,
     userId?: string
@@ -256,7 +256,7 @@ export class CreditUsageService {
     }[];
   }
 
-  // 获取用户最近的积分操作
+  // Get Recent Credit Usage Operations
   async getRecentOperations(
     userId: string,
     limit: number = 10
@@ -268,7 +268,7 @@ export class CreditUsageService {
     });
   }
 
-  // 删除过期的使用记录（数据清理）
+  // Delete Old Credit Usage Records
   async deleteOldRecords(daysToKeep: number = 365): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
@@ -284,7 +284,7 @@ export class CreditUsageService {
     return result.count;
   }
 
-  // 获取系统级积分使用统计
+  // Get System-wide Credit Usage Statistics
   async getSystemStats(): Promise<{
     totalUsers: number;
     totalOperations: number;
@@ -315,7 +315,7 @@ export class CreditUsageService {
       }),
     ]);
 
-    // 计算运营天数（从第一条记录到现在）
+    // Calculate operating days (from first record to now)
     const firstRecord = await prisma.creditUsage.findFirst({
       orderBy: { createdAt: 'asc' },
       select: { createdAt: true },
@@ -338,7 +338,7 @@ export class CreditUsageService {
     };
   }
 
-  // 检查是否存在重复记录（用于幂等性检查）
+  // Check for Duplicate Operations
   async isDuplicateOperation(
     userId: string,
     orderId: string,

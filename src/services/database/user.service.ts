@@ -7,7 +7,7 @@ import { UserStatus } from '@/db/constants';
 const prisma = new PrismaClient();
 
 export class UserService {
-  // 创建用户
+  // Create user
   async createUser(data: {
     fingerprintId?: string;
     clerkUserId?: string;
@@ -24,7 +24,7 @@ export class UserService {
     });
   }
 
-  // 通过ID查找用户
+  // Find user by ID
   async findById(userId: string): Promise<User | null> {
     return await prisma.user.findUnique({
       where: { userId },
@@ -39,7 +39,7 @@ export class UserService {
     });
   }
 
-  // 通过邮箱查找用户
+  // Find user by email
   async findByEmail(email: string): Promise<User | null> {
     return await prisma.user.findFirst({
       where: { email },
@@ -54,7 +54,7 @@ export class UserService {
     });
   }
 
-  // 通过Fingerprint ID查找用户
+  // Find user by Fingerprint ID
   async findByFingerprintId(fingerprintId: string): Promise<User | null> {
     return await prisma.user.findUnique({
       where: { fingerprintId },
@@ -64,7 +64,7 @@ export class UserService {
     });
   }
 
-  // 通过Clerk用户ID查找用户
+  // Find user by Clerk user ID
   async findByClerkUserId(clerkUserId: string): Promise<User | null> {
     return await prisma.user.findUnique({
       where: { clerkUserId },
@@ -79,7 +79,7 @@ export class UserService {
     });
   }
 
-  // 更新用户
+  // Update user
   async updateUser(
     userId: string,
     data: Prisma.UserUpdateInput
@@ -90,7 +90,7 @@ export class UserService {
     });
   }
 
-  // 将匿名用户升级为注册用户
+  // Upgrade anonymous user to registered user
   async upgradeToRegistered(
     userId: string,
     data: {
@@ -108,7 +108,7 @@ export class UserService {
     });
   }
 
-  // 软删除用户（标记为deleted）
+  // Soft delete user (mark as deleted)
   async softDeleteUser(userId: string): Promise<User> {
     return await prisma.user.update({
       where: { userId },
@@ -120,9 +120,9 @@ export class UserService {
     });
   }
 
-  // 硬删除用户
+  // Hard delete user (permanent deletion)
   async hardDeleteUser(userId: string): Promise<void> {
-    // 先备份用户数据
+    // Backup user data before deletion
     const user = await prisma.user.findUnique({
       where: { userId },
       include: {
@@ -134,7 +134,7 @@ export class UserService {
     });
 
     if (user) {
-      // 备份到UserBackup表
+      // Backup user data to UserBackup table
       await prisma.userBackup.create({
         data: {
           originalUserId: user.userId,
@@ -146,14 +146,14 @@ export class UserService {
         },
       });
 
-      // 删除用户（级联删除会自动删除关联数据）
+      // Delete user (cascading delete will automatically delete associated data)
       await prisma.user.delete({
         where: { userId },
       });
     }
   }
 
-  // 获取用户列表
+  // Get user list
   async listUsers(params: {
     skip?: number;
     take?: number;
@@ -197,7 +197,7 @@ export class UserService {
     return result.count;
   }
 
-  // 检查用户是否存在
+  // Check if user exists
   async exists(userId: string): Promise<boolean> {
     const count = await prisma.user.count({
       where: { userId },
@@ -205,7 +205,7 @@ export class UserService {
     return count > 0;
   }
 
-  // 获取用户统计信息
+  // Get user statistics
   async getUserStats(): Promise<{
     total: number;
     anonymous: number;

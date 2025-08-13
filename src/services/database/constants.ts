@@ -1,5 +1,5 @@
-// 数据库字段枚举常量定义
-// 与数据库CHECK约束保持一致
+// Database Field Enums
+// Keep in sync with DB CHECK constraints
 
 export const UserStatus = {
   ANONYMOUS: 'anonymous',
@@ -47,7 +47,7 @@ export const PaySupplier = {
   PAYPAL: 'Paypal',
 } as const;
 
-// 类型定义
+// Type Definitions
 export type UserStatus = typeof UserStatus[keyof typeof UserStatus];
 export type SubscriptionStatus = typeof SubscriptionStatus[keyof typeof SubscriptionStatus];
 export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
@@ -56,7 +56,7 @@ export type CreditType = typeof CreditType[keyof typeof CreditType];
 export type OperationType = typeof OperationType[keyof typeof OperationType];
 export type PaySupplier = typeof PaySupplier[keyof typeof PaySupplier];
 
-// 验证函数
+// Validation Functions
 export const isValidUserStatus = (status: string): status is UserStatus => {
   return Object.values(UserStatus).includes(status as UserStatus);
 };

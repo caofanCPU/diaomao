@@ -5,8 +5,8 @@ export { transactionService } from './transaction.service';
 export { creditUsageService } from './creditUsage.service';
 export { userBackupService } from './userBackup.service';
 
-// 导出Prisma模型类型
-export type { 
+// Export Prisma Model Types
+export type {
   User,
   Subscription,
   Credit,
@@ -15,7 +15,7 @@ export type {
   UserBackup,
 } from '@prisma/client';
 
-// 导出枚举常量和类型
+// Export Enums and Types
 export {
   UserStatus,
   SubscriptionStatus,
@@ -31,7 +31,7 @@ export {
   isValidOperationType,
 } from './constants';
 
-// 导出枚举类型定义
+// Export Enum Type Definitions
 export type {
   UserStatus as UserStatusType,
   SubscriptionStatus as SubscriptionStatusType,

@@ -5,7 +5,7 @@ import { CreditType, OperationType } from '@/db/constants';
 const prisma = new PrismaClient();
 
 export class CreditService {
-  // 初始化用户积分
+  // Initialize User Credits
   async initializeCredits(
     userId: string,
     freeCredits: number = 50
@@ -21,21 +21,21 @@ export class CreditService {
     });
   }
 
-  // 获取用户积分信息
+  // Get User Credits
   async getCredits(userId: string): Promise<Credit | null> {
     return await prisma.credit.findUnique({
       where: { userId },
     });
   }
 
-  // 获取用户总积分余额
+  // Get Total Credit Balance
   async getTotalBalance(userId: string): Promise<number> {
     const credits = await this.getCredits(userId);
     if (!credits) return 0;
     return credits.balanceFree + credits.balancePaid;
   }
 
-  // 充值积分（事务处理）
+  // Recharge Credits (Transactional)
   async rechargeCredits(
     userId: string,
     amount: number,
@@ -44,7 +44,7 @@ export class CreditService {
     feature?: string
   ): Promise<{ credit: Credit; usage: CreditUsage }> {
     return await prisma.$transaction(async (tx) => {
-      // 获取当前积分信息
+      // Get Current Credits
       const currentCredit = await tx.credit.findUnique({
         where: { userId },
       });
@@ -53,7 +53,7 @@ export class CreditService {
         throw new Error('User credits not found');
       }
 
-      // 更新积分余额
+      // Update Credits
       const updateData: Prisma.CreditUpdateInput = {};
       if (creditType === CreditType.FREE) {
         updateData.balanceFree = currentCredit.balanceFree + amount;
@@ -68,7 +68,7 @@ export class CreditService {
         data: updateData,
       });
 
-      // 记录积分充值
+      // Record Credit Recharge
       const usage = await tx.creditUsage.create({
         data: {
           userId,
@@ -84,7 +84,7 @@ export class CreditService {
     });
   }
 
-  // 消耗积分（事务处理）
+  // Consume Credits (Transactional)
   async consumeCredits(
     userId: string,
     amount: number,
@@ -92,7 +92,7 @@ export class CreditService {
     orderId?: string
   ): Promise<{ credit: Credit; usage: CreditUsage[] }> {
     return await prisma.$transaction(async (tx) => {
-      // 获取当前积分信息
+      // Get Current Credits
       const currentCredit = await tx.credit.findUnique({
         where: { userId },
       });
@@ -101,13 +101,13 @@ export class CreditService {
         throw new Error('User credits not found');
       }
 
-      // 检查总余额是否足够
+      // Check Total Balance
       const totalBalance = currentCredit.balanceFree + currentCredit.balancePaid;
       if (totalBalance < amount) {
         throw new Error('Insufficient credits');
       }
 
-      // 优先扣除免费积分，不足部分从付费积分扣除
+      // Prioritize Free Credits
       const freeToDeduct = Math.min(amount, currentCredit.balanceFree);
       const paidToDeduct = amount - freeToDeduct;
 
@@ -119,7 +119,7 @@ export class CreditService {
         },
       });
 
-      // 记录积分消耗
+      // Record Credit Consume
       const usageRecords = [];
       if (freeToDeduct > 0) {
         const freeUsage = await tx.creditUsage.create({
@@ -153,7 +153,7 @@ export class CreditService {
     });
   }
 
-  // 冻结积分
+  // Freeze Credits
   async freezeCredits(
     userId: string,
     amount: number,
@@ -168,7 +168,7 @@ export class CreditService {
         throw new Error('User credits not found');
       }
 
-      // 优先冻结付费积分
+      // Prioritize Freezing Paid Credits
       const paidToFreeze = Math.min(amount, currentCredit.balancePaid);
       const freeToFreeze = amount - paidToFreeze;
 
@@ -198,7 +198,7 @@ export class CreditService {
     });
   }
 
-  // 解冻积分
+  // Unfreeze Credits
   async unfreezeCredits(
     userId: string,
     amount: number,
@@ -240,7 +240,7 @@ export class CreditService {
     });
   }
 
-  // 退款扣除积分
+  // Refund Credits
   async refundCredits(
     userId: string,
     amount: number,
@@ -255,7 +255,7 @@ export class CreditService {
         throw new Error('User credits not found');
       }
 
-      // 退款优先扣除付费积分
+      // Refund Prioritize Deduction of Paid Credits
       const paidToDeduct = Math.min(amount, currentCredit.balancePaid);
       const freeToDeduct = amount - paidToDeduct;
 
@@ -284,7 +284,7 @@ export class CreditService {
     });
   }
 
-  // 重置免费积分
+  // Reset Free Credits 
   async resetFreeCredits(userId: string, newLimit: number = 50): Promise<Credit> {
     return await prisma.credit.update({
       where: { userId },
@@ -295,7 +295,7 @@ export class CreditService {
     });
   }
 
-  // 批量更新积分（管理员操作）
+  // Batch Update Credits (Admin Operation)
   async adjustCredits(
     userId: string,
     adjustments: {
@@ -321,7 +321,7 @@ export class CreditService {
     });
   }
 
-  // 获取积分不足的用户
+  // Get Users with Low Credit Balance
   async getLowBalanceUsers(threshold: number = 10): Promise<Credit[]> {
     return await prisma.$queryRaw<Credit[]>`
       SELECT * FROM credits 
@@ -330,7 +330,7 @@ export class CreditService {
     `;
   }
 
-  // 获取积分统计信息
+  // Get Credit Statistics
   async getCreditStats(): Promise<{
     totalUsers: number;
     totalFreeBalance: number;
@@ -370,7 +370,7 @@ export class CreditService {
     };
   }
 
-  // 检查用户是否有足够积分
+  // Check if User has Enough Credits
   async hasEnoughCredits(userId: string, amount: number): Promise<boolean> {
     const totalBalance = await this.getTotalBalance(userId);
     return totalBalance >= amount;

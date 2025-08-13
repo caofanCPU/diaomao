@@ -5,7 +5,7 @@ import { SubscriptionStatus } from '@/db/constants';
 const prisma = new PrismaClient();
 
 export class SubscriptionService {
-  // 创建订阅
+  // Create a new subscription
   async createSubscription(data: {
     userId: string;
     paySubscriptionId?: string;
@@ -30,7 +30,7 @@ export class SubscriptionService {
     });
   }
 
-  // 通过订阅ID查找
+  // Find subscription by ID
   async findById(subscriptionId: string): Promise<Subscription | null> {
     return await prisma.subscription.findUnique({
       where: { subscriptionId },
@@ -40,7 +40,7 @@ export class SubscriptionService {
     });
   }
 
-  // 通过支付订阅ID查找
+  // Find subscription by pay subscription ID
   async findByPaySubscriptionId(
     paySubscriptionId: string
   ): Promise<Subscription | null> {
@@ -52,7 +52,7 @@ export class SubscriptionService {
     });
   }
 
-  // 获取用户的订阅列表
+  // Get user's subscription list
   async findByUserId(
     userId: string,
     params?: {
@@ -81,7 +81,7 @@ export class SubscriptionService {
     });
   }
 
-  // 获取用户当前活跃订阅
+  // Get user's active subscription
   async getActiveSubscription(userId: string): Promise<Subscription | null> {
     return await prisma.subscription.findFirst({
       where: {
@@ -96,7 +96,7 @@ export class SubscriptionService {
     });
   }
 
-  // 更新订阅
+  // Update subscription
   async updateSubscription(
     subscriptionId: string,
     data: Prisma.SubscriptionUpdateInput
@@ -107,7 +107,7 @@ export class SubscriptionService {
     });
   }
 
-  // 更新订阅状态
+  // Update subscription status
   async updateStatus(
     subscriptionId: string,
     status: string
@@ -118,7 +118,7 @@ export class SubscriptionService {
     });
   }
 
-  // 更新订阅周期
+  // Update subscription period
   async updatePeriod(
     subscriptionId: string,
     subPeriodStart: Date,
@@ -133,7 +133,7 @@ export class SubscriptionService {
     });
   }
 
-  // 取消订阅
+  // Cancel subscription
   async cancelSubscription(
     subscriptionId: string,
     cancelAtPeriodEnd: boolean = true
@@ -152,7 +152,7 @@ export class SubscriptionService {
     });
   }
 
-  // 续费订阅
+  // Renew subscription
   async renewSubscription(
     subscriptionId: string,
     newPeriodEnd: Date,
@@ -172,21 +172,21 @@ export class SubscriptionService {
         status: SubscriptionStatus.ACTIVE,
         subPeriodStart: subscription.subPeriodEnd || new Date(),
         subPeriodEnd: newPeriodEnd,
-        creditsAllocated: creditsToAdd 
-          ? subscription.creditsAllocated + creditsToAdd 
+        creditsAllocated: creditsToAdd
+          ? subscription.creditsAllocated + creditsToAdd
           : subscription.creditsAllocated,
       },
     });
   }
 
-  // 删除订阅
+  // Delete subscription
   async deleteSubscription(subscriptionId: string): Promise<void> {
     await prisma.subscription.delete({
       where: { subscriptionId },
     });
   }
 
-  // 获取即将过期的订阅（7天内）
+  // Get expiring subscriptions (within 7 days)
   async getExpiringSubscriptions(days: number = 7): Promise<Subscription[]> {
     const now = new Date();
     const expiryDate = new Date();
@@ -206,7 +206,7 @@ export class SubscriptionService {
     });
   }
 
-  // 获取过期的订阅
+  // Get expired subscriptions
   async getExpiredSubscriptions(): Promise<Subscription[]> {
     return await prisma.subscription.findMany({
       where: {
@@ -221,7 +221,7 @@ export class SubscriptionService {
     });
   }
 
-  // 批量更新过期订阅状态
+  // Update expired subscriptions status
   async updateExpiredSubscriptions(): Promise<number> {
     const result = await prisma.subscription.updateMany({
       where: {
@@ -238,7 +238,7 @@ export class SubscriptionService {
     return result.count;
   }
 
-  // 获取订阅统计信息
+  // Get subscription statistics
   async getSubscriptionStats(): Promise<{
     total: number;
     active: number;
@@ -248,27 +248,27 @@ export class SubscriptionService {
     trialing: number;
     revenue: number;
   }> {
-    const [total, active, canceled, pastDue, incomplete, trialing] = 
+    const [total, active, canceled, pastDue, incomplete, trialing] =
       await Promise.all([
         prisma.subscription.count(),
-        prisma.subscription.count({ 
-          where: { status: SubscriptionStatus.ACTIVE } 
+        prisma.subscription.count({
+          where: { status: SubscriptionStatus.ACTIVE }
         }),
-        prisma.subscription.count({ 
-          where: { status: SubscriptionStatus.CANCELED } 
+        prisma.subscription.count({
+          where: { status: SubscriptionStatus.CANCELED }
         }),
-        prisma.subscription.count({ 
-          where: { status: SubscriptionStatus.PAST_DUE } 
+        prisma.subscription.count({
+          where: { status: SubscriptionStatus.PAST_DUE }
         }),
-        prisma.subscription.count({ 
-          where: { status: SubscriptionStatus.INCOMPLETE } 
+        prisma.subscription.count({
+          where: { status: SubscriptionStatus.INCOMPLETE }
         }),
-        prisma.subscription.count({ 
-          where: { status: SubscriptionStatus.TRIALING } 
+        prisma.subscription.count({
+          where: { status: SubscriptionStatus.TRIALING }
         }),
       ]);
 
-    // 计算活跃订阅的总收入（需要结合交易表）
+    // Calculate active subscription revenue (need to combine with transaction table)
     const activeSubscriptions = await prisma.subscription.findMany({
       where: { status: SubscriptionStatus.ACTIVE },
       select: { paySubscriptionId: true },
@@ -288,7 +288,7 @@ export class SubscriptionService {
         select: { amount: true },
       });
 
-      revenue = transactions.reduce((sum, t) => 
+      revenue = transactions.reduce((sum, t) =>
         sum + (t.amount ? parseFloat(t.amount.toString()) : 0), 0
       );
     }

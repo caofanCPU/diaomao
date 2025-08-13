@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PrismaClient, Prisma } from '@prisma/client';
-import type{ UserBackup } from '@prisma/client';
+import type { UserBackup } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export class UserBackupService {
-  // 创建用户备份
+  // Create user backup
   async createBackup(data: {
     originalUserId: string;
     fingerprintId?: string;
@@ -27,9 +27,9 @@ export class UserBackupService {
     });
   }
 
-  // 备份用户基本数据
+  // Backup user basic data
   async backupUserData(userId: string): Promise<UserBackup> {
-    // 获取用户基本数据
+    // Get user basic data
     const userData = await prisma.user.findUnique({
       where: { userId },
     });
@@ -38,7 +38,7 @@ export class UserBackupService {
       throw new Error('User not found');
     }
 
-    // 创建备份记录
+    // Create backup record
     return await this.createBackup({
       originalUserId: userData.userId,
       fingerprintId: userData.fingerprintId || undefined,
@@ -58,7 +58,7 @@ export class UserBackupService {
     });
   }
 
-  // 通过原始用户ID查找备份
+  // Find backup by original user ID
   async findByOriginalUserId(
     originalUserId: string
   ): Promise<UserBackup[]> {
@@ -68,7 +68,7 @@ export class UserBackupService {
     });
   }
 
-  // 通过邮箱查找备份
+  // Find backup by email
   async findByEmail(email: string): Promise<UserBackup[]> {
     return await prisma.userBackup.findMany({
       where: { email },
@@ -76,7 +76,7 @@ export class UserBackupService {
     });
   }
 
-  // 通过Fingerprint ID查找备份
+  // Find backup by Fingerprint ID
   async findByFingerprintId(
     fingerprintId: string
   ): Promise<UserBackup[]> {
@@ -86,7 +86,7 @@ export class UserBackupService {
     });
   }
 
-  // 通过Clerk用户ID查找备份
+  // Find backup by Clerk user ID
   async findByClerkUserId(
     clerkUserId: string
   ): Promise<UserBackup[]> {
@@ -96,14 +96,14 @@ export class UserBackupService {
     });
   }
 
-  // 获取备份详情
+  // Find backup by backup ID
   async getBackupById(id: bigint): Promise<UserBackup | null> {
     return await prisma.userBackup.findUnique({
       where: { id },
     });
   }
 
-  // 恢复用户数据
+  // Restore user data from backup
   async restoreUserData(backupId: bigint): Promise<{ user: unknown }> {
     const backup = await this.getBackupById(backupId);
     if (!backup) {
@@ -116,7 +116,7 @@ export class UserBackupService {
     }
 
     return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // 恢复用户主数据
+      // Restore user main data
       const user = await tx.user.create({
         data: {
           fingerprintId: backupData.fingerprintId,
@@ -132,7 +132,7 @@ export class UserBackupService {
     });
   }
 
-  // 获取备份列表
+  // List backups
   async listBackups(params: {
     skip?: number;
     take?: number;
@@ -172,7 +172,7 @@ export class UserBackupService {
     return { backups, total };
   }
 
-  // 删除旧备份（数据清理）
+  // Delete old backups (data cleanup)
   async deleteOldBackups(daysToKeep: number = 90): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
@@ -188,7 +188,7 @@ export class UserBackupService {
     return result.count;
   }
 
-  // 获取备份统计信息
+  // Get backup statistics
   async getBackupStats(): Promise<{
     totalBackups: number;
     last24Hours: number;
@@ -219,7 +219,7 @@ export class UserBackupService {
       }),
     ]);
 
-    // 计算平均备份大小（简化计算）
+    // Calculate average backup size (simplified calculation)
     const sampleBackups = await prisma.userBackup.findMany({
       take: 100,
       select: { backupData: true },
@@ -227,9 +227,9 @@ export class UserBackupService {
 
     const avgBackupSize = sampleBackups.length > 0
       ? sampleBackups.reduce((sum: number, backup: { backupData: unknown }) => {
-          const size = JSON.stringify(backup.backupData || {}).length;
-          return sum + size;
-        }, 0) / sampleBackups.length
+        const size = JSON.stringify(backup.backupData || {}).length;
+        return sum + size;
+      }, 0) / sampleBackups.length
       : 0;
 
     return {
@@ -241,7 +241,7 @@ export class UserBackupService {
     };
   }
 
-  // 导出备份数据为JSON
+  // Export backup data as JSON
   async exportBackup(backupId: bigint): Promise<string> {
     const backup = await this.getBackupById(backupId);
     if (!backup) {
@@ -251,7 +251,7 @@ export class UserBackupService {
     return JSON.stringify(backup, null, 2);
   }
 
-  // 批量备份用户（用于定期备份任务）
+  // Batch backup users (for scheduled backup tasks)
   async batchBackupUsers(userIds: string[]): Promise<number> {
     let successCount = 0;
 

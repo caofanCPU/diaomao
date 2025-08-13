@@ -1,4 +1,4 @@
--- 用户表 (Users)
+-- Users
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
@@ -11,12 +11,12 @@ CREATE TABLE users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 创建索引
+-- Indexes
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_status ON users(status);
 CREATE INDEX idx_users_created_at ON users(created_at);
 
--- 订阅表 (Subscriptions)
+-- Subscriptions
 CREATE TABLE subscriptions (
     id BIGSERIAL PRIMARY KEY,
     subscription_id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
@@ -33,13 +33,13 @@ CREATE TABLE subscriptions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 创建索引
+-- Indexes
 CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
 CREATE INDEX idx_subscriptions_pay_subscription_id ON subscriptions(pay_subscription_id);
 CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 CREATE INDEX idx_subscriptions_sub_period_end ON subscriptions(sub_period_end);
 
--- 积分表 (Credits)
+-- Credits
 CREATE TABLE credits (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID UNIQUE NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -51,10 +51,10 @@ CREATE TABLE credits (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 创建索引
+-- Indexes
 CREATE INDEX idx_credits_user_id ON credits(user_id);
 
--- 订单交易表 (Transactions)
+-- Transactions
 CREATE TABLE transactions (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -87,7 +87,7 @@ CREATE TABLE transactions (
     pay_updated_at TIMESTAMP WITH TIME ZONE
 );
 
--- 创建索引
+-- Indexes
 CREATE INDEX idx_transactions_user_id ON transactions(user_id);
 CREATE INDEX idx_transactions_order_id ON transactions(order_id);
 CREATE INDEX idx_transactions_pay_session_id ON transactions(pay_session_id);
@@ -96,7 +96,7 @@ CREATE INDEX idx_transactions_pay_subscription_id ON transactions(pay_subscripti
 CREATE INDEX idx_transactions_order_status ON transactions(order_status);
 CREATE INDEX idx_transactions_order_created_at ON transactions(order_created_at);
 
--- 积分使用表 (Credit_Usage)
+-- Credit_Usage
 CREATE TABLE credit_usage (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -108,14 +108,14 @@ CREATE TABLE credit_usage (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 创建索引
+-- Indexes
 CREATE INDEX idx_credit_usage_user_id ON credit_usage(user_id);
 CREATE INDEX idx_credit_usage_order_id ON credit_usage(order_id);
 CREATE INDEX idx_credit_usage_credit_type ON credit_usage(credit_type);
 CREATE INDEX idx_credit_usage_operation_type ON credit_usage(operation_type);
 CREATE INDEX idx_credit_usage_created_at ON credit_usage(created_at);
 
--- 用户备份表 (UserBackup)
+-- UserBackup
 CREATE TABLE user_backup (
     id BIGSERIAL PRIMARY KEY,
     original_user_id UUID NOT NULL,
@@ -128,14 +128,14 @@ CREATE TABLE user_backup (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 创建索引
+-- Indexes
 CREATE INDEX idx_user_backup_original_user_id ON user_backup(original_user_id);
 CREATE INDEX idx_user_backup_fingerprint_id ON user_backup(fingerprint_id);
 CREATE INDEX idx_user_backup_clerk_user_id ON user_backup(clerk_user_id);
 CREATE INDEX idx_user_backup_email ON user_backup(email);
 CREATE INDEX idx_user_backup_deleted_at ON user_backup(deleted_at);
 
--- 创建更新时间触发器函数
+-- UpdateTime Trigger
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -144,7 +144,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 为需要updated_at的表创建触发器
+-- UpdateTime Triggers
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
@@ -157,7 +157,7 @@ CREATE TRIGGER update_credits_updated_at BEFORE UPDATE ON credits
 CREATE TRIGGER update_transactions_order_updated_at BEFORE UPDATE ON transactions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- 添加注释
+-- Comments
 COMMENT ON TABLE users IS '用户表，存储匿名用户和注册用户信息';
 COMMENT ON TABLE subscriptions IS '订阅表，跟踪用户订阅状态';
 COMMENT ON TABLE credits IS '积分表，管理用户积分余额';
