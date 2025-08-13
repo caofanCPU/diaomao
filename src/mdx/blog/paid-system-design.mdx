@@ -328,7 +328,7 @@ flowchart TB
 | `fingerprint_id`    | String       | 匿名用户的Fingerprint标识符            |
 | `clerk_user_id`     | String       | Clerk用户ID, 注册用户必填, 匿名用户为空 |
 | `email`             | String       | 用户电子邮件(注册用户必填, 匿名用户为空) |
-| `status`            | Enum         | 状态:  anonymous、registered、frozen、deleted等             |
+| `status`            | Enum         | 状态:  anonymous、registered、frozen、*deleted*等             |
 | `created_at`        | Timestamp    | 账户创建时间戳                        |
 | `updated_at`        | Timestamp    | 最后更新时间戳                        |
 
@@ -347,6 +347,7 @@ flowchart TB
 | `credits_allocated` | Integer      | 每个计费周期分配的积分                 |
 | `sub_period_start`  | Timestamp    | 订阅周期开始时间戳                    |
 | `sub_period_end`    | Timestamp    | 订阅周期结束时间戳                    |
+| `deleted`        | Enum    | 删除：0否、1是, 默认0                      | 
 | `created_at`        | Timestamp    | 记录创建时间戳                        |
 | `updated_at`        | Timestamp    | 最后更新时间戳                        |
 
@@ -395,6 +396,7 @@ flowchart TB
 | `paid_at`           | Timestamp    | 支付时间戳                            |
 | `paid_email`        | String       | 支付邮箱                            |
 | `paid_detail`       | String       | 支付详情(例如, 订阅、一次性购买)     |
+| `deleted`        | Enum    | 删除：0否、1是, 默认0                      | 
 | `pay_created_at`        | Timestamp    | 交易创建时间戳                        |
 | `pay_updated_at`        | Timestamp    | 交易最后更新时间戳                        |
 
@@ -410,6 +412,7 @@ flowchart TB
 | `credit_type`       | Enum         | 积分类型: free、paid                    |
 | `operation_type`    | Enum         | 操作类型: consume、recharge、freeze、unfreeze                |
 | `credits_used`      | Integer      | 消耗的积分数量                        |
+| `deleted`        | Enum    | 删除：0否、1是, 默认0                      | 
 | `created_at`        | Timestamp    | 使用时间戳                            |
 
 #### 用户备份表 (UserBackup)
@@ -424,6 +427,7 @@ flowchart TB
 | `email`             | String       | 用户邮箱                               |
 | `status`            | String       | 用户状态                               |
 | `backup_data`       | JSON         | 完整的用户数据备份(包括积分、订阅等) |
+| `deleted`        | Enum    | 删除：0否、1是, 默认0                      | 
 | `deleted_at`        | Timestamp    | 删除时间戳                            |
 | `created_at`        | Timestamp    | 备份创建时间戳                        |
 
@@ -538,6 +542,7 @@ classDiagram
         int credits_allocated
         string sub_period_start
         string sub_period_end
+        <<enumeration>> deleted
         string created_at
         string updated_at
     }
@@ -580,6 +585,7 @@ classDiagram
         string paid_at
         string paid_email
         string paid_detail
+        <<enumeration>> deleted
         string pay_created_at
         string pay_updated_at
     }
@@ -592,6 +598,7 @@ classDiagram
         <<enumeration>> credit_type
         <<enumeration>> operation_type
         int credits_used
+        <<enumeration>> deleted
         string created_at
     }
 
@@ -603,6 +610,7 @@ classDiagram
         string email
         string status
         string backup_data
+        <<enumeration>> deleted
         string deleted_at
         string created_at
     }
