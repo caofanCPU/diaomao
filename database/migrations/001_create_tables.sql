@@ -29,6 +29,7 @@ CREATE TABLE subscriptions (
     credits_allocated INTEGER NOT NULL DEFAULT 0,
     sub_period_start TIMESTAMP WITH TIME ZONE,
     sub_period_end TIMESTAMP WITH TIME ZONE,
+    deleted INTEGER DEFAULT 0 NOT NULL CHECK (deleted IN (0, 1)),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -38,6 +39,7 @@ CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
 CREATE INDEX idx_subscriptions_pay_subscription_id ON subscriptions(pay_subscription_id);
 CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 CREATE INDEX idx_subscriptions_sub_period_end ON subscriptions(sub_period_end);
+CREATE INDEX idx_subscriptions_deleted ON subscriptions(deleted);
 
 -- Credits
 CREATE TABLE credits (
@@ -84,7 +86,8 @@ CREATE TABLE transactions (
     paid_email VARCHAR(255),
     paid_detail TEXT,
     pay_created_at TIMESTAMP WITH TIME ZONE,
-    pay_updated_at TIMESTAMP WITH TIME ZONE
+    pay_updated_at TIMESTAMP WITH TIME ZONE,
+    deleted INTEGER DEFAULT 0 NOT NULL CHECK (deleted IN (0, 1))
 );
 
 -- Indexes
@@ -105,6 +108,7 @@ CREATE TABLE credit_usage (
     credit_type VARCHAR(10) NOT NULL CHECK (credit_type IN ('free', 'paid')),
     operation_type VARCHAR(20) NOT NULL CHECK (operation_type IN ('consume', 'recharge', 'freeze', 'unfreeze')),
     credits_used INTEGER NOT NULL,
+    deleted INTEGER DEFAULT 0 NOT NULL CHECK (deleted IN (0, 1)),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -124,6 +128,7 @@ CREATE TABLE user_backup (
     email VARCHAR(255),
     status VARCHAR(50),
     backup_data JSONB,
+    deleted INTEGER DEFAULT 0 NOT NULL CHECK (deleted IN (0, 1)),
     deleted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -164,3 +169,9 @@ COMMENT ON TABLE credits IS '积分表，管理用户积分余额';
 COMMENT ON TABLE transactions IS '订单交易表，记录所有支付交易';
 COMMENT ON TABLE credit_usage IS '积分使用表，跟踪积分消耗和充值';
 COMMENT ON TABLE user_backup IS '用户备份表，存储注销用户数据';
+
+-- Column Comments for deleted fields
+COMMENT ON COLUMN subscriptions.deleted IS '软删除标记，0=正常，1=已删除';
+COMMENT ON COLUMN transactions.deleted IS '软删除标记，0=正常，1=已删除';
+COMMENT ON COLUMN credit_usage.deleted IS '软删除标记，0=正常，1=已删除';
+COMMENT ON COLUMN user_backup.deleted IS '软删除标记，0=正常，1=已删除';

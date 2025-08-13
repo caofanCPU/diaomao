@@ -62,8 +62,8 @@ export class TransactionService {
 
   // Find transaction by order ID
   async findByOrderId(orderId: string): Promise<Transaction | null> {
-    return await prisma.transaction.findUnique({
-      where: { orderId },
+    return await prisma.transaction.findFirst({
+      where: { orderId, deleted: 0 },
       include: {
         user: true,
       },
@@ -75,7 +75,7 @@ export class TransactionService {
     paySessionId: string
   ): Promise<Transaction | null> {
     return await prisma.transaction.findFirst({
-      where: { paySessionId },
+      where: { paySessionId, deleted: 0 },
       include: {
         user: true,
       },
@@ -86,8 +86,8 @@ export class TransactionService {
   async findByPayTransactionId(
     payTransactionId: string
   ): Promise<Transaction | null> {
-    return await prisma.transaction.findUnique({
-      where: { payTransactionId },
+    return await prisma.transaction.findFirst({
+      where: { payTransactionId, deleted: 0 },
     });
   }
 
@@ -102,7 +102,7 @@ export class TransactionService {
       orderBy?: Prisma.TransactionOrderByWithRelationInput;
     }
   ): Promise<{ transactions: Transaction[]; total: number }> {
-    const where: Prisma.TransactionWhereInput = { userId };
+    const where: Prisma.TransactionWhereInput = { userId, deleted: 0 };
 
     if (params?.orderStatus) {
       where.orderStatus = params.orderStatus;
@@ -219,6 +219,7 @@ export class TransactionService {
     return await prisma.transaction.findMany({
       where: {
         orderStatus: OrderStatus.CREATED,
+        deleted: 0,
         orderExpiredAt: {
           lt: new Date(),
         },
@@ -231,6 +232,7 @@ export class TransactionService {
     const result = await prisma.transaction.updateMany({
       where: {
         orderStatus: OrderStatus.CREATED,
+        deleted: 0,
         orderExpiredAt: {
           lt: new Date(),
         },
@@ -249,7 +251,7 @@ export class TransactionService {
     paySubscriptionId: string
   ): Promise<Transaction[]> {
     return await prisma.transaction.findMany({
-      where: { paySubscriptionId },
+      where: { paySubscriptionId, deleted: 0 },
       orderBy: { orderCreatedAt: 'desc' },
     });
   }
@@ -268,6 +270,7 @@ export class TransactionService {
   }> {
     const where: Prisma.TransactionWhereInput = {
       orderStatus: OrderStatus.SUCCESS,
+      deleted: 0,
     };
 
     if (startDate || endDate) {
@@ -288,6 +291,7 @@ export class TransactionService {
     // Get refund transactions
     const refundWhere: Prisma.TransactionWhereInput = {
       orderStatus: OrderStatus.REFUNDED,
+      deleted: 0,
     };
 
     if (startDate || endDate) {
@@ -346,6 +350,7 @@ export class TransactionService {
         SUM(CASE WHEN type = 'one_time' THEN amount ELSE 0 END) as onetime_revenue
       FROM transactions
       WHERE order_status = 'success'
+        AND deleted = 0
         AND paid_at >= ${startDate}
       GROUP BY DATE(paid_at)
       ORDER BY date DESC
@@ -354,10 +359,11 @@ export class TransactionService {
     return result as any[];
   }
 
-  // Delete transaction
+  // Soft Delete transaction
   async deleteTransaction(orderId: string): Promise<void> {
-    await prisma.transaction.delete({
+    await prisma.transaction.update({
       where: { orderId },
+      data: { deleted: 1 },
     });
   }
 

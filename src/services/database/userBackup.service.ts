@@ -63,7 +63,7 @@ export class UserBackupService {
     originalUserId: string
   ): Promise<UserBackup[]> {
     return await prisma.userBackup.findMany({
-      where: { originalUserId },
+      where: { originalUserId, deleted: 0 },
       orderBy: { deletedAt: 'desc' },
     });
   }
@@ -71,7 +71,7 @@ export class UserBackupService {
   // Find backup by email
   async findByEmail(email: string): Promise<UserBackup[]> {
     return await prisma.userBackup.findMany({
-      where: { email },
+      where: { email, deleted: 0 },
       orderBy: { deletedAt: 'desc' },
     });
   }
@@ -81,7 +81,7 @@ export class UserBackupService {
     fingerprintId: string
   ): Promise<UserBackup[]> {
     return await prisma.userBackup.findMany({
-      where: { fingerprintId },
+      where: { fingerprintId, deleted: 0 },
       orderBy: { deletedAt: 'desc' },
     });
   }
@@ -91,15 +91,15 @@ export class UserBackupService {
     clerkUserId: string
   ): Promise<UserBackup[]> {
     return await prisma.userBackup.findMany({
-      where: { clerkUserId },
+      where: { clerkUserId, deleted: 0 },
       orderBy: { deletedAt: 'desc' },
     });
   }
 
   // Find backup by backup ID
   async getBackupById(id: bigint): Promise<UserBackup | null> {
-    return await prisma.userBackup.findUnique({
-      where: { id },
+    return await prisma.userBackup.findFirst({
+      where: { id, deleted: 0 },
     });
   }
 
@@ -140,7 +140,7 @@ export class UserBackupService {
     endDate?: Date;
     orderBy?: Prisma.UserBackupOrderByWithRelationInput;
   }): Promise<{ backups: UserBackup[]; total: number }> {
-    const where: Prisma.UserBackupWhereInput = {};
+    const where: Prisma.UserBackupWhereInput = { deleted: 0 };
 
     if (params.startDate || params.endDate) {
       where.deletedAt = {};
@@ -164,6 +164,7 @@ export class UserBackupService {
           backupData: true,
           deletedAt: true,
           createdAt: true,
+          deleted: true,
         },
       }),
       prisma.userBackup.count({ where }),
@@ -172,16 +173,20 @@ export class UserBackupService {
     return { backups, total };
   }
 
-  // Delete old backups (data cleanup)
+  // Soft Delete old backups (data cleanup)
   async deleteOldBackups(daysToKeep: number = 90): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
 
-    const result = await prisma.userBackup.deleteMany({
+    const result = await prisma.userBackup.updateMany({
       where: {
         deletedAt: {
           lt: cutoffDate,
         },
+        deleted: 0,
+      },
+      data: {
+        deleted: 1,
       },
     });
 
@@ -207,20 +212,21 @@ export class UserBackupService {
       last7Days,
       last30Days,
     ] = await Promise.all([
-      prisma.userBackup.count(),
+      prisma.userBackup.count({ where: { deleted: 0 } }),
       prisma.userBackup.count({
-        where: { deletedAt: { gte: oneDayAgo } },
+        where: { deletedAt: { gte: oneDayAgo }, deleted: 0 },
       }),
       prisma.userBackup.count({
-        where: { deletedAt: { gte: sevenDaysAgo } },
+        where: { deletedAt: { gte: sevenDaysAgo }, deleted: 0 },
       }),
       prisma.userBackup.count({
-        where: { deletedAt: { gte: thirtyDaysAgo } },
+        where: { deletedAt: { gte: thirtyDaysAgo }, deleted: 0 },
       }),
     ]);
 
     // Calculate average backup size (simplified calculation)
     const sampleBackups = await prisma.userBackup.findMany({
+      where: { deleted: 0 },
       take: 100,
       select: { backupData: true },
     });

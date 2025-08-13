@@ -52,7 +52,7 @@ export class CreditUsageService {
       orderBy?: Prisma.CreditUsageOrderByWithRelationInput;
     }
   ): Promise<{ usage: CreditUsage[]; total: number }> {
-    const where: Prisma.CreditUsageWhereInput = { userId };
+    const where: Prisma.CreditUsageWhereInput = { userId, deleted: 0 };
 
     if (params?.creditType) {
       where.creditType = params.creditType;
@@ -88,7 +88,7 @@ export class CreditUsageService {
   // Get Credit Usage Record by Order ID
   async getOrderUsage(orderId: string): Promise<CreditUsage[]> {
     return await prisma.creditUsage.findMany({
-      where: { orderId },
+      where: { orderId, deleted: 0 },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -107,7 +107,7 @@ export class CreditUsageService {
     paidRecharged: number;
     featureUsage: { feature: string; credits: number }[];
   }> {
-    const where: Prisma.CreditUsageWhereInput = { userId };
+    const where: Prisma.CreditUsageWhereInput = { userId, deleted: 0 };
 
     if (startDate || endDate) {
       where.createdAt = {};
@@ -182,6 +182,7 @@ export class CreditUsageService {
     const where: Prisma.CreditUsageWhereInput = {
       operationType: OperationType.CONSUME,
       feature: { not: null },
+      deleted: 0,
     };
 
     if (startDate || endDate) {
@@ -241,6 +242,7 @@ export class CreditUsageService {
         COUNT(DISTINCT user_id) as unique_users
       FROM credit_usage
       WHERE created_at >= ${startDate}
+        AND deleted = 0
         ${Prisma.raw(whereCondition)}
       GROUP BY DATE(created_at)
       ORDER BY date DESC
@@ -262,22 +264,26 @@ export class CreditUsageService {
     limit: number = 10
   ): Promise<CreditUsage[]> {
     return await prisma.creditUsage.findMany({
-      where: { userId },
+      where: { userId, deleted: 0 },
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
   }
 
-  // Delete Old Credit Usage Records
+  // Soft Delete Old Credit Usage Records
   async deleteOldRecords(daysToKeep: number = 365): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
 
-    const result = await prisma.creditUsage.deleteMany({
+    const result = await prisma.creditUsage.updateMany({
       where: {
         createdAt: {
           lt: cutoffDate,
         },
+        deleted: 0,
+      },
+      data: {
+        deleted: 1,
       },
     });
 
@@ -301,15 +307,16 @@ export class CreditUsageService {
     ] = await Promise.all([
       prisma.creditUsage.groupBy({
         by: ['userId'],
+        where: { deleted: 0 },
       }).then((result) => result.length),
-      prisma.creditUsage.count(),
+      prisma.creditUsage.count({ where: { deleted: 0 } }),
       prisma.creditUsage.aggregate({
-        where: { operationType: OperationType.CONSUME },
+        where: { operationType: OperationType.CONSUME, deleted: 0 },
         _sum: { creditsUsed: true },
         _count: true,
       }),
       prisma.creditUsage.aggregate({
-        where: { operationType: OperationType.RECHARGE },
+        where: { operationType: OperationType.RECHARGE, deleted: 0 },
         _sum: { creditsUsed: true },
         _count: true,
       }),
@@ -317,6 +324,7 @@ export class CreditUsageService {
 
     // Calculate operating days (from first record to now)
     const firstRecord = await prisma.creditUsage.findFirst({
+      where: { deleted: 0 },
       orderBy: { createdAt: 'asc' },
       select: { createdAt: true },
     });
@@ -349,6 +357,7 @@ export class CreditUsageService {
         userId,
         orderId,
         operationType,
+        deleted: 0,
       },
     });
 

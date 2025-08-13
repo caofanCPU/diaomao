@@ -32,8 +32,8 @@ export class SubscriptionService {
 
   // Find subscription by ID
   async findById(subscriptionId: string): Promise<Subscription | null> {
-    return await prisma.subscription.findUnique({
-      where: { subscriptionId },
+    return await prisma.subscription.findFirst({
+      where: { subscriptionId, deleted: 0 },
       include: {
         user: true,
       },
@@ -44,8 +44,8 @@ export class SubscriptionService {
   async findByPaySubscriptionId(
     paySubscriptionId: string
   ): Promise<Subscription | null> {
-    return await prisma.subscription.findUnique({
-      where: { paySubscriptionId },
+    return await prisma.subscription.findFirst({
+      where: { paySubscriptionId, deleted: 0 },
       include: {
         user: true,
       },
@@ -62,6 +62,7 @@ export class SubscriptionService {
   ): Promise<Subscription[]> {
     const where: Prisma.SubscriptionWhereInput = {
       userId,
+      deleted: 0,
     };
 
     if (params?.status) {
@@ -87,6 +88,7 @@ export class SubscriptionService {
       where: {
         userId,
         status: SubscriptionStatus.ACTIVE,
+        deleted: 0,
         OR: [
           { subPeriodEnd: { gte: new Date() } },
           { subPeriodEnd: null },
@@ -179,10 +181,11 @@ export class SubscriptionService {
     });
   }
 
-  // Delete subscription
+  // Soft Delete subscription
   async deleteSubscription(subscriptionId: string): Promise<void> {
-    await prisma.subscription.delete({
+    await prisma.subscription.update({
       where: { subscriptionId },
+      data: { deleted: 1 },
     });
   }
 
@@ -195,6 +198,7 @@ export class SubscriptionService {
     return await prisma.subscription.findMany({
       where: {
         status: SubscriptionStatus.ACTIVE,
+        deleted: 0,
         subPeriodEnd: {
           gte: now,
           lte: expiryDate,
@@ -211,6 +215,7 @@ export class SubscriptionService {
     return await prisma.subscription.findMany({
       where: {
         status: SubscriptionStatus.ACTIVE,
+        deleted: 0,
         subPeriodEnd: {
           lt: new Date(),
         },
@@ -226,6 +231,7 @@ export class SubscriptionService {
     const result = await prisma.subscription.updateMany({
       where: {
         status: SubscriptionStatus.ACTIVE,
+        deleted: 0,
         subPeriodEnd: {
           lt: new Date(),
         },
@@ -250,27 +256,27 @@ export class SubscriptionService {
   }> {
     const [total, active, canceled, pastDue, incomplete, trialing] =
       await Promise.all([
-        prisma.subscription.count(),
+        prisma.subscription.count({ where: { deleted: 0 } }),
         prisma.subscription.count({
-          where: { status: SubscriptionStatus.ACTIVE }
+          where: { status: SubscriptionStatus.ACTIVE, deleted: 0 }
         }),
         prisma.subscription.count({
-          where: { status: SubscriptionStatus.CANCELED }
+          where: { status: SubscriptionStatus.CANCELED, deleted: 0 }
         }),
         prisma.subscription.count({
-          where: { status: SubscriptionStatus.PAST_DUE }
+          where: { status: SubscriptionStatus.PAST_DUE, deleted: 0 }
         }),
         prisma.subscription.count({
-          where: { status: SubscriptionStatus.INCOMPLETE }
+          where: { status: SubscriptionStatus.INCOMPLETE, deleted: 0 }
         }),
         prisma.subscription.count({
-          where: { status: SubscriptionStatus.TRIALING }
+          where: { status: SubscriptionStatus.TRIALING, deleted: 0 }
         }),
       ]);
 
     // Calculate active subscription revenue (need to combine with transaction table)
     const activeSubscriptions = await prisma.subscription.findMany({
-      where: { status: SubscriptionStatus.ACTIVE },
+      where: { status: SubscriptionStatus.ACTIVE, deleted: 0 },
       select: { paySubscriptionId: true },
     });
 
