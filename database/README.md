@@ -38,6 +38,56 @@ npx prisma db pull
 npx prisma generate
 ```
 
+### 5. 初始化执行结果
+
+```text
+执行结果很好！npx prisma db pull 成功从数据库同步了模型到
+  schema.prisma。让我分析一下输出：
+
+  ✅ 成功的部分：
+
+  - 成功内省了6个模型：User, Subscription, Credit, Transaction, CreditUsage,
+  UserBackup
+  - 保留了原有的字段映射：所有的 @map 信息都被正确保留
+  - 保留了表映射：所有的 @@map 信息都被正确保留
+  - 数据库连接正常：成功连接到PostgreSQL数据库
+
+  ⚠️ 警告信息（不是错误，是正常的）：
+
+  1. CHECK约束不支持
+
+  These constraints are not supported by Prisma Client, because Prisma currently
+   does not fully support check constraints
+  这是正常的，Prisma目前不完全支持CHECK约束，但不影响使用。
+
+  2. 数据库注释不支持
+
+  These objects have comments defined in the database, which is not yet fully
+  supported
+  数据库表的注释暂不支持，但不影响功能。
+
+  🎯 需要的后续操作：
+
+  # 生成Prisma Client
+  npx prisma generate
+
+  📋 检查同步结果：
+
+  从生成的schema.prisma看，所有字段都正确同步了：
+  - ✅ paySubscriptionId 字段正确
+  - ✅ payTransactionId 字段正确
+  - ✅ paySessionId 字段正确
+  - ✅ payInvoiceId 字段正确
+  - ✅ paySupplier 字段正确
+  - ✅ subCycleAnchor 字段正确
+
+  总结：
+
+  没有任何问题！ 这是一次成功的Database
+  First同步。警告信息都是Prisma的已知限制，不影响实际使用。现在可以运行 npx 
+  prisma generate 来生成客户端代码了。
+```
+
 ## Database First 工作流程
 
 当你手动修改数据库结构后，需要同步到 Prisma：
