@@ -1,6 +1,6 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import type { Credit, CreditUsage } from '@prisma/client';
-import { CreditType, OperationType } from '@/db/constants';
+import { CreditType, OperationType } from './constants';
 
 const prisma = new PrismaClient();
 
@@ -8,15 +8,16 @@ export class CreditService {
   // Initialize User Credits
   async initializeCredits(
     userId: string,
-    freeCredits: number = 50
+    freeCredits: number = 50,
+    paidCredits: number = 0
   ): Promise<Credit> {
     return await prisma.credit.create({
       data: {
         userId,
         balanceFree: freeCredits,
         totalFreeLimit: freeCredits,
-        balancePaid: 0,
-        totalPaidLimit: 0,
+        balancePaid: paidCredits,
+        totalPaidLimit: paidCredits,
       },
     });
   }

@@ -6,6 +6,7 @@ import { FumaBannerSuit } from '@windrun-huaiin/third-ui/fuma/server';
 import type { ReactNode } from 'react';
 import { showBanner } from '@/lib/appConfig';
 import { ClerkProviderClient } from '@windrun-huaiin/third-ui/clerk';
+import { FingerprintProvider } from '@/lib/context/FingerprintProvider';
 
 async function homeOptions(locale: string): Promise<HomeLayoutProps> {
   return {
@@ -29,22 +30,24 @@ export default async function Layout({
   
   return (
     <ClerkProviderClient locale={locale}>
-      <HomeLayout
-        {...customeOptions}
-        searchToggle={{
-          enabled: false,
-        }}
-        themeSwitch={{
-          enabled: true,
-          mode: 'light-dark-system',
-        }}
-        className={`min-h-screen flex flex-col bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300 ${showBanner ? 'pt-30 has-banner' : 'pt-15 no-banner'}`}
-        >
-        <FumaBannerSuit locale={locale} showBanner={showBanner}/>
-        {children}
-        <Footer locale={locale} />
-        <GoToTop />
-      </HomeLayout>
+      <FingerprintProvider autoInitialize={true}>
+        <HomeLayout
+          {...customeOptions}
+          searchToggle={{
+            enabled: false,
+          }}
+          themeSwitch={{
+            enabled: true,
+            mode: 'light-dark-system',
+          }}
+          className={`min-h-screen flex flex-col bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300 ${showBanner ? 'pt-30 has-banner' : 'pt-15 no-banner'}`}
+          >
+          <FumaBannerSuit locale={locale} showBanner={showBanner}/>
+          {children}
+          <Footer locale={locale} />
+          <GoToTop />
+        </HomeLayout>
+      </FingerprintProvider>
     </ClerkProviderClient>
   );
 }

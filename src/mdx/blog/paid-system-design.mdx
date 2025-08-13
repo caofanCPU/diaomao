@@ -32,7 +32,7 @@ flowchart TB
     subgraph P1["NO.1: 规划与需求确认"]
         direction TB
         T1A["需求分析与优化: 产品方案, 优化用户场景/数据模型, 定义MVP范围"]:::task
-        T1B["技术栈选型: 技术方案，确认后端(Node.js/Prisma), 前端(React), 数据库(PostgreSQL), 集成(Stripe/Clerk/Fingerprint/Redis)"]:::task
+        T1B["技术栈选型: 技术方案, 确认后端(Node.js/Prisma), 前端(React), 数据库(PostgreSQL), 集成(Stripe/Clerk/Fingerprint/Redis)"]:::task
         T1C["风险评估: GDPR合规, 安全审计, 性能瓶颈评估"]:::task
         T1D["团队分工: 分配前后端/测试角色, 设定里程碑"]:::task
         T1A --> T1B & T1C
@@ -119,7 +119,7 @@ flowchart TB
         direction TB
         T8A["通用组件: 积分订阅系统中模块化复用（如用户管理、积分系统）"]:::task
         T8B["提取公共UI组件: 将通用组件沉淀到@windrun-huaiin工具包中"]:::task
-        T8C["模板化升级: 创建脚本命令，支持第三方应用一键接入与升级积分订阅系统"]:::task
+        T8C["模板化升级: 创建脚本命令, 支持第三方应用一键接入与升级积分订阅系统"]:::task
         T8A --> T8B & T8C
     end
     P8:::phase
@@ -977,59 +977,59 @@ stateDiagram-v2
 ### 4.5. Clerk用户认证流程
 
 #### 4.5.1 匿名用户初始化
-1. **前端处理**: 
+1. **前端处理**：
    - 用户访问平台时, 前端生成Fingerprint ID。
-   - 调用Clerk创建匿名会话, 获取`clerk_user_id`。
-   - 向后端发送初始化请求, 包含`fingerprint_id`和`clerk_user_id`。
-2. **后端处理**: 
+   - 向后端发送初始化请求, 包含`fingerprint_id`, `clerk_user_id`为空。
+2. **后端处理**：
    - 查询Redis缓存, 检查是否已有用户记录。
    - 缓存未命中时, 查询数据库`Users`表。
    - 用户不存在时, 创建新的匿名用户记录。
    - 分配50个免费积分, 创建`Credits`和`Credit_Usage`记录。
    - 将用户信息缓存到Redis, TTL设置为24小时。
-3. **返回结果**: 
+3. **返回结果**：
    - 返回用户信息和积分余额给前端。
    - 前端显示平台界面和积分余额。
 
 #### 4.5.2 用户注册/登录
-1. **Clerk认证**: 
+1. **Clerk认证**：
    - 用户通过Clerk界面完成注册或登录。
-   - Clerk验证用户信息, 返回`clerk_user_id`和`email`。
-   - 前端将认证结果发送给后端。
-2. **后端处理**: 
+   - 通过`SignUp`组件传递`unsafeMetadata`, 传递`fingerprint_id`以及数据库里的`user_id`(最核心的匹配数据)
+   - Clerk验证用户信息, 异步webhook回调API, 发送`UserCreated`事件, 返回`clerk_user_id`和`email`, 以及`unsafeMetadata`：`user_id`和`fingerprint_id`
+2. **后端异步处理**：
    - 查询Redis缓存, 检查用户状态。
-   - **匿名用户升级**: 更新`Users`表, 设置`email`和`clerk_user_id`, 状态改为`registered`。
-   - **新注册用户**: 创建完整的用户记录, 包括积分初始化。
+   - **匿名用户升级**：根据`user_id`查找记录, 更新`Users`表, 设置`email`和`clerk_user_id`, 状态改为`registered`。
+   - **新注册用户**：创建完整的用户记录, 包括积分初始化。
    - 更新Redis缓存, 包含新的用户信息。
-3. **数据一致性**: 
-   - 确保`fingerprint_id`和`clerk_user_id`的关联关系正确。
+3. **数据一致性**：
+   - 通过`user_id`传递来确保`fingerprint_id`和`clerk_user_id`的关联关系正确。
    - 维护用户从匿名到注册的完整数据连续性。
 
 #### 4.5.3 用户注销
-1. **Clerk注销**: 
+1. **Clerk注销**：
    - 用户通过Clerk完成注销操作。
-   - 前端向后端发送注销请求。
-2. **数据备份**: 
+   - Clerk异步webhook回调API, 发送`UserDeleted`事件, 返回`clerk_user_id`。
+2. **数据备份**：
    - 将用户数据备份到`UserBackup`表。
    - 硬删除`Users`及关联表记录。
-3. **缓存清理**: 
+3. **缓存清理**：
    - 删除Redis中所有相关的用户缓存。
    - 包括`fingerprint_id`、`email`、`user_id`相关的缓存。
-4. **状态重置**: 
+4. **状态重置**：
    - 用户重新访问时, 重新开始匿名用户流程。
 
 #### 4.5.4 Redis缓存策略
-1. **缓存键设计**: 
-   - `fingerprint_id:user_info`: 用户身份信息
-   - `email:user_info`: 邮箱关联的用户信息
-   - `clerk_user_id:user_info`: Clerk用户关联信息
-   - `user_id:credits`: 用户积分余额
-   - `user_id:session`: 用户会话状态
-2. **缓存更新策略**: 
+1. **缓存键设计**：
+   - `fingerprint_id:user_info`：用户身份信息
+   - `user_id:user_info`：用户身份信息
+   - `email:user_info`：邮箱关联的用户信息
+   - `clerk_user_id:user_info`：Clerk用户关联信息
+   - `user_id:credits`：用户积分余额
+   - `user_id:session`：用户会话状态
+2. **缓存更新策略**：
    - 用户信息变更时主动更新缓存。
    - 积分操作时更新积分缓存。
    - 用户注销时清理所有相关缓存。
-3. **缓存一致性**: 
+3. **缓存一致性**：
    - 采用Cache-Aside模式, 先更新数据库再更新缓存。
    - 缓存失效时从数据库重新加载。
    - 监控缓存命中率和响应时间。
@@ -1088,12 +1088,17 @@ flowchart TB
       O --> M4_OUT((→ 完)):::entry
     end
 
-    %% 模块5: 注册引导
+    %% 模块5：注册引导（新增Clerk注册流程）
     subgraph M5[注册引导]
       direction LR
       M5_IN((← 积分不足)):::entry
       M5_IN --> U{用户注册?}:::core
-      U -->|是| V[提交注册信息]:::core --> W[更新 Users 表]:::core --> M4_IN
+      U -->|是| V1[前端: SignUp 组件传递 user_id/fingerprint_id 到 Clerk]:::core
+      V1 --> V2[Clerk 验证用户信息]:::core
+      V2 --> V3[异步 Webhook: UserCreated 事件返回 clerk_user_id/email/unsafeMetadata]:::core
+      V3 --> V4[后端: 查询 Redis, 匹配 user_id]:::core
+      V4 --> V5[更新 Users 表: 设置 email/clerk_user_id, 状态为 registered]:::core
+      V5 --> V6[更新 Redis 缓存]:::core --> M4_IN
       U -->|否| M3_IN
     end
 
@@ -1454,15 +1459,15 @@ sequenceDiagram
 
     U->>F: 点击注册/登录
     F->>C: 打开Clerk注册界面
-    U->>C: 填写邮箱/密码
+    U->>C: 填写邮箱/密码, 携带user_id匹配信息
     C->>C: 验证用户信息
-    C-->>F: 注册/登录成功
+    C-->>F: 注册成功
     Note over C: 返回clerk_user_id和email
     
-    F->>B: 用户注册/登录完成通知
-    Note over B: 包含clerk_user_id, email, fingerprint_id
+    F->>B: 用户注册, 异步webhook回调
+    Note over B: 包含user_id, clerk_user_id, email, fingerprint_id
     
-    B->>R: 查询缓存: fingerprint_id
+    B->>R: 查询缓存: user_id或fingerprint_id
     R-->>B: 返回用户信息
     
     alt 匿名用户升级为注册用户
@@ -1553,8 +1558,8 @@ sequenceDiagram
     F->>C: 调用Clerk注销
     C-->>F: 注销成功
     
-    F->>B: 用户注销请求
-    Note over B: 包含user_id和fingerprint_id
+    F->>B: 异步webhook回调, 用户注销请求
+    Note over B: clerk_user_id
     
     B->>DB: 备份用户数据到UserBackup表
     DB-->>B: 备份成功

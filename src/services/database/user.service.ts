@@ -2,7 +2,7 @@
 
 import { PrismaClient, Prisma } from '@prisma/client';
 import type { User } from '@prisma/client';
-import { UserStatus } from '@/db/constants';
+import { UserStatus } from './constants';
 
 const prisma = new PrismaClient();
 

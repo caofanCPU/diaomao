@@ -2,6 +2,7 @@ import { clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher } from "@clerk
 import { NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { appConfig } from "@/lib/appConfig";
+import { extractFingerprintId, FINGERPRINT_CONSTANTS } from "@/lib/fingerprint";
 
 const intlMiddleware = createMiddleware({
   locales: appConfig.i18n.locales,
@@ -14,7 +15,40 @@ const intlMiddleware = createMiddleware({
 // TODO
 const allowPassWhitelist = createRouteMatcher(['/(.*)'])
 
+/**
+ * 处理fingerprint ID的提取和验证
+ */
+async function handleFingerprintId(req: NextRequest): Promise<string | null> {
+  // 从请求中提取fingerprint ID
+  const headers = Object.fromEntries(req.headers.entries());
+  const cookies = req.cookies.getAll().reduce((acc, cookie) => {
+    acc[cookie.name] = cookie.value;
+    return acc;
+  }, {} as Record<string, string>);
+  
+  // 尝试提取fingerprint ID
+  const fingerprintId = extractFingerprintId(headers, cookies);
+  
+  if (fingerprintId) {
+    console.log('Fingerprint ID found in request:', fingerprintId);
+    return fingerprintId;
+  }
+
+  // 如果是API路由或静态资源，不需要处理fingerprint
+  if (req.nextUrl.pathname.startsWith('/api') || 
+      req.nextUrl.pathname.startsWith('/_next') ||
+      req.nextUrl.pathname.includes('.')) {
+    return null;
+  }
+
+  console.log('No fingerprint ID found in request for path:', req.nextUrl.pathname);
+  return null;
+}
+
 export default clerkMiddleware(async (auth: ClerkMiddlewareAuth, req: NextRequest) => {
+  // 处理fingerprint ID
+  const fingerprintId = await handleFingerprintId(req);
+  
   if (!allowPassWhitelist(req)) {
       const { userId, redirectToSignIn } = await auth()
       if (!userId) {
@@ -35,7 +69,13 @@ export default clerkMiddleware(async (auth: ClerkMiddlewareAuth, req: NextReques
     return NextResponse.redirect(newUrl, 301);
   }
 
-  return intlMiddleware(req);
+  // 在响应中设置fingerprint ID (如果存在)
+  const response = intlMiddleware(req);
+  if (fingerprintId && response) {
+    response.headers.set(FINGERPRINT_CONSTANTS.HEADER_NAME, fingerprintId);
+  }
+
+  return response;
 }, { debug: appConfig.clerk.debug }
 );
 

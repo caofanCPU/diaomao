@@ -2,7 +2,7 @@
 
 import { PrismaClient, Prisma } from '@prisma/client';
 import type { CreditUsage } from '@prisma/client';
-import { CreditType, OperationType } from '@/db/constants';
+import { CreditType, OperationType } from './constants';
 
 const prisma = new PrismaClient();
 
@@ -26,6 +26,18 @@ export class CreditUsageService {
         creditsUsed: data.creditsUsed,
       },
     });
+  }
+
+  // Record Credit Operation (alias for recordUsage)
+  async recordCreditOperation(data: {
+    userId: string;
+    feature?: string;
+    orderId?: string;
+    creditType: string;
+    operationType: string;
+    creditsUsed: number;
+  }): Promise<CreditUsage> {
+    return this.recordUsage(data);
   }
 
   // Batch Record Credit Usage

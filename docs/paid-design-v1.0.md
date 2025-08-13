@@ -143,10 +143,10 @@ flowchart TB
 - **描述**：用户首次访问平台，未注册，系统通过 Fingerprint 识别其设备。
 - **流程**：
   1. 用户访问平台，系统通过 Fingerprint 生成唯一的 `fingerprint_id`。
-  2. 系统在 `Users` 表中创建一条记录，生成唯一的 `user_id`，`email` 字段为空，`fingerprint_id` 记录设备标识。
-  3. 系统分配 50 个免费积分，更新 `Credits` 表（`user_id` 关联，`balance_free = 50`，`total_free_limit = 50`）。
-  4. 在 `Credit_Usage` 表中插入记录，`operation_type` 为 `recharge`，`credit_type` 为 `free`。
-  5. 用户使用免费积分访问功能，系统记录在 `Credit_Usage` 表（`operation_type` 为 `consume`，`credit_type` 为 `free`）。
+  2. 系统在 `Users` 表中创建一条记录，生成唯一的 `user_id`, `email` 字段为空，`fingerprint_id` 记录设备标识。
+  3. 系统分配 50 个免费积分，更新 `Credits` 表（`user_id` 关联，`balance_free = 50`, `total_free_limit = 50`）。
+  4. 在 `Credit_Usage` 表中插入记录，`operation_type` 为 `recharge`, `credit_type` 为 `free`。
+  5. 用户使用免费积分访问功能，系统记录在 `Credit_Usage` 表（`operation_type` 为 `consume`, `credit_type` 为 `free`）。
   6. 如果积分耗尽，提示用户注册或购买积分。
 - **结果**：匿名用户获得 `user_id` 和有限的免费积分，数据已与 `fingerprint_id` 关联。
 
@@ -426,12 +426,12 @@ flowchart TB
 | `created_at`        | Timestamp    | 备份创建时间戳                        |
 
 ### 3.2 索引
-- **用户表**：主键 (`id`)，`user_id` 唯一索引，`fingerprint_id` 唯一索引，`clerk_user_id` 唯一索引，`email` 索引。
-- **订阅表**：主键 (`id`)，`subscription_id` 唯一索引，`user_id` 索引。
-- **积分表**：主键 (`id`)，`user_id` 索引。
-- **交易表**：主键 (`id`)，`user_id`、`pay_session_id`、`pay_invoice_id` 索引。
-- **积分使用表**：主键 (`id`)，`user_id`索引。
-- **用户备份表**：主键 (`id`)，`original_user_id` 索引，`fingerprint_id` 索引，`clerk_user_id` 索引。
+- **用户表**：主键 (`id`), `user_id` 唯一索引，`fingerprint_id` 唯一索引，`clerk_user_id` 唯一索引，`email` 索引。
+- **订阅表**：主键 (`id`), `subscription_id` 唯一索引，`user_id` 索引。
+- **积分表**：主键 (`id`), `user_id` 索引。
+- **交易表**：主键 (`id`), `user_id`、`pay_session_id`、`pay_invoice_id` 索引。
+- **积分使用表**：主键 (`id`), `user_id`索引。
+- **用户备份表**：主键 (`id`), `original_user_id` 索引，`fingerprint_id` 索引，`clerk_user_id` 索引。
 
 ### 3.3 数据表关联关系
 
@@ -889,7 +889,7 @@ stateDiagram-v2
 4. **积分充值**：
    - 从`Transactions`表的`credits_granted`字段获取积分数量。
    - 更新`Credits`表的`balance_paid`和`total_paid_limit`。
-   - 在`Credit_Usage`表中插入充值记录，`operation_type`为`recharge`，`credit_type`为`paid`。
+   - 在`Credit_Usage`表中插入充值记录，`operation_type`为`recharge`, `credit_type`为`paid`。
 5. **用户通知**：
    - 用户收到确认电子邮件，界面显示更新后的积分余额。
 
@@ -905,7 +905,7 @@ stateDiagram-v2
 3. **积分扣除逻辑**：
    - **优先扣除策略**：优先从`balance_free`扣除，不足时从`balance_paid`扣除。
    - **数据更新**：更新`Credits`表中对应的余额字段。
-   - **使用记录**：在`Credit_Usage`表中插入记录，`operation_type`为`consume`，`credit_type`为实际扣除的积分类型。
+   - **使用记录**：在`Credit_Usage`表中插入记录，`operation_type`为`consume`, `credit_type`为实际扣除的积分类型。
 4. **功能授权**：
    - 积分扣除成功后，返回功能访问授权。
    - 积分不足时，提示用户购买积分或升级计划。
@@ -914,13 +914,13 @@ stateDiagram-v2
 1. **系统授予免费积分**：
    - **触发场景**：新用户注册、活动奖励、系统补偿等。
    - **数据变化**：更新`Credits`表的`balance_free`和`total_free_limit`。
-   - **记录追踪**：在`Credit_Usage`表中插入记录，`operation_type`为`recharge`，`credit_type`为`free`。
+   - **记录追踪**：在`Credit_Usage`表中插入记录，`operation_type`为`recharge`, `credit_type`为`free`。
 
 2. **用户支付后充值**：
    - **触发场景**：订阅支付成功、一次性购买完成。
    - **数据来源**：从`Transactions`表的`credits_granted`字段获取充值数量。
    - **数据变化**：更新`Credits`表的`balance_paid`和`total_paid_limit`。
-   - **记录追踪**：在`Credit_Usage`表中插入记录，`operation_type`为`recharge`，`credit_type`为`paid`。
+   - **记录追踪**：在`Credit_Usage`表中插入记录，`operation_type`为`recharge`, `credit_type`为`paid`。
 
 #### 4.2.3 积分余额管理
 - **总量限制**：`total_free_limit`和`total_paid_limit`记录用户获得的总积分量。
@@ -933,7 +933,7 @@ stateDiagram-v2
   - 后端更新`Subscriptions`表，创建续费交易记录。
   - 从`Transactions`表的`credits_granted`字段获取积分数量。
   - 更新`Credits`表的`balance_paid`和`total_paid_limit`。
-  - 在`Credit_Usage`表中插入充值记录，`operation_type`为`recharge`，`credit_type`为`paid`。
+  - 在`Credit_Usage`表中插入充值记录，`operation_type`为`recharge`, `credit_type`为`paid`。
 - **取消**：
   - 用户通过订阅管理界面取消订阅。
   - 后端向Stripe发送取消请求，更新`Subscriptions`表（`status` = canceled）。
@@ -955,15 +955,14 @@ stateDiagram-v2
    - 后端更新`Transactions`表（`status` = refunded）。
    - 从`Transactions`表的`credits_granted`字段获取需要扣除的积分数量。
    - 更新`Credits`表的`balance_paid`和`total_paid_limit`（减少积分）。
-   - 在`Credit_Usage`表中插入扣除记录，`operation_type`为`consume`，`credit_type`为`paid`。
+   - 在`Credit_Usage`表中插入扣除记录，`operation_type`为`consume`, `credit_type`为`paid`。
 
 ### 4.5 Clerk用户认证流程
 
 #### 4.5.1 匿名用户初始化
 1. **前端处理**：
    - 用户访问平台时，前端生成Fingerprint ID。
-   - 调用Clerk创建匿名会话，获取`clerk_user_id`。
-   - 向后端发送初始化请求，包含`fingerprint_id`和`clerk_user_id`。
+   - 向后端发送初始化请求，包含`fingerprint_id`, `clerk_user_id`为空。
 2. **后端处理**：
    - 查询Redis缓存，检查是否已有用户记录。
    - 缓存未命中时，查询数据库`Users`表。
@@ -977,21 +976,21 @@ stateDiagram-v2
 #### 4.5.2 用户注册/登录
 1. **Clerk认证**：
    - 用户通过Clerk界面完成注册或登录。
-   - Clerk验证用户信息，返回`clerk_user_id`和`email`。
-   - 前端将认证结果发送给后端。
-2. **后端处理**：
+   - 通过`SignUp`组件传递`unsafeMetadata`，传递`fingerprint_id`以及数据库里的`user_id`(最核心的匹配数据)
+   - Clerk验证用户信息，异步webhook回调API，发送`UserCreated`事件，返回`clerk_user_id`和`email`，以及`unsafeMetadata`：`user_id`和`fingerprint_id`
+2. **后端异步处理**：
    - 查询Redis缓存，检查用户状态。
-   - **匿名用户升级**：更新`Users`表，设置`email`和`clerk_user_id`，状态改为`registered`。
+   - **匿名用户升级**：根据`user_id`查找记录，更新`Users`表，设置`email`和`clerk_user_id`，状态改为`registered`。
    - **新注册用户**：创建完整的用户记录，包括积分初始化。
    - 更新Redis缓存，包含新的用户信息。
 3. **数据一致性**：
-   - 确保`fingerprint_id`和`clerk_user_id`的关联关系正确。
+   - 通过`user_id`传递来确保`fingerprint_id`和`clerk_user_id`的关联关系正确。
    - 维护用户从匿名到注册的完整数据连续性。
 
 #### 4.5.3 用户注销
 1. **Clerk注销**：
    - 用户通过Clerk完成注销操作。
-   - 前端向后端发送注销请求。
+   - Clerk异步webhook回调API，发送`UserDeleted`事件，返回`clerk_user_id`。
 2. **数据备份**：
    - 将用户数据备份到`UserBackup`表。
    - 硬删除`Users`及关联表记录。
@@ -1004,6 +1003,7 @@ stateDiagram-v2
 #### 4.5.4 Redis缓存策略
 1. **缓存键设计**：
    - `fingerprint_id:user_info`：用户身份信息
+   - `user_id:user_info`：用户身份信息
    - `email:user_info`：邮箱关联的用户信息
    - `clerk_user_id:user_info`：Clerk用户关联信息
    - `user_id:credits`：用户积分余额
@@ -1069,12 +1069,17 @@ flowchart TB
       O --> M4_OUT((→ 完)):::entry
     end
 
-    %% 模块5：注册引导
+    %% 模块5：注册引导（新增Clerk注册流程）
     subgraph M5[注册引导]
       direction LR
       M5_IN((← 积分不足)):::entry
       M5_IN --> U{用户注册?}:::core
-      U -->|是| V[提交注册信息]:::core --> W[更新 Users 表]:::core --> M4_IN
+      U -->|是| V1[前端: SignUp 组件传递 user_id/fingerprint_id 到 Clerk]:::core
+      V1 --> V2[Clerk 验证用户信息]:::core
+      V2 --> V3[异步 Webhook: UserCreated 事件返回 clerk_user_id/email/unsafeMetadata]:::core
+      V3 --> V4[后端: 查询 Redis, 匹配 user_id]:::core
+      V4 --> V5[更新 Users 表: 设置 email/clerk_user_id, 状态为 registered]:::core
+      V5 --> V6[更新 Redis 缓存]:::core --> M4_IN
       U -->|否| M3_IN
     end
 
@@ -1413,15 +1418,15 @@ sequenceDiagram
 
     U->>F: 点击注册/登录
     F->>C: 打开Clerk注册界面
-    U->>C: 填写邮箱/密码
+    U->>C: 填写邮箱/密码，携带user_id匹配信息
     C->>C: 验证用户信息
-    C-->>F: 注册/登录成功
+    C-->>F: 注册成功
     Note over C: 返回clerk_user_id和email
     
-    F->>B: 用户注册/登录完成通知
-    Note over B: 包含clerk_user_id, email, fingerprint_id
+    F->>B: 用户注册，异步webhook回调
+    Note over B: 包含user_id，clerk_user_id, email, fingerprint_id
     
-    B->>R: 查询缓存: fingerprint_id
+    B->>R: 查询缓存: user_id或fingerprint_id
     R-->>B: 返回用户信息
     
     alt 匿名用户升级为注册用户
@@ -1508,8 +1513,8 @@ sequenceDiagram
     F->>C: 调用Clerk注销
     C-->>F: 注销成功
     
-    F->>B: 用户注销请求
-    Note over B: 包含user_id和fingerprint_id
+    F->>B: 异步webhook回调，用户注销请求
+    Note over B: clerk_user_id
     
     B->>DB: 备份用户数据到UserBackup表
     DB-->>B: 备份成功
