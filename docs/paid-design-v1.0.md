@@ -266,11 +266,11 @@ flowchart TB
 
 #### 2.2.1 用户注册与识别
 - **匿名用户**：通过Fingerprint（基于设备的标识符）识别，防止滥用（例如，过度使用免费积分）。
-- **注册用户**：用户可通过电子邮件和密码注册，或使用SSO（例如Google、Apple）。注册用户分配唯一的`user_id`。
+- **注册用户**：用户可通过电子邮件和密码注册，或使用SSO（例如Google、Apple）。注册用户分配唯一的`clerk_user_id`。
 - **场景**：
   - 新用户访问平台，系统分配Fingerprint ID。
   - 用户无需注册即可使用有限的免费积分。
-  - 要访问付费功能，用户必须注册或登录，将Fingerprint ID关联到`user_id`。
+  - 要访问付费功能，用户必须注册或登录，将Fingerprint ID关联到`clerk_user_id`。
 
 #### 2.2.2 订阅管理
 - **订阅计划**：用户可选择多种计划（例如，基础版、专业版、企业版），具有不同的积分分配和定价。
@@ -1167,6 +1167,287 @@ const event = wh.verify(rawBody, headers);
 - 用户创建/删除操作结果
 - 积分操作记录
 - 错误和异常信息
+
+### 4.7 Fingerprint匿名机制详细设计
+
+#### 4.7.1 匿名用户首次访问时序图
+
+```mermaid
+sequenceDiagram
+    participant Browser as 浏览器
+    participant Middleware as middleware.ts
+    participant FP_Lib as fingerprint.ts
+    participant Hook as useFingerprint.ts
+    participant Provider as FingerprintProvider.tsx
+    participant API as /api/user/anonymous/init
+    participant UserService as userService
+    participant CreditService as creditService
+    participant DB as 数据库
+
+    Note over Browser,DB: 🚀 用户首次访问网站
+
+    Browser->>Middleware: 1. 请求页面 (GET /)
+    Middleware->>FP_Lib: 2. extractFingerprintId(headers, cookies)
+    FP_Lib-->>Middleware: 3. return null (首次访问无fingerprint)
+    Note over Middleware: 4. 跳过fingerprint处理<br/>(非API路由请求)
+    Middleware-->>Browser: 5. 返回页面HTML (包含React应用)
+
+    Note over Browser,DB: 📱 客户端React应用启动和Fingerprint初始化
+
+    Browser->>Provider: 6. <FingerprintProvider> 组件挂载
+    Provider->>Hook: 7. useFingerprint() hook初始化
+    Hook->>FP_Lib: 8. initializeFingerprintId()
+    FP_Lib->>FP_Lib: 9. 检查localStorage/cookie
+    Note over FP_Lib: localStorage: null<br/>cookie: null
+    FP_Lib->>FP_Lib: 10. 尝试使用FingerprintJS收集浏览器特征
+    
+    alt FingerprintJS成功
+        FP_Lib->>FP_Lib: 生成真实指纹: fp_abc123def456
+    else FingerprintJS失败(降级)
+        FP_Lib->>FP_Lib: 生成降级ID: fp_fallback_1692345678901_x7k9m2n4p
+    end
+    
+    FP_Lib->>FP_Lib: 11. 存储到localStorage和cookie
+    FP_Lib-->>Hook: 12. return fingerprintId
+    Hook-->>Provider: 13. 设置状态: fingerprintId = "fp_xxx"
+
+    Note over Browser,DB: 🔄 自动初始化匿名用户
+
+    Provider->>Provider: 14. useEffect检测到fingerprintId
+    Provider->>Hook: 15. 触发 initializeAnonymousUser()
+    Hook->>Hook: 16. 设置 isLoading = true
+    Hook->>API: 17. POST /api/user/anonymous/init<br/>Headers: X-Fingerprint-Id: fp_xxx<br/>Body: {fingerprintId: "fp_xxx"}
+
+    Note over API,DB: 🏗️ 服务端处理匿名用户创建<br/>Middleware再次处理指纹ID
+
+    API->>Middleware: 18. API请求经过middleware处理
+    Middleware->>FP_Lib: 19. extractFingerprintId(headers, cookies)
+    FP_Lib-->>Middleware: 20. return "fp_xxx" (从X-Fingerprint-Id header)
+    Middleware->>API: 21. 继续处理API请求
+    
+    API->>FP_Lib: 22. extractFingerprintId(headers, cookies, body)
+    FP_Lib-->>API: 23. return "fp_xxx"
+    API->>FP_Lib: 24. isValidFingerprintId("fp_xxx")
+    
+    alt 有效的FingerprintJS ID
+        FP_Lib-->>API: return true (fp_abc123def456)
+    else 有效的降级ID  
+        FP_Lib-->>API: return true (fp_fallback_1692345678901_x7k9m2n4p)
+    else 服务端环境降级（理论情况）
+        Note over FP_Lib: ⚠️ 在当前架构下不会发生<br/>因为指纹生成只在客户端执行
+        FP_Lib-->>API: return true
+    end
+    API->>UserService: 27. findByFingerprintId("fp_xxx")
+    UserService->>DB: 28. SELECT * FROM users WHERE fingerprint_id = 'fp_xxx'
+    DB-->>UserService: 29. return null (用户不存在)
+    UserService-->>API: 30. return null
+
+    Note over API,DB: 📝 创建新匿名用户
+
+    API->>UserService: 31. createUser({fingerprintId: "fp_xxx", status: "anonymous"})
+    UserService->>DB: 32. INSERT INTO users (user_id, fingerprint_id, status)
+    DB-->>UserService: 33. return 新用户记录 {userId: "uuid", ...}
+    UserService-->>API: 34. return newUser
+
+    Note over API,DB: 🪙 初始化积分系统
+
+    API->>CreditService: 35. initializeCredits(userId, 50, 0)
+    CreditService->>DB: 36. INSERT INTO credits (user_id, balance_free: 50, ...)
+    DB-->>CreditService: 37. return credits记录
+    CreditService-->>API: 38. return credits
+
+    API->>CreditService: 39. recordCreditOperation({userId, feature: "anonymous_user_init", ...})
+    CreditService->>DB: 40. INSERT INTO credit_usage (operation_type: "recharge", ...)
+    DB-->>CreditService: 41. return usage记录
+    CreditService-->>API: 42. return success
+
+    Note over API,DB: ✅ 返回初始化结果
+
+    API-->>Hook: 43. return {success: true, user: {...}, credits: {...}, isNewUser: true}
+
+    Hook->>Hook: 44. 更新状态:<br/>- anonymousUser = user<br/>- credits = credits<br/>- isInitialized = true<br/>- isLoading = false
+    Hook-->>Provider: 45. 状态更新完成
+    Provider-->>Browser: 46. 触发组件重新渲染
+
+    Note over Browser,DB: 🎉 用户界面更新
+
+    Browser->>Browser: 47. 显示用户状态:<br/>- Fingerprint ID: fp_xxx<br/>- 匿名用户<br/>- 免费积分: 50
+```
+
+#### 4.7.2 匿名用户首次访问流程图
+
+```mermaid
+flowchart TD
+    Start([用户访问网站]) --> CheckBrowser{浏览器环境?}
+    
+    CheckBrowser -->|否| ServerSide[服务端渲染]
+    CheckBrowser -->|是| InitFP[初始化Fingerprint]
+    
+    ServerSide --> Middleware[middleware.ts处理]
+    Middleware --> ExtractFP[提取fingerprint ID]
+    ExtractFP --> FPExists{fingerprint存在?}
+    FPExists -->|否| SkipFP[跳过fingerprint处理]
+    FPExists -->|是| SetHeader[设置响应header]
+    SkipFP --> ReturnHTML[返回HTML页面]
+    SetHeader --> ReturnHTML
+    
+    InitFP --> CheckStorage{检查本地存储}
+    CheckStorage -->|localStorage有| UseExisting[使用现有fingerprint]
+    CheckStorage -->|cookie有| UseExisting
+    CheckStorage -->|都没有| Generate[生成新fingerprint ID]
+    
+    Generate --> GenerateID["生成: fp_ + 32位随机字符"]
+    GenerateID --> SaveStorage[保存到localStorage和cookie]
+    SaveStorage --> FPReady[fingerprint ID就绪]
+    UseExisting --> FPReady
+    
+    ReturnHTML --> ReactInit[React应用初始化]
+    ReactInit --> ProviderMount[FingerprintProvider挂载]
+    ProviderMount --> HookInit[useFingerprint初始化]
+    HookInit --> FPReady
+    
+    FPReady --> AutoInit{autoInitialize?}
+    AutoInit -->|否| WaitManual[等待手动调用]
+    AutoInit -->|是| CheckUser[检查用户是否已存在]
+    
+    CheckUser --> CallAPI["调用 GET /api/user/anonymous/init"]
+    CallAPI --> UserExists{用户存在?}
+    UserExists -->|是| LoadUser[加载现有用户数据]
+    UserExists -->|否| CreateUser[创建新匿名用户]
+    
+    LoadUser --> UpdateState[更新React状态]
+    
+    CreateUser --> ValidateFP[验证fingerprint格式]
+    ValidateFP --> Invalid{有效?}
+    Invalid -->|否| ErrorState[错误状态]
+    Invalid -->|是| CreateUserRecord[创建用户记录]
+    
+    CreateUserRecord --> DBInsert["数据库插入:\nusers表 (user_id, fingerprint_id, status)"]
+    DBInsert --> InitCredits[初始化积分]
+    InitCredits --> CreditInsert["数据库插入:\ncredits表 (balance_free: 50)"]
+    CreditInsert --> RecordUsage[记录积分操作]
+    RecordUsage --> UsageInsert["数据库插入:\ncredit_usage表 (recharge, free)"]
+    UsageInsert --> Success[创建成功]
+    
+    Success --> UpdateState
+    UpdateState --> RenderUI[渲染用户界面]
+    RenderUI --> ShowStatus["显示:\n- Fingerprint ID\n- 匿名用户状态\n- 50免费积分"]
+    
+    WaitManual --> ManualTrigger[手动调用initializeAnonymousUser]
+    ManualTrigger --> CheckUser
+    
+    ErrorState --> ShowError[显示错误信息]
+    
+    style Start fill:#e1f5fe
+    style FPReady fill:#f3e5f5
+    style Success fill:#e8f5e8
+    style ShowStatus fill:#fff3e0
+    style ErrorState fill:#ffebee
+```
+
+#### 4.7.3 核心交互图
+
+```mermaid
+flowchart TD
+    subgraph 浏览器环境
+        浏览器
+        localStorage[localStorage]
+        Cookie[Cookie]
+    end
+    
+    subgraph Next.js中间件层
+        middleware.ts
+    end
+    
+    subgraph React客户端
+        React组件
+        FingerprintProvider.tsx
+        useFingerprint.ts
+    end
+    
+    subgraph 工具库
+        fingerprint.ts
+    end
+    
+    subgraph API层
+        subgraph "/api/user/anonymous/init/route.ts"
+            InitAPI["/api/user/anonymous/init/route.ts"]
+        end
+    end
+    
+    subgraph 服务层
+        userService.ts
+        creditService.ts
+        creditUsageService.ts
+    end
+    
+    subgraph 数据库
+        users表[(users表)]
+        credits表[(credits表)]
+        credit_usage表[(credit_usage表)]
+    end
+    
+    浏览器 --> middleware.ts
+    middleware.ts --> React组件
+    React组件 --> FingerprintProvider.tsx
+    FingerprintProvider.tsx --> useFingerprint.ts
+    useFingerprint.ts --> fingerprint.ts
+    useFingerprint.ts --> InitAPI
+    
+    fingerprint.ts --> localStorage
+    fingerprint.ts --> Cookie
+    
+    InitAPI --> userService.ts
+    InitAPI --> creditService.ts
+    InitAPI --> creditUsageService.ts
+    
+    userService.ts --> users表
+    creditService.ts --> credits表
+    creditUsageService.ts --> credit_usage表
+    
+    style 浏览器 fill:#e3f2fd
+    style React组件 fill:#f3e5f5
+    style InitAPI fill:#e8f5e8
+    style users表 fill:#fff3e0
+```
+
+#### 4.7.4 关键代码执行顺序
+
+1. **浏览器访问** (`/` 路径)
+2. **middleware.ts:21** - `handleFingerprintId()` 尝试提取fingerprint
+3. **fingerprint.ts:131** - `extractFingerprintId()` 检查headers/cookies, 如果没有就是null
+4. **React渲染** - 页面组件开始渲染
+5. **FingerprintProvider.tsx:45** - Provider组件挂载
+6. **useFingerprint.ts:140** - Hook初始化，调用`checkExistingUser()`
+7. **fingerprint.ts:47** - `getOrGenerateFingerprintId()` 生成新ID
+8. **fingerprint.ts:21** - `generateFingerprintId()` 创建唯一ID
+9. **useFingerprint.ts:164** - 自动调用`initializeAnonymousUser()`
+10. **route.ts:17** - API接收POST请求初始化用户
+11. **userService.ts:17** - 创建新用户记录
+12. **creditService.ts:14** - 初始化50免费积分
+13. **creditUsageService.ts:40** - 记录积分充值操作
+14. **useFingerprint.ts:113** - 更新React状态
+15. **界面渲染** - 显示匿名用户状态和积分信息
+
+#### 4.7.5 数据流程总结
+
+1. **首次访问**：
+   - 生成fingerprint ID
+   - 调用 `/api/user/anonymous/init` 创建匿名用户
+   - 分配50免费积分
+
+2. **再次访问**：
+   - 从localStorage/cookie获取fingerprint ID
+   - 调用 `/api/user/anonymous/init` 获取现有用户数据
+
+3. **用户注册**：
+   - Clerk webhook接收用户创建事件
+   - 根据传递的user_id升级匿名用户为注册用户
+
+4. **用户注销**：
+   - Clerk webhook接收用户删除事件
+   - 备份并删除用户数据
+   - 用户重新成为匿名状态
   
 ---
 
