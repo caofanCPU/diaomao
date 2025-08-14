@@ -2,7 +2,7 @@
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
-    fingerprint_id VARCHAR(255) UNIQUE,
+    fingerprint_id VARCHAR(255),
     clerk_user_id VARCHAR(255) UNIQUE,
     email VARCHAR(255),
     status VARCHAR(20) NOT NULL DEFAULT 'anonymous' 
@@ -15,6 +15,7 @@ CREATE TABLE users (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_status ON users(status);
 CREATE INDEX idx_users_created_at ON users(created_at);
+CREATE INDEX idx_users_fingerprint_id ON users(fingerprint_id);
 
 -- Subscriptions
 CREATE TABLE subscriptions (
@@ -169,6 +170,9 @@ COMMENT ON TABLE credits IS '积分表，管理用户积分余额';
 COMMENT ON TABLE transactions IS '订单交易表，记录所有支付交易';
 COMMENT ON TABLE credit_usage IS '积分使用表，跟踪积分消耗和充值';
 COMMENT ON TABLE user_backup IS '用户备份表，存储注销用户数据';
+
+-- Column Comments
+COMMENT ON COLUMN users.fingerprint_id IS '浏览器指纹ID，用于标识设备，可重复（多用户共享设备）';
 
 -- Column Comments for deleted fields
 COMMENT ON COLUMN subscriptions.deleted IS '软删除标记，0=正常，1=已删除';

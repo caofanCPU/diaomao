@@ -6,7 +6,8 @@ import { FumaBannerSuit } from '@windrun-huaiin/third-ui/fuma/server';
 import type { ReactNode } from 'react';
 import { showBanner } from '@/lib/appConfig';
 import { ClerkProviderClient } from '@windrun-huaiin/third-ui/clerk';
-import { FingerprintProvider } from '@/lib/context/FingerprintProvider';
+import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
+import { fingerprintConfig } from '@/lib/fingerprint-config';
 
 async function homeOptions(locale: string): Promise<HomeLayoutProps> {
   return {
@@ -30,7 +31,7 @@ export default async function Layout({
   
   return (
     <ClerkProviderClient locale={locale}>
-      <FingerprintProvider autoInitialize={true}>
+      <FingerprintProvider config={fingerprintConfig}>
         <HomeLayout
           {...customeOptions}
           searchToggle={{

@@ -28,7 +28,15 @@ export class UserService {
   async findById(userId: string): Promise<User | null> {
     return await prisma.user.findUnique({
       where: { userId },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        fingerprintId: true,
+        clerkUserId: true,
+        email: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
         credits: true,
         subscriptions: {
           where: { status: 'active' },
@@ -43,7 +51,15 @@ export class UserService {
   async findByEmail(email: string): Promise<User | null> {
     return await prisma.user.findFirst({
       where: { email },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        fingerprintId: true,
+        clerkUserId: true,
+        email: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
         credits: true,
         subscriptions: {
           where: { status: 'active' },
@@ -54,13 +70,22 @@ export class UserService {
     });
   }
 
-  // Find user by Fingerprint ID
-  async findByFingerprintId(fingerprintId: string): Promise<User | null> {
-    return await prisma.user.findUnique({
+  // Find users by Fingerprint ID, fp_id can be used for multi user_ids
+  async findListByFingerprintId(fingerprintId: string): Promise<User[]> {
+    return await prisma.user.findMany({
       where: { fingerprintId },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        fingerprintId: true,
+        clerkUserId: true,
+        email: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
         credits: true,
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -68,7 +93,15 @@ export class UserService {
   async findByClerkUserId(clerkUserId: string): Promise<User | null> {
     return await prisma.user.findUnique({
       where: { clerkUserId },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        fingerprintId: true,
+        clerkUserId: true,
+        email: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
         credits: true,
         subscriptions: {
           where: { status: 'active' },
@@ -170,7 +203,15 @@ export class UserService {
         skip,
         take,
         orderBy,
-        include: {
+        select: {
+          id: true,
+          userId: true,
+          fingerprintId: true,
+          clerkUserId: true,
+          email: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
           credits: true,
         },
       }),

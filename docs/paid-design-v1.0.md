@@ -1017,6 +1017,157 @@ stateDiagram-v2
    - 缓存失效时从数据库重新加载。
    - 监控缓存命中率和响应时间。
 
+
+### 4.6 Clerk Webhook回调
+
+#### 4.6.1 API端点
+
+```
+POST /api/webhook/clerk/user
+```
+
+#### 4.6.2 环境配置
+
+在`.env.local`文件中添加以下环境变量：
+
+```bash
+# Clerk Webhook签名密钥
+CLERK_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxx
+```
+
+#### 4.6.3 Clerk控制台配置
+
+1. 登录 [Clerk Dashboard](https://dashboard.clerk.com/)
+2. 选择你的应用
+3. 进入 **Webhooks** 页面
+4. 点击 **Add Endpoint**
+5. 配置如下：
+   - **Endpoint URL**: `https://yourdomain.com/api/webhook/clerk/user`
+   - **Events**: 选择以下事件
+     - `user.created`
+     - `user.deleted`
+6. 保存后复制 **Signing Secret** 到环境变量中
+
+#### 4.6.4 本地开发配置
+
+由于webhook需要公网访问，本地开发时需要使用隧道工具：
+
+* 使用 ngrok
+
+1. 安装ngrok：`npm install -g ngrok`
+2. 启动开发服务器：`npm run dev`
+3. 在另一个终端运行：`ngrok http 3000`
+4. 使用ngrok提供的公网URL配置Clerk webhook
+
+* 使用 Vercel
+
+部署到Vercel后，直接使用生产URL配置webhook。
+
+#### 4.6.5 数据流程
+
+* 匿名用户注册流程
+
+1. 匿名用户访问网站 → 生成fingerprint_id
+2. 用户决定注册 → 通过Clerk SignUp组件传递user_id和fingerprint_id
+3. Clerk验证用户信息 → 异步发送UserCreated webhook
+4. 系统接收webhook → 查找匿名用户记录 → 升级为注册用户
+
+* 直接注册流程
+
+1. 新用户直接注册 → Clerk发送UserCreated webhook
+2. 系统创建新用户记录 → 初始化50积分 → 记录积分操作
+
+* 用户注销流程
+
+1. 用户删除账户 → Clerk发送UserDeleted webhook
+2. 系统备份用户数据 → 硬删除所有相关记录 → 清理缓存
+
+#### 4.6.6 签名验证
+
+API使用svix库验证Clerk webhook签名：
+
+```javascript
+const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+const event = wh.verify(rawBody, headers);
+```
+
+#### 4.6.7 正常处理和容错处理
+
+* UserCreated事件数据结构
+
+```json
+{
+  "data": {
+    "email_addresses": ["xxx@gmail.com", "yyy@gmail.com"],
+    "unsafe_metadata": {
+      "user_id": "本系统的用户ID",
+      "fingerprint_id": "浏览器指纹ID"
+    }
+    "id": "user_2g7np7Hrk0SN6kj5EDMLDaKNL0S"
+  },
+  "event_attributes": {
+    "http_request": {
+      "client_ip": "192.168.1.100",
+      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    }
+  },
+  "instance_id": "ins_2g7np7Hrk0SN6kj5EDMLDaKNL0S",
+  "object": "event",
+  "timestamp": 1716883200,
+  "type": "user.created"
+}
+```
+
+* UserDeleted事件数据结构
+
+```json
+{
+  "data": {
+    "deleted": true,
+    "id": "user_29wBMCtzATuFJut8jO2VNTVekS4",
+    "object": "user"
+  },
+  "event_attributes": {
+    "http_request": {
+      "client_ip": "0.0.0.0",
+      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    }
+  },
+  "object": "event",
+  "timestamp": 1661861640000,
+  "type": "user.deleted"
+}
+```
+
+* webhook处理完成后会返回：
+
+```json
+{
+  "received": true
+}
+```
+
+* 异常情况
+  
+- 缺少必要的headers → 返回400错误
+- 签名验证失败 → 返回400错误
+- 系统处理异常 → 返回500错误，记录错误日志
+
+#### 4.6.8 安全考虑
+
+1. **环境变量**：webhook signing secret必须存储为环境变量
+2. **签名验证**：所有webhook请求都必须通过签名验证
+3. **错误处理**：适当的错误处理避免敏感信息泄露
+4. **日志记录**：记录关键操作用于审计和调试
+
+#### 4.6.9 监控和日志
+
+系统会记录以下日志：
+- webhook事件类型和处理状态
+- 用户创建/删除操作结果
+- 积分操作记录
+- 错误和异常信息
+  
 ---
 
 ## 5. Mermaid流程图
