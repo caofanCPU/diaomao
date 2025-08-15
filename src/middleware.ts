@@ -1,55 +1,95 @@
-import { clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from 'next/server';
-import createMiddleware from 'next-intl/middleware';
 import { appConfig } from "@/lib/appConfig";
-import { extractFingerprintFromNextRequest } from "@windrun-huaiin/third-ui/fingerprint/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { handleUserAuth, setAuthHeaders } from "@/lib/auth-utils";
+import createMiddleware from 'next-intl/middleware';
+import { NextRequest, NextResponse } from 'next/server';
 
 const intlMiddleware = createMiddleware({
   locales: appConfig.i18n.locales,
-
   defaultLocale: appConfig.i18n.defaultLocale,
   localePrefix: "always",
   localeDetection: false
 });
 
-// TODO
-const allowPassWhitelist = createRouteMatcher(['/(.*)'])
+// 需要身份认证的路由（页面路由）
+const protectedPageRoutes = createRouteMatcher([
+  '/(.*)/(dashboard|settings|profile)/(.*)',
+  '/(.*)/(subscriptions|billing)/(.*)',
+]);
 
-/**
- * 处理fingerprint ID的提取和验证
- */
-async function handleFingerprintId(req: NextRequest): Promise<string | null> {
-  // 尝试提取fingerprint ID
-  const fingerprintId = extractFingerprintFromNextRequest(req);
-  
-  if (fingerprintId) {
-    console.log('Fingerprint ID found in request:', fingerprintId);
-    return fingerprintId;
-  }
+// 需要身份认证的API路由
+const protectedApiRoutes = createRouteMatcher([
+  // 订阅相关API
+  '/api/subscriptions/(.*)',
+  // 积分相关API  
+  '/api/credits/(.*)',
+  // 交易记录API
+  '/api/transactions/(.*)',
+  // 用户资料API
+  '/api/user/profile/(.*)',
+  '/api/user/settings/(.*)',
+]);
 
-  // 如果是API路由或静态资源，不需要处理fingerprint
-  if (req.nextUrl.pathname.startsWith('/api') || 
-      req.nextUrl.pathname.startsWith('/_next') ||
-      req.nextUrl.pathname.includes('.')) {
-    return null;
-  }
+// 免认证的API路由（webhook、匿名用户初始化等）
+const publicApiRoutes = createRouteMatcher([
+  // Stripe webhook
+  '/api/webhook/stripe',
+  // Clerk webhook
+  '/api/webhook/clerk/user',
+  // 匿名用户初始化
+  '/api/user/anonymous/init',
+  // 健康检查等
+  '/api/health',
+]);
 
-  console.log('No fingerprint ID found in request for path:', req.nextUrl.pathname);
-  return null;
-}
 
-export default clerkMiddleware(async (auth: ClerkMiddlewareAuth, req: NextRequest) => {
-  // 处理fingerprint ID
-  const fingerprintId = await handleFingerprintId(req);
-  
-  if (!allowPassWhitelist(req)) {
-      const { userId, redirectToSignIn } = await auth()
-      if (!userId) {
-          return redirectToSignIn()
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  // 1. 处理需要认证的页面路由
+  if (protectedPageRoutes(req)) {
+    const { userId, shouldRedirect, authContext } = await handleUserAuth(auth, req);
+    
+    if (shouldRedirect) {
+      const { redirectToSignIn } = await auth();
+      return redirectToSignIn();
+    }
+    
+    if (userId && authContext) {
+      const response = intlMiddleware(req);
+      if (response) {
+        setAuthHeaders(response, authContext);
+        console.log('Set user_id for protected page:', userId);
       }
-      console.log('User is authorized:', userId)
+      return response;
+    }
+  }
+  
+  // 2. 处理需要认证的API路由
+  if (protectedApiRoutes(req)) {
+    const { userId, shouldRedirect, authContext } = await handleUserAuth(auth, req);
+    
+    if (shouldRedirect || !userId) {
+      return NextResponse.json(
+        { error: 'Authentication required' }, 
+        { status: 401 }
+      );
+    }
+    
+    if (authContext) {
+      const response = NextResponse.next();
+      setAuthHeaders(response, authContext);
+      console.log('Set user_id for protected API:', userId);
+      return response;
+    }
+  }
+  
+  // 3. 免认证的API路由，直接通过
+  if (publicApiRoutes(req)) {
+    console.log('Public API route, no auth required:', req.nextUrl.pathname);
+    return NextResponse.next();
   }
 
+  // 4. 其他路由使用默认的国际化中间件处理
+  
   // handle root path to default locale permanent redirect
   if (req.nextUrl.pathname === '/') {
     const defaultLocale = appConfig.i18n.defaultLocale;
@@ -62,13 +102,8 @@ export default clerkMiddleware(async (auth: ClerkMiddlewareAuth, req: NextReques
     return NextResponse.redirect(newUrl, 301);
   }
 
-  // 在响应中设置fingerprint ID (如果存在)
-  const response = intlMiddleware(req);
-  if (fingerprintId && response) {
-    response.headers.set('x-fingerprint-id', fingerprintId);
-  }
-
-  return response;
+  // 默认处理其他路由（公开页面路由）
+  return intlMiddleware(req);
 }, { debug: appConfig.clerk.debug }
 );
 

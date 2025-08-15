@@ -130,10 +130,13 @@ export class TransactionService {
     orderId: string,
     orderStatus: string,
     additionalData?: {
+      payTransactionId?: string;
       paidAt?: Date;
       paidEmail?: string;
       paidDetail?: string;
       payUpdatedAt?: Date;
+      payCreatedAt?: Date;
+      payDetail?: string;
     }
   ): Promise<Transaction> {
     const updateData: Prisma.TransactionUpdateInput = {

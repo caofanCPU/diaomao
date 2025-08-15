@@ -23,6 +23,7 @@ export {
   TransactionType,
   CreditType,
   OperationType,
+  PaySupplier,
   isValidUserStatus,
   isValidSubscriptionStatus,
   isValidOrderStatus,
@@ -39,4 +40,5 @@ export type {
   TransactionType as TransactionTypeType,
   CreditType as CreditTypeType,
   OperationType as OperationTypeType,
+  PaySupplier as PaySupplierType,
 } from './constants';
