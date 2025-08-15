@@ -111,39 +111,59 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
   const clerkUserId = data.id;
   const email = data.email_addresses?.[0]?.email_address;
   const unsafeMetadata = data.unsafe_metadata;
-  const userId = unsafeMetadata?.user_id;
   const fingerprintId = unsafeMetadata?.fingerprint_id;
 
   console.log('Processing user.created event:', {
     clerkUserId,
     email,
-    userId,
     fingerprintId
   });
 
+  // 检查必要参数
+  if (!fingerprintId) {
+    console.error('Missing fingerprintId in webhook data, process flow error');
+    return;
+  }
+
+  if (!email) {
+    console.error('Missing email in webhook data');
+    return;
+  }
+
   try {
-    // 如果有user_id，说明是匿名用户升级为注册用户
-    if (userId && fingerprintId) {
-      // 查找现有的匿名用户记录
-      const existingUser = await userService.findById(userId);
-      
-      if (existingUser && existingUser.status === UserStatus.ANONYMOUS) {
-        // 升级匿名用户为注册用户
-        await userService.upgradeToRegistered(userId, {
-          email: email || '',
-          clerkUserId
-        });
-        
-        console.log(`Successfully upgraded anonymous user ${userId} to registered user`);
+    // 按fingerprintId查询该设备的所有用户记录
+    const existingUsers = await userService.findListByFingerprintId(fingerprintId);
+
+    // 查找email相同的记录
+    const sameEmailUser = existingUsers.find(user => user.email === email);
+    if (sameEmailUser) {
+      // 同一账号，检查是否需要更新clerkUserId
+      if (sameEmailUser.clerkUserId !== clerkUserId) {
+        await userService.updateUser(sameEmailUser.userId, { clerkUserId });
+        console.log(`Updated clerkUserId for user ${sameEmailUser.userId}`);
       } else {
-        console.log(`User ${userId} not found or not anonymous, creating new user`);
-        await createNewRegisteredUser(clerkUserId, email, fingerprintId);
+        console.log(`User with email ${email} already exists, skipping duplicate message`);
       }
-    } else {
-      // 直接注册的新用户（没有经过匿名状态）
-      console.log('Creating new registered user without anonymous state');
-      await createNewRegisteredUser(clerkUserId, email);
+      return;
     }
+
+    // 查找匿名用户（email为空且clerkUserId为空）
+    const anonymousUser = existingUsers.find(user => 
+      !user.email && !user.clerkUserId && user.status === UserStatus.ANONYMOUS
+    );
+    if (anonymousUser) {
+      // 匿名用户升级
+      await userService.upgradeToRegistered(anonymousUser.userId, {
+        email,
+        clerkUserId
+      });
+      console.log(`Successfully upgraded anonymous user ${anonymousUser.userId} to registered user`);
+      return;
+    }
+
+    // 同设备新账号，创建新用户
+    await createNewRegisteredUser(clerkUserId, email, fingerprintId);
+    console.log(`Created new user for device ${fingerprintId} with email ${email}`);
     
   } catch (error) {
     console.error('Error handling user.created event:', error);
