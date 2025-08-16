@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export class CreditService {
   // Initialize User Credits
-  async initializeCredits(
+  async initializeCredit(
     userId: string,
     freeCredits: number = 50,
     paidCredits: number = 0
@@ -23,7 +23,7 @@ export class CreditService {
   }
 
   // Get User Credits
-  async getCredits(userId: string): Promise<Credit | null> {
+  async getCredit(userId: string): Promise<Credit | null> {
     return await prisma.credit.findUnique({
       where: { userId },
     });
@@ -31,13 +31,13 @@ export class CreditService {
 
   // Get Total Credit Balance
   async getTotalBalance(userId: string): Promise<number> {
-    const credits = await this.getCredits(userId);
+    const credits = await this.getCredit(userId);
     if (!credits) return 0;
     return credits.balanceFree + credits.balancePaid;
   }
 
   // Recharge Credits (Transactional)
-  async rechargeCredits(
+  async rechargeCredit(
     userId: string,
     amount: number,
     creditType: string,
@@ -86,7 +86,7 @@ export class CreditService {
   }
 
   // Consume Credits (Transactional)
-  async consumeCredits(
+  async consumeCredit(
     userId: string,
     amount: number,
     feature: string,
@@ -155,7 +155,7 @@ export class CreditService {
   }
 
   // Freeze Credits
-  async freezeCredits(
+  async freezeCredit(
     userId: string,
     amount: number,
     reason: string
@@ -200,7 +200,7 @@ export class CreditService {
   }
 
   // Unfreeze Credits
-  async unfreezeCredits(
+  async unfreezeCredit(
     userId: string,
     amount: number,
     creditType: string,
@@ -242,7 +242,7 @@ export class CreditService {
   }
 
   // Refund Credits
-  async refundCredits(
+  async refundCredit(
     userId: string,
     amount: number,
     orderId: string
@@ -286,7 +286,7 @@ export class CreditService {
   }
 
   // Reset Free Credits 
-  async resetFreeCredits(userId: string, newLimit: number = 50): Promise<Credit> {
+  async resetFreeCredit(userId: string, newLimit: number = 50): Promise<Credit> {
     return await prisma.credit.update({
       where: { userId },
       data: {
@@ -297,7 +297,7 @@ export class CreditService {
   }
 
   // Batch Update Credits (Admin Operation)
-  async adjustCredits(
+  async adjustCredit(
     userId: string,
     adjustments: {
       balanceFree?: number;
@@ -306,7 +306,7 @@ export class CreditService {
       totalPaidLimit?: number;
     }
   ): Promise<Credit> {
-    const currentCredit = await this.getCredits(userId);
+    const currentCredit = await this.getCredit(userId);
     if (!currentCredit) {
       throw new Error('User credits not found');
     }

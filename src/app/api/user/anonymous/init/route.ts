@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { userService, creditService, creditUsageService, User, Credit } from '@/services/database';
+import { userService, creditService, creditUsageService, User, Credit, Subscription} from '@/services/database';
 import { subscriptionService } from '@/services/database/subscription.service';
-import type { Subscription } from '@prisma/client';
 import { UserStatus, CreditType, OperationType } from '@/services/database';
 import { extractFingerprintFromNextRequest } from '@windrun-huaiin/third-ui/fingerprint/server';
-import { AnonymousUser, Credits } from '@windrun-huaiin/third-ui/fingerprint';
+import { XUser, XCredit, XSubscription } from '@windrun-huaiin/third-ui/fingerprint';
 
 // 免费积分配置
 const FREE_CREDITS_AMOUNT = 50;
@@ -14,11 +13,11 @@ const FREE_CREDITS_AMOUNT = 50;
 // ==================== 类型定义 ====================
 
 /** 成功响应数据 */
-interface AnonymousUserResponse {
+interface XUserResponse {
   success: true;
-  user: AnonymousUser;
-  credits: Credits | null;
-  subscription: Subscription | null;
+  xUser: XUser;
+  xCredit: XCredit | null;
+  xSubscription: XSubscription | null;
   isNewUser: boolean;
   totalUsersOnDevice?: number;
   hasAnonymousUser?: boolean;
@@ -32,7 +31,7 @@ interface ErrorResponse {
 // ==================== 工具函数 ====================
 
 /** 创建用户信息对象 */
-function createUserInfo(user: User): AnonymousUser {
+function createUserInfo(user: User): XUser {
   return {
     userId: user.userId,
     fingerprintId: user.fingerprintId || '',
@@ -44,30 +43,45 @@ function createUserInfo(user: User): AnonymousUser {
 }
 
 /** 创建积分信息对象 */
-function createCreditsInfo(credits: Credit): Credits {
+function createCreditsInfo(credit: Credit): XCredit {
   return {
-    balanceFree: credits.balanceFree,
-    balancePaid: credits.balancePaid,
-    totalBalance: credits.balanceFree + credits.balancePaid,
+    balanceFree: credit.balanceFree,
+    balancePaid: credit.balancePaid,
+    totalBalance: credit.balanceFree + credit.balancePaid,
+  };
+}
+
+/** 创建订阅信息对象 */
+function createSubscriptionInfo(subscription: Subscription): XSubscription {
+  return {
+    id: subscription.id,
+    userId: subscription.userId || '',
+    paySubscriptionId: subscription.paySubscriptionId || '',
+    priceId: subscription.priceId || '',
+    priceName: subscription.priceName || '',
+    status: subscription.status || '',
+    creditsAllocated: subscription.creditsAllocated,
+    subPeriodStart: subscription.subPeriodStart?.toISOString() || '',
+    subPeriodEnd: subscription.subPeriodEnd?.toISOString() || '' 
   };
 }
 
 /** 创建成功响应对象 */
 function createSuccessResponse(
   user: User,
-  credits: Credit | null,
+  credit: Credit | null,
   subscription: Subscription | null,
   isNewUser: boolean,
   options: {
     totalUsersOnDevice?: number;
     hasAnonymousUser?: boolean;
   } = {}
-): AnonymousUserResponse {
+): XUserResponse {
   return {
     success: true,
-    user: createUserInfo(user),
-    credits: credits ? createCreditsInfo(credits) : null,
-    subscription,
+    xUser: createUserInfo(user),
+    xCredit: credit ? createCreditsInfo(credit) : null,
+    xSubscription: subscription ? createSubscriptionInfo(subscription) : null,
     isNewUser,
     ...options,
   };
@@ -83,7 +97,7 @@ function createErrorResponse(message: string, status = 400): NextResponse {
  * 根据fingerprint_id查询用户并返回响应数据
  * 共用逻辑：优先返回匿名用户，只有匿名用户才返回积分数据
  */
-async function getUserByFingerprintId(fingerprintId: string): Promise<AnonymousUserResponse | null> {
+async function getUserByFingerprintId(fingerprintId: string): Promise<XUserResponse | null> {
   const existingUsers = await userService.findListByFingerprintId(fingerprintId);
   
   if (existingUsers.length === 0) {
@@ -96,12 +110,12 @@ async function getUserByFingerprintId(fingerprintId: string): Promise<AnonymousU
   
   if (latestAnonymousUser) {
     // 找到匿名用户，返回匿名用户信息和积分
-    const credits = await creditService.getCredits(latestAnonymousUser.userId);
+    const credit = await creditService.getCredit(latestAnonymousUser.userId);
     const subscription = await subscriptionService.getActiveSubscription(latestAnonymousUser.userId);
     
     return createSuccessResponse(
       latestAnonymousUser,
-      credits,
+      credit,
       subscription,
       false,
       {
@@ -159,7 +173,7 @@ async function handleFingerprintRequest(request: NextRequest, options: { createI
     });
 
     // 初始化积分记录
-    const credits = await creditService.initializeCredits(
+    const credit = await creditService.initializeCredit(
       newUser.userId,
       FREE_CREDITS_AMOUNT,
       0 // 匿名用户只给免费积分
@@ -177,7 +191,7 @@ async function handleFingerprintRequest(request: NextRequest, options: { createI
     console.log(`Created new anonymous user ${newUser.userId} with fingerprint ${fingerprintId}`);
 
     // 返回创建结果
-    const response = createSuccessResponse(newUser, credits, null, true);
+    const response = createSuccessResponse(newUser, credit, null, true);
     return NextResponse.json(response);
 
   } catch (error) {

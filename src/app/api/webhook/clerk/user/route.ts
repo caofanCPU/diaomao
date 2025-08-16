@@ -217,7 +217,7 @@ async function createNewRegisteredUser(
   });
 
   // 初始化积分记录
-  await creditService.initializeCredits(
+  await creditService.initializeCredit(
     newUser.userId,
     FREE_CREDITS_AMOUNT,
     0 // 注册时只给免费积分，付费积分为0

@@ -399,13 +399,13 @@ async function allocateCreditsToUser(
 ) {
   try {
     // Get or create user credits record
-    let credits = await creditService.getCredits(userId);
+    let credits = await creditService.getCredit(userId);
     if (!credits) {
-      credits = await creditService.initializeCredits(userId, 0, 0);
+      credits = await creditService.initializeCredit(userId, 0, 0);
     }
 
     // Update paid credits
-    await creditService.rechargeCredits(userId, creditsAmount, CreditType.PAID, orderId, reason);
+    await creditService.rechargeCredit(userId, creditsAmount, CreditType.PAID, orderId, reason);
 
     // Record credit usage
     await creditUsageService.recordCreditOperation({
@@ -433,7 +433,7 @@ async function deductCreditsFromUser(
   reason: string
 ) {
   try {
-    const credits = await creditService.getCredits(userId);
+    const credits = await creditService.getCredit(userId);
     if (!credits) {
       console.error('Credits record not found for user:', userId);
       return;
@@ -444,7 +444,7 @@ async function deductCreditsFromUser(
     // const remainingToDeduct = creditsAmount - (credits.balancePaid - newBalancePaid); // Not used
     // const newBalanceFree = remainingToDeduct > 0 ? Math.max(0, credits.balanceFree - remainingToDeduct) : credits.balanceFree; // Not used
 
-    await creditService.consumeCredits(userId, creditsAmount, CreditType.PAID, orderId || 'webhook_refund');
+    await creditService.consumeCredit(userId, creditsAmount, CreditType.PAID, orderId || 'webhook_refund');
     
 
     // Record credit deduction

@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const subscriptions = await subscriptionService.findByUserId(userId);
     
     // Get user's credits
-    const credits = await creditService.getCredits(userId);
+    const credits = await creditService.getCredit(userId);
 
     // Process subscription data
     const subscriptionData = await Promise.all(

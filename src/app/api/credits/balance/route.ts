@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's credits
-    const credits = await creditService.getCredits(user.userId);
+    const credits = await creditService.getCredit(user.userId);
 
     if (!credits) {
       return NextResponse.json(
