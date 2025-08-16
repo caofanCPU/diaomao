@@ -9,8 +9,6 @@
 
 'use client';
 
-import { SignUpWithFingerprint } from '@windrun-huaiin/third-ui/clerk';
+import { createSignUpPageWithFingerprint } from '@windrun-huaiin/third-ui/clerk';
 
-export default function SignUpPage() {
-  return <SignUpWithFingerprint />;
-}
+export default createSignUpPageWithFingerprint()
