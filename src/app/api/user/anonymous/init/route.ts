@@ -154,6 +154,8 @@ async function handleFingerprintRequest(request: NextRequest, options: { createI
       return createErrorResponse('Invalid or missing fingerprint ID');
     }
 
+    console.log('Received fingerprintId:', fingerprintId);
+
     // 检查是否已存在该fingerprint的用户
     const existingUserResult = await getUserByFingerprintId(fingerprintId);
     

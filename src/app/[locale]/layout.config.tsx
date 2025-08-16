@@ -19,7 +19,7 @@ export async function homeNavLinks(locale: string): Promise<LinkItemType[]> {
     {
       icon: <icons.BTC />,
       text: t1('pricing'),
-      url: `/${locale}#pricing`,
+      url: `/${locale}#money-pricing`,
     },
     {
       type: 'custom',

@@ -36,8 +36,8 @@ export const moneyPriceConfig: MoneyPriceConfig = {
             },
             yearly: {
               priceId: process.env.STRIPE_PRO_YEARLY_PRICE_ID!,
-              amount: Number(process.env.STRIPE_PRO_YEARLY_AMOUNT!), // 96
-              originalAmount: 120, // 10*12
+              amount: Number(process.env.STRIPE_PRO_YEARLY_AMOUNT!), // 8
+              originalAmount: 10, // 10*12
               discountPercent: 20,
               currency: process.env.STRIPE_PRO_YEARLY_CURRENCY!,
               credits: Number(process.env.STRIPE_PRO_YEARLY_CREDITS!) // 1200
@@ -56,8 +56,8 @@ export const moneyPriceConfig: MoneyPriceConfig = {
             },
             yearly: {
               priceId: process.env.STRIPE_ULTRA_YEARLY_PRICE_ID!,
-              amount: Number(process.env.STRIPE_ULTRA_YEARLY_AMOUNT!), // 192
-              originalAmount: 240, // 20*12
+              amount: Number(process.env.STRIPE_ULTRA_YEARLY_AMOUNT!), // 16
+              originalAmount: 20, // 20*12
               discountPercent: 20,
               currency: process.env.STRIPE_ULTRA_YEARLY_CURRENCY!,
               credits: Number(process.env.STRIPE_ULTRA_YEARLY_CREDITS!) // 3000
@@ -101,8 +101,8 @@ export const moneyPriceConfig: MoneyPriceConfig = {
             },
             yearly: {
               priceId: process.env.STRIPE_PRO_YEARLY_PRICE_ID!,
-              amount: Number(process.env.STRIPE_PRO_YEARLY_AMOUNT!), // 96
-              originalAmount: 120, // 10*12
+              amount: Number(process.env.STRIPE_PRO_YEARLY_AMOUNT!), // 8
+              originalAmount: 10, // 10*12
               discountPercent: 20,
               currency: process.env.STRIPE_PRO_YEARLY_CURRENCY!,
               credits: Number(process.env.STRIPE_PRO_YEARLY_CREDITS!) // 1200
@@ -121,8 +121,8 @@ export const moneyPriceConfig: MoneyPriceConfig = {
             },
             yearly: {
               priceId: process.env.STRIPE_ULTRA_YEARLY_PRICE_ID!,
-              amount: Number(process.env.STRIPE_ULTRA_YEARLY_AMOUNT!), // 192
-              originalAmount: 240, // 20*12
+              amount: Number(process.env.STRIPE_ULTRA_YEARLY_AMOUNT!), // 16
+              originalAmount: 20, // 20*12
               discountPercent: 20,
               currency: process.env.STRIPE_ULTRA_YEARLY_CURRENCY!,
               credits: Number(process.env.STRIPE_ULTRA_YEARLY_CREDITS!) // 3000
