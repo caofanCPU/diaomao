@@ -23,16 +23,16 @@ const createSubscriptionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // 使用统一的认证工具获取用户ID - 一行代码搞定所有认证逻辑！
+    const authUtils = new ApiAuthUtils(request);
+    const userId = authUtils.requireAuth(); // 自动处理三种ID关系，未认证会抛出错误
     // Parse request body
     const body = await request.json();
     const { priceId, successUrl, cancelUrl } = createSubscriptionSchema.parse(body);
 
-    // 使用统一的认证工具获取用户ID - 一行代码搞定所有认证逻辑！
-    const authUtils = new ApiAuthUtils(request);
-    const userId = authUtils.requireAuth(); // 自动处理三种ID关系，未认证会抛出错误
     
     // 根据用户ID查询用户信息
-    const user = await userService.findById(userId);
+    const user = await userService.findByUserId(userId);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },

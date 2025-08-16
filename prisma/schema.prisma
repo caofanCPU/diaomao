@@ -10,7 +10,7 @@ datasource db {
 model User {
   id            BigInt         @id @default(autoincrement())
   userId        String         @unique @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
-  fingerprintId String?        @unique @map("fingerprint_id") @db.VarChar(255)
+  fingerprintId String?        @map("fingerprint_id") @db.VarChar(255)
   clerkUserId   String?        @unique @map("clerk_user_id") @db.VarChar(255)
   email         String?        @db.VarChar(255)
   status        String         @default("anonymous") @db.VarChar(20)
@@ -21,17 +21,15 @@ model User {
   subscriptions Subscription[]
   transactions  Transaction[]
 
-  @@index([createdAt], map: "idx_users_created_at")
-  @@index([email], map: "idx_users_email")
   @@index([status], map: "idx_users_status")
+  @@index([fingerprintId], map: "idx_users_fingerprint_id")
   @@map("users")
 }
 
 model Subscription {
   id                BigInt    @id @default(autoincrement())
-  subscriptionId    String    @unique @default(dbgenerated("gen_random_uuid()")) @map("subscription_id") @db.Uuid
   userId            String    @map("user_id") @db.Uuid
-  paySubscriptionId String?   @unique @map("pay_subscription_id") @db.VarChar(255)
+  paySubscriptionId String?   @map("pay_subscription_id") @db.VarChar(255)
   priceId           String?   @map("price_id") @db.VarChar(255)
   priceName         String?   @map("price_name") @db.VarChar(255)
   status            String    @default("incomplete") @db.VarChar(20)
@@ -44,8 +42,6 @@ model Subscription {
   user              User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([paySubscriptionId], map: "idx_subscriptions_pay_subscription_id")
-  @@index([status], map: "idx_subscriptions_status")
-  @@index([subPeriodEnd], map: "idx_subscriptions_sub_period_end")
   @@index([userId], map: "idx_subscriptions_user_id")
   @@map("subscriptions")
 }
@@ -97,11 +93,8 @@ model Transaction {
   deleted           Int       @default(0)
   user              User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([orderCreatedAt], map: "idx_transactions_order_created_at")
   @@index([orderId], map: "idx_transactions_order_id")
   @@index([orderStatus], map: "idx_transactions_order_status")
-  @@index([payInvoiceId], map: "idx_transactions_pay_invoice_id")
-  @@index([paySessionId], map: "idx_transactions_pay_session_id")
   @@index([paySubscriptionId], map: "idx_transactions_pay_subscription_id")
   @@index([userId], map: "idx_transactions_user_id")
   @@map("transactions")
@@ -119,7 +112,6 @@ model CreditUsage {
   deleted       Int       @default(0)
   user          User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([createdAt], map: "idx_credit_usage_created_at")
   @@index([creditType], map: "idx_credit_usage_credit_type")
   @@index([operationType], map: "idx_credit_usage_operation_type")
   @@index([orderId], map: "idx_credit_usage_order_id")
@@ -140,7 +132,6 @@ model UserBackup {
   deleted        Int       @default(0)
 
   @@index([clerkUserId], map: "idx_user_backup_clerk_user_id")
-  @@index([deletedAt], map: "idx_user_backup_deleted_at")
   @@index([email], map: "idx_user_backup_email")
   @@index([fingerprintId], map: "idx_user_backup_fingerprint_id")
   @@index([originalUserId], map: "idx_user_backup_original_user_id")

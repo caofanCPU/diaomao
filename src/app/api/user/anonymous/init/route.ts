@@ -2,6 +2,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { userService, creditService, creditUsageService, User, Credit } from '@/services/database';
+import { subscriptionService } from '@/services/database/subscription.service';
+import type { Subscription } from '@prisma/client';
 import { UserStatus, CreditType, OperationType } from '@/services/database';
 import { extractFingerprintFromNextRequest } from '@windrun-huaiin/third-ui/fingerprint/server';
 import { AnonymousUser, Credits } from '@windrun-huaiin/third-ui/fingerprint';
@@ -16,6 +18,7 @@ interface AnonymousUserResponse {
   success: true;
   user: AnonymousUser;
   credits: Credits | null;
+  subscription: Subscription | null;
   isNewUser: boolean;
   totalUsersOnDevice?: number;
   hasAnonymousUser?: boolean;
@@ -53,6 +56,7 @@ function createCreditsInfo(credits: Credit): Credits {
 function createSuccessResponse(
   user: User,
   credits: Credit | null,
+  subscription: Subscription | null,
   isNewUser: boolean,
   options: {
     totalUsersOnDevice?: number;
@@ -63,6 +67,7 @@ function createSuccessResponse(
     success: true,
     user: createUserInfo(user),
     credits: credits ? createCreditsInfo(credits) : null,
+    subscription,
     isNewUser,
     ...options,
   };
@@ -92,10 +97,12 @@ async function getUserByFingerprintId(fingerprintId: string): Promise<AnonymousU
   if (latestAnonymousUser) {
     // 找到匿名用户，返回匿名用户信息和积分
     const credits = await creditService.getCredits(latestAnonymousUser.userId);
+    const subscription = await subscriptionService.getActiveSubscription(latestAnonymousUser.userId);
     
     return createSuccessResponse(
       latestAnonymousUser,
       credits,
+      subscription,
       false,
       {
         totalUsersOnDevice: existingUsers.length,
@@ -105,10 +112,12 @@ async function getUserByFingerprintId(fingerprintId: string): Promise<AnonymousU
   } else {
     // 没有匿名用户，说明该设备用户都已注册，不返回积分数据
     const latestUser = existingUsers[0];
+    const subscription = await subscriptionService.getActiveSubscription(latestUser.userId);
     
     return createSuccessResponse(
       latestUser,
       null, // 注册用户不返回积分数据
+      subscription,
       false,
       {
         totalUsersOnDevice: existingUsers.length,
@@ -168,7 +177,7 @@ async function handleFingerprintRequest(request: NextRequest, options: { createI
     console.log(`Created new anonymous user ${newUser.userId} with fingerprint ${fingerprintId}`);
 
     // 返回创建结果
-    const response = createSuccessResponse(newUser, credits, true);
+    const response = createSuccessResponse(newUser, credits, null, true);
     return NextResponse.json(response);
 
   } catch (error) {

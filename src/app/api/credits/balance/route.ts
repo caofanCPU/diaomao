@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const userId = authUtils.requireAuth();
     
     // 根据用户ID查询用户信息
-    const user = await userService.findById(userId);
+    const user = await userService.findByUserId(userId);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },

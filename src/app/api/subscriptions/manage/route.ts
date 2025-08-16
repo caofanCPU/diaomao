@@ -1,23 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { z } from 'zod';
-import { 
-  stripe,
-  updateSubscription,
+import { ApiAuthUtils } from '@/lib/auth-utils';
+import {
   cancelSubscription,
-  getPriceConfig 
+  getPriceConfig,
+  stripe,
+  updateSubscription
 } from '@/lib/stripe-config';
-import { 
-  userService,
-  subscriptionService,
-  transactionService,
-  SubscriptionStatus,
-  TransactionType,
+import {
   OrderStatus,
-  PaySupplier 
+  PaySupplier,
+  subscriptionService,
+  SubscriptionStatus,
+  transactionService,
+  TransactionType
 } from '@/services/database';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 // Update subscription schema
 const updateSubscriptionSchema = z.object({
@@ -27,33 +26,17 @@ const updateSubscriptionSchema = z.object({
 });
 
 // GET - Get current subscription status
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const { userId: clerkUserId } = await auth();
-    
-    if (!clerkUserId) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    // Find user by clerk ID
-    const user = await userService.findByClerkUserId(clerkUserId);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
+    const authUtils = new ApiAuthUtils(request);
+    const userId = authUtils.requireAuth(); 
     // Get active subscriptions
-    const subscriptions = await subscriptionService.findByUserId(user.userId);
+    const subscriptions = await subscriptionService.findByUserId(userId);
     
     const activeSubscriptions = subscriptions
       .filter(sub => sub.status === SubscriptionStatus.ACTIVE)
       .map(sub => ({
-        subscriptionId: sub.subscriptionId,
+        id: sub.id,
         paySubscriptionId: sub.paySubscriptionId,
         priceName: sub.priceName,
         priceId: sub.priceId,
@@ -84,30 +67,15 @@ export async function GET() {
 // PUT - Update subscription (upgrade/downgrade/cancel)
 export async function PUT(request: NextRequest) {
   try {
-    const { userId: clerkUserId } = await auth();
-    
-    if (!clerkUserId) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
+    const authUtils = new ApiAuthUtils(request);
+    const userId = authUtils.requireAuth(); 
     // Parse request body
     const body = await request.json();
     const { action, newPriceId, cancelAtPeriodEnd } = updateSubscriptionSchema.parse(body);
 
-    // Find user by clerk ID
-    const user = await userService.findByClerkUserId(clerkUserId);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
 
     // Get current active subscription
-    const subscriptions = await subscriptionService.findByUserId(user.userId);
+    const subscriptions = await subscriptionService.findByUserId(userId);
     const activeSubscription = subscriptions.find(sub => sub.status === SubscriptionStatus.ACTIVE);
     
     if (!activeSubscription || !activeSubscription.paySubscriptionId) {
@@ -146,7 +114,7 @@ export async function PUT(request: NextRequest) {
         });
 
         // Update subscription in database
-        await subscriptionService.updateSubscription(activeSubscription.id.toString(), {
+        await subscriptionService.updateSubscription(activeSubscription.id, {
           priceId: newPriceId,
           priceName: newPriceConfig.priceName,
           creditsAllocated: newPriceConfig.credits,
@@ -156,7 +124,7 @@ export async function PUT(request: NextRequest) {
         // Create transaction record for the change
         const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2)}`;
         await transactionService.createTransaction({
-          userId: user.userId,
+          userId: userId,
           orderId,
           orderStatus: OrderStatus.SUCCESS,
           paySupplier: PaySupplier.STRIPE,
@@ -187,7 +155,7 @@ export async function PUT(request: NextRequest) {
 
         // Update subscription status in database
         const newStatus = cancelAtPeriodEnd ? SubscriptionStatus.CANCELED : SubscriptionStatus.CANCELED;
-        await subscriptionService.updateSubscription(activeSubscription.id.toString(), {
+        await subscriptionService.updateSubscription(activeSubscription.id, {
           status: newStatus,
           updatedAt: new Date(),
         });
@@ -212,7 +180,7 @@ export async function PUT(request: NextRequest) {
         );
 
         // Update subscription status in database
-        await subscriptionService.updateSubscription(activeSubscription.id.toString(), {
+        await subscriptionService.updateSubscription(activeSubscription.id, {
           status: SubscriptionStatus.ACTIVE,
           updatedAt: new Date(),
         });

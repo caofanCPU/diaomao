@@ -126,7 +126,7 @@ export async function buildAuthContext(
     const fingerprintId = extractFingerprintFromNextRequest(req);
     
     // 获取用户完整信息
-    const user = await userService.findById(userId);
+    const user = await userService.findByUserId(userId);
     
     return {
       userId,

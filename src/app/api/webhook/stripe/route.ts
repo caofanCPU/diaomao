@@ -202,7 +202,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     });
 
     // Update subscription period
-    await subscriptionService.updateSubscription(subscription.id.toString(), {
+    await subscriptionService.updateSubscription(subscription.id, {
       subPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
       subPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
       status: SubscriptionStatus.ACTIVE,
@@ -247,7 +247,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     // Update subscription status to past due
     const subscription = await subscriptionService.findByPaySubscriptionId(stripeSubscription.id);
     if (subscription) {
-      await subscriptionService.updateSubscription(subscription.id.toString(), {
+      await subscriptionService.updateSubscription(subscription.id, {
         status: SubscriptionStatus.PAST_DUE,
         updatedAt: new Date(),
       });
@@ -289,7 +289,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     // But we can update subscription details here if needed
     const dbSubscription = await subscriptionService.findByPaySubscriptionId(subscription.id);
     if (dbSubscription) {
-      await subscriptionService.updateSubscription(dbSubscription.id.toString(), {
+      await subscriptionService.updateSubscription(dbSubscription.id, {
         status: subscription.status as SubscriptionStatus,
         subPeriodStart: new Date((subscription as any).current_period_start * 1000),
         subPeriodEnd: new Date((subscription as any).current_period_end * 1000),
@@ -315,7 +315,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     }
 
     // Update subscription status and period
-    await subscriptionService.updateSubscription(dbSubscription.id.toString(), {
+    await subscriptionService.updateSubscription(dbSubscription.id, {
       status: subscription.status as SubscriptionStatus,
       subPeriodStart: new Date((subscription as any).current_period_start * 1000),
       subPeriodEnd: new Date((subscription as any).current_period_end * 1000),
@@ -342,7 +342,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     }
 
     // Update subscription status to canceled
-    await subscriptionService.updateSubscription(dbSubscription.id.toString(), {
+    await subscriptionService.updateSubscription(dbSubscription.id, {
       status: SubscriptionStatus.CANCELED,
       updatedAt: new Date(),
     });
@@ -471,13 +471,13 @@ async function findUserByStripeData(customerId: string, subscriptionId: string) 
     // Try to find by subscription ID first
     const subscription = await subscriptionService.findByPaySubscriptionId(subscriptionId);
     if (subscription) {
-      return await userService.findById(subscription.userId);
+      return await userService.findByUserId(subscription.userId);
     }
 
     // If not found, try to find user by Stripe customer metadata
     const customer = await stripe.customers.retrieve(customerId);
     if (customer && !customer.deleted && customer.metadata?.user_id) {
-      return await userService.findById(customer.metadata.user_id);
+      return await userService.findByUserId(customer.metadata.user_id);
     }
 
     return null;
@@ -502,7 +502,7 @@ async function processSubscriptionFromSession(
     
     if (existingSubscription) {
       // Update existing subscription
-      await subscriptionService.updateSubscription(existingSubscription.id.toString(), {
+      await subscriptionService.updateSubscription(existingSubscription.id, {
         status: stripeSubscription.status as SubscriptionStatus,
         subPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
         subPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),

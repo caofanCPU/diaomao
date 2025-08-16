@@ -31,9 +31,9 @@ export class SubscriptionService {
   }
 
   // Find subscription by ID
-  async findById(subscriptionId: string): Promise<Subscription | null> {
+  async findById(id: bigint): Promise<Subscription | null> {
     return await prisma.subscription.findFirst({
-      where: { subscriptionId, deleted: 0 },
+      where: { id, deleted: 0 },
       include: {
         user: true,
       },
@@ -100,34 +100,34 @@ export class SubscriptionService {
 
   // Update subscription
   async updateSubscription(
-    subscriptionId: string,
+    id: bigint,
     data: Prisma.SubscriptionUpdateInput
   ): Promise<Subscription> {
     return await prisma.subscription.update({
-      where: { subscriptionId },
+      where: { id },
       data,
     });
   }
 
   // Update subscription status
   async updateStatus(
-    subscriptionId: string,
+    id: bigint,
     status: string
   ): Promise<Subscription> {
     return await prisma.subscription.update({
-      where: { subscriptionId },
+      where: { id },
       data: { status },
     });
   }
 
   // Update subscription period
   async updatePeriod(
-    subscriptionId: string,
+    id: bigint,
     subPeriodStart: Date,
     subPeriodEnd: Date
   ): Promise<Subscription> {
     return await prisma.subscription.update({
-      where: { subscriptionId },
+      where: { id },
       data: {
         subPeriodStart,
         subPeriodEnd,
@@ -137,7 +137,7 @@ export class SubscriptionService {
 
   // Cancel subscription
   async cancelSubscription(
-    subscriptionId: string,
+    id: bigint,
     cancelAtPeriodEnd: boolean = true
   ): Promise<Subscription> {
     const updateData: Prisma.SubscriptionUpdateInput = {
@@ -149,19 +149,19 @@ export class SubscriptionService {
     }
 
     return await prisma.subscription.update({
-      where: { subscriptionId },
+      where: { id },
       data: updateData,
     });
   }
 
   // Renew subscription
   async renewSubscription(
-    subscriptionId: string,
+    id: bigint,
     newPeriodEnd: Date,
     creditsToAdd?: number
   ): Promise<Subscription> {
-    const subscription = await prisma.subscription.findUnique({
-      where: { subscriptionId },
+    const subscription = await prisma.subscription.findFirst({
+      where: { id },
     });
 
     if (!subscription) {
@@ -169,7 +169,7 @@ export class SubscriptionService {
     }
 
     return await prisma.subscription.update({
-      where: { subscriptionId },
+      where: { id },
       data: {
         status: SubscriptionStatus.ACTIVE,
         subPeriodStart: subscription.subPeriodEnd || new Date(),
@@ -182,9 +182,9 @@ export class SubscriptionService {
   }
 
   // Soft Delete subscription
-  async deleteSubscription(subscriptionId: string): Promise<void> {
+  async deleteSubscription(id: bigint): Promise<void> {
     await prisma.subscription.update({
-      where: { subscriptionId },
+      where: { id },
       data: { deleted: 1 },
     });
   }

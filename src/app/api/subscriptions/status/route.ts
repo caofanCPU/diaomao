@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 import { stripe } from '@/lib/stripe-config';
 import { 
@@ -10,31 +9,13 @@ import {
   creditService,
   SubscriptionStatus 
 } from '@/services/database';
+import { ApiAuthUtils } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get query parameters
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    // Get user authentication (for registered users)
-    const { userId: clerkUserId } = await auth();
-    
-    let user;
-    
-    if (clerkUserId) {
-      // Registered user - find by clerk ID
-      user = await userService.findByClerkUserId(clerkUserId);
-    } else if (userId) {
-      // Find by provided user ID
-      user = await userService.findById(userId);
-    } else {
-      return NextResponse.json(
-        { error: 'User identification required' },
-        { status: 400 }
-      );
-    }
-
+    const authUtils = new ApiAuthUtils(request);
+    const userId = authUtils.requireAuth(); // 自动处理三种ID关系，未认证会抛出错误
+    const user = await userService.findByUserId(userId)
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -43,10 +24,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's subscriptions
-    const subscriptions = await subscriptionService.findByUserId(user.userId);
+    const subscriptions = await subscriptionService.findByUserId(userId);
     
     // Get user's credits
-    const credits = await creditService.getCredits(user.userId);
+    const credits = await creditService.getCredits(userId);
 
     // Process subscription data
     const subscriptionData = await Promise.all(
@@ -63,7 +44,7 @@ export async function GET(request: NextRequest) {
         }
 
         return {
-          subscriptionId: sub.subscriptionId,
+          id: sub.id,
           paySubscriptionId: sub.paySubscriptionId,
           priceId: sub.priceId,
           priceName: sub.priceName,

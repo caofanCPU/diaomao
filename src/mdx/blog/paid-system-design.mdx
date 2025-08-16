@@ -338,7 +338,6 @@ flowchart TB
 | 列名                | 类型         | 描述                                    |
 |---------------------|--------------|----------------------------------------|
 | `id`                | BigInt       | 主键                                   |
-| `subscription_id`   | UUID         | 订阅ID, 唯一订阅ID                      |
 | `user_id`           | UUID         | 外键, 引用`Users`表                     |
 | `pay_subscription_id` | String   | 交易厂商订阅ID (sub_xxx)                |
 | `price_id`          | String       | 交易厂商价格ID (price_xxx)               |
@@ -432,8 +431,8 @@ flowchart TB
 | `created_at`        | Timestamp    | 备份创建时间戳                        |
 
 ### 3.2. 索引
-- **用户表**: 主键 (`id`), `user_id` 唯一索引, `fingerprint_id` 唯一索引, `clerk_user_id` 唯一索引, `email` 索引。
-- **订阅表**: 主键 (`id`), `subscription_id` 唯一索引, `user_id` 索引。
+- **用户表**: 主键 (`id`), `user_id` 唯一索引, `fingerprint_id` 索引, `clerk_user_id` 唯一索引, `email` 索引。
+- **订阅表**: 主键 (`id`), `user_id` 索引。
 - **积分表**: 主键 (`id`), `user_id` 索引。
 - **交易表**: 主键 (`id`), `user_id`、`pay_session_id`、`pay_invoice_id` 索引。
 - **积分使用表**: 主键 (`id`), `user_id`索引。
@@ -533,7 +532,6 @@ classDiagram
 
     class Subscriptions {
         number id PK
-        string subscription_id FK
         string user_id
         string pay_subscription_id
         string price_id
