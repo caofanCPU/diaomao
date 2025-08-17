@@ -1,316 +1,333 @@
-# 统一身份认证系统使用指南
-
-## 概述
-
-新的身份认证系统在中间件层统一处理了三种ID的关系：
-- `clerk_user_id` (Clerk 用户ID)  
-- `fingerprint_id` (浏览器指纹ID)
-- `user_id` (系统内部用户ID)
-
-后端API只需要关心统一的 `user_id`，大大简化了业务逻辑。
-
-## 认证流程
-
-### 1. 中间件处理逻辑
+## 中间件处理逻辑
 
 ```mermaid
 flowchart TD
-    Start[请求进入中间件] --> CheckClerk{检查Clerk认证}
+    Start[请求进入中间件] --> RouteCheck{路由类型检查}
     
-    CheckClerk -->|已登录| GetUserByClerk[根据clerk_user_id查询用户]
-    CheckClerk -->|未登录| CheckFingerprint{检查fingerprint_id}
+    RouteCheck -->|受保护的页面路由| ProtectedPageAuth{检查Clerk认证}
+    RouteCheck -->|受保护的API路由| ProtectedApiAuth{检查Clerk认证}
+    RouteCheck -->|公开API路由| PublicApi[直接通过，无需认证]
+    RouteCheck -->|其他API路由| OtherApi[直接通过，不添加语言前缀]
+    RouteCheck -->|其他路由| HandleOther[处理根路径/尾斜杠重定向]
     
-    GetUserByClerk -->|找到用户| SetUserId[设置user_id到headers]
-    GetUserByClerk -->|未找到| Redirect[重定向到登录]
+    ProtectedPageAuth -->|已登录| SetClerkIdPage[设置x-clerk-user-id到headers]
+    ProtectedPageAuth -->|未登录| RedirectSignIn[重定向到登录页]
     
-    CheckFingerprint -->|有fingerprint_id| QueryByFingerprint[查询该fingerprint的用户]
-    CheckFingerprint -->|无fingerprint_id| Redirect
+    ProtectedApiAuth -->|已登录| SetClerkIdApi[设置x-clerk-user-id到headers]
+    ProtectedApiAuth -->|未登录| RedirectSignIn
     
-    QueryByFingerprint --> AnalyzeUsers{分析用户记录}
-    AnalyzeUsers -->|有注册用户| Redirect
-    AnalyzeUsers -->|只有匿名用户| UseAnonymous[使用匿名用户的user_id]
-    AnalyzeUsers -->|无用户记录| Redirect
+    SetClerkIdPage --> IntlMiddleware[应用国际化中间件]
+    SetClerkIdApi --> ContinueApi[继续API请求处理]
     
-    UseAnonymous --> SetUserId
-    SetUserId --> Continue[继续处理请求]
-    Redirect --> SignIn[跳转登录页]
+    PublicApi --> ContinueApi
+    OtherApi --> ContinueApi
+    
+    HandleOther --> RootPath{是否为根路径 '/'}
+    RootPath -->|是| DefaultLocaleRedirect[永久重定向到默认语言]
+    RootPath -->|否| TrailingSlash{是否有尾斜杠}
+    
+    TrailingSlash -->|有| RemoveSlashRedirect[移除尾斜杠重定向]
+    TrailingSlash -->|无| IntlMiddleware
+    
+    IntlMiddleware --> Continue[继续处理请求]
+    ContinueApi --> Continue
+    DefaultLocaleRedirect --> Continue
+    RemoveSlashRedirect --> Continue
+    RedirectSignIn --> SignInPage[跳转登录页面]
+    
+    %% Positioning to reduce crossings
+    subgraph ProtectedFlow
+        ProtectedPageAuth
+        ProtectedApiAuth
+        SetClerkIdPage
+        SetClerkIdApi
+        RedirectSignIn
+    end
+    
+    subgraph ApiFlow
+        PublicApi
+        OtherApi
+        ContinueApi
+    end
+    
+    subgraph OtherFlow
+        HandleOther
+        RootPath
+        DefaultLocaleRedirect
+        TrailingSlash
+        RemoveSlashRedirect
+    end
+    
+    subgraph FinalFlow
+        IntlMiddleware
+        Continue
+        SignInPage
+    end
+    
+    style ProtectedPageAuth fill:#ffcccc
+    style ProtectedApiAuth fill:#ffcccc
+    style PublicApi fill:#ccffcc
+    style OtherApi fill:#ccffcc
 ```
 
-### 2. 用户状态判断
-
-- **已登录注册用户**: 有 `clerk_user_id`，数据库中有对应记录
-- **未登录注册用户**: 有 `fingerprint_id`，数据库中有注册状态的用户记录 → 需要登录
-- **匿名用户**: 有 `fingerprint_id`，数据库中只有匿名状态的用户记录 → 可以继续使用
-- **全新用户**: 没有任何记录 → 需要初始化（通过前端调用初始化API）
-
-## API 使用方法
-
-### 方法一：使用工具类（推荐）
-
-```typescript
-import { ApiAuthUtils } from '@/lib/auth-utils';
-
-export async function POST(request: NextRequest) {
-  try {
-    // 创建认证工具实例
-    const authUtils = new ApiAuthUtils(request);
+## Credits 模块
+```mermaid
+flowchart TD
+    CB_Start[Credits API 请求] --> CB_Auth{身份认证}
     
-    // 获取用户ID（如果需要强制认证）
-    const userId = authUtils.requireAuth(); // 未认证会抛出错误
+    CB_Auth -->|认证失败| CB_Error[返回认证错误]
+    CB_Auth -->|认证成功| CB_Route{路由类型}
     
-    // 或者检查是否已认证
-    if (!authUtils.isAuthenticated()) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    CB_Route -->|GET /balance| CB_Balance[查询积分余额]
+    CB_Route -->|GET /usage-history| CB_Usage[查询使用历史]
+    
+    CB_Balance --> CB_ReadUser[读取 users 表]
+    CB_ReadUser --> CB_ReadCredit[读取 credits 表]
+    CB_ReadCredit --> CB_CalcBalance[计算余额统计]
+    CB_CalcBalance --> CB_OptionalUsage{includeUsageHistory参数}
+    CB_OptionalUsage -->|true| CB_ReadUsage[读取 credit_usage 表]
+    CB_OptionalUsage -->|false| CB_ReturnBalance[返回余额数据]
+    CB_ReadUsage --> CB_ReturnBalance
+    
+    CB_Usage --> CB_ReadUser2[读取 users 表]
+    CB_ReadUser2 --> CB_ReadUsageFiltered[读取 credit_usage 表带过滤]
+    CB_ReadUsageFiltered --> CB_CalcSummary[计算使用统计]
+    CB_CalcSummary --> CB_ReturnUsage[返回使用历史]
+    
+    style CB_ReadUser fill:#e1f5fe
+    style CB_ReadCredit fill:#e1f5fe
+    style CB_ReadUsage fill:#e1f5fe
+    style CB_ReadUser2 fill:#e1f5fe
+    style CB_ReadUsageFiltered fill:#e1f5fe
+```
+
+## Subscriptions 模块
+```mermaid
+flowchart TD
+    SB_Start[Subscriptions API 请求] --> SB_Auth{身份认证}
+    
+    SB_Auth -->|认证失败| SB_Error[返回认证错误]
+    SB_Auth -->|认证成功| SB_Route{路由类型}
+    
+    SB_Route -->|POST /create| SB_Create[创建订阅]
+    SB_Route -->|GET /manage| SB_Manage[管理订阅]
+    SB_Route -->|GET /status| SB_Status[查询订阅状态]
+    
+    SB_Create --> SB_ReadUser[读取 users 表]
+    SB_ReadUser --> SB_ValidatePrice[验证价格配置]
+    SB_ValidatePrice --> SB_CreateCustomer[创建/获取Stripe客户]
+    SB_CreateCustomer --> SB_CreateSession[创建Stripe会话]
+    SB_CreateSession --> SB_WriteTransaction[写入 transactions 表]
+    SB_WriteTransaction --> SB_ReturnSession[返回会话信息]
+    
+    SB_Manage --> SB_ReadUser2[读取 users 表]
+    SB_ReadUser2 --> SB_ReadSubscriptions[读取 subscriptions 表]
+    SB_ReadSubscriptions --> SB_FilterActive[过滤活跃订阅]
+    SB_FilterActive --> SB_ReturnManage[返回订阅信息]
+    
+    SB_Status --> SB_ReadUser3[读取 users 表]
+    SB_ReadUser3 --> SB_ReadSubsDetail[读取 subscriptions 表]
+    SB_ReadSubsDetail --> SB_ReadCredits[读取 credits 表]
+    SB_ReadCredits --> SB_QueryStripe[查询Stripe订阅详情]
+    SB_QueryStripe --> SB_MergeData[合并数据]
+    SB_MergeData --> SB_ReturnStatus[返回完整状态]
+    
+    style SB_ReadUser fill:#e1f5fe
+    style SB_ReadUser2 fill:#e1f5fe
+    style SB_ReadUser3 fill:#e1f5fe
+    style SB_ReadSubscriptions fill:#e1f5fe
+    style SB_ReadSubsDetail fill:#e1f5fe
+    style SB_ReadCredits fill:#e1f5fe
+    style SB_WriteTransaction fill:#ffecb3
+```
+
+## Transactions 模块
+```mermaid
+flowchart TD
+    TB_Start[Transactions API 请求] --> TB_Auth{身份认证}
+    
+    TB_Auth -->|认证失败| TB_Error[返回认证错误]
+    TB_Auth -->|认证成功| TB_Route{路由类型}
+    
+    TB_Route -->|GET /history| TB_History[查询交易历史]
+    
+    TB_History --> TB_ReadUser[读取 users 表]
+    TB_ReadUser --> TB_ParseFilters[解析查询过滤条件]
+    TB_ParseFilters --> TB_ReadTransactions[读取 transactions 表带过滤]
+    TB_ReadTransactions --> TB_ProcessData[处理交易数据]
+    TB_ProcessData --> TB_CalcSummary[计算统计摘要]
+    TB_CalcSummary --> TB_ReturnHistory[返回交易历史]
+    
+    style TB_ReadUser fill:#e1f5fe
+    style TB_ReadTransactions fill:#e1f5fe
+```
+
+## Webhook-Clerk 模块
+```mermaid
+flowchart TD
+    WC_Start[Clerk Webhook 请求] --> WC_Verify{验证签名}
+    
+    WC_Verify -->|验证失败| WC_Error[返回验证错误]
+    WC_Verify -->|验证成功| WC_Event{事件类型}
+    
+    WC_Event -->|user.created| WC_Created[处理用户创建]
+    WC_Event -->|user.deleted| WC_Deleted[处理用户删除]
+    
+    WC_Created --> WC_ReadFingerprint[读取 users 表按fingerprint_id]
+    WC_ReadFingerprint --> WC_CheckEmail{检查邮箱是否存在}
+    WC_CheckEmail -->|存在| WC_UpdateClerk[更新 users 表的clerkUserId]
+    WC_CheckEmail -->|不存在| WC_CheckAnonymous{检查匿名用户}
+    WC_CheckAnonymous -->|有匿名用户| WC_Upgrade[升级匿名用户]
+    WC_CheckAnonymous -->|无匿名用户| WC_CreateUser[创建新用户]
+    
+    WC_Upgrade --> WC_WriteUser[写入 users 表]
+    WC_CreateUser --> WC_WriteUser
+    WC_WriteUser --> WC_InitCredit[写入 credits 表]
+    WC_InitCredit --> WC_RecordUsage[写入 credit_usage 表]
+    
+    WC_Deleted --> WC_ReadClerkUser[读取 users 表按clerkUserId]
+    WC_ReadClerkUser --> WC_HardDelete[硬删除用户数据]
+    
+    style WC_ReadFingerprint fill:#e1f5fe
+    style WC_ReadClerkUser fill:#e1f5fe
+    style WC_UpdateClerk fill:#ffecb3
+    style WC_WriteUser fill:#ffecb3
+    style WC_InitCredit fill:#ffecb3
+    style WC_RecordUsage fill:#ffecb3
+    style WC_HardDelete fill:#ffcdd2
+```
+
+## Webhook-Stripe 模块
+```mermaid
+flowchart TD
+    WS_Start[Stripe Webhook 请求] --> WS_Verify{验证签名}
+    
+    WS_Verify -->|验证失败| WS_Error[返回验证错误]
+    WS_Verify -->|验证成功| WS_Event{事件类型}
+    
+    WS_Event -->|checkout.session.completed| WS_CheckoutComplete[处理支付完成]
+    WS_Event -->|invoice.paid| WS_InvoicePaid[处理发票支付]
+    WS_Event -->|invoice.payment_failed| WS_PaymentFailed[处理支付失败]
+    WS_Event -->|customer.subscription.*| WS_SubEvents[处理订阅事件]
+    WS_Event -->|charge.refunded| WS_Refunded[处理退款]
+    
+    WS_CheckoutComplete --> WS_ReadTransaction[读取 transactions 表]
+    WS_ReadTransaction --> WS_UpdateTransaction[更新 transactions 表状态]
+    WS_UpdateTransaction --> WS_AllocateCredits[分配积分]
+    WS_AllocateCredits --> WS_UpdateCredits[更新 credits 表]
+    WS_UpdateCredits --> WS_RecordCredit[写入 credit_usage 表]
+    WS_RecordCredit --> WS_CheckSubscription{是否为订阅}
+    WS_CheckSubscription -->|是| WS_CreateSub[创建/更新 subscriptions 表]
+    WS_CheckSubscription -->|否| WS_Complete[处理完成]
+    WS_CreateSub --> WS_Complete
+    
+    WS_InvoicePaid --> WS_ReadSub[读取 subscriptions 表]
+    WS_ReadSub --> WS_CreateRenewal[创建续费交易记录]
+    WS_CreateRenewal --> WS_WriteRenewalTrans[写入 transactions 表]
+    WS_WriteRenewalTrans --> WS_UpdateSubPeriod[更新 subscriptions 表周期]
+    WS_UpdateSubPeriod --> WS_AllocateRenewal[分配续费积分]
+    WS_AllocateRenewal --> WS_UpdateRenewalCredits[更新 credits 表]
+    WS_UpdateRenewalCredits --> WS_RecordRenewal[写入 credit_usage 表]
+    
+    WS_PaymentFailed --> WS_ReadFailedSub[读取 subscriptions 表]
+    WS_ReadFailedSub --> WS_UpdateSubStatus[更新订阅状态为逾期]
+    WS_UpdateSubStatus --> WS_CreateFailedTrans[创建失败交易记录]
+    WS_CreateFailedTrans --> WS_WriteFailedTrans[写入 transactions 表]
+    
+    WS_SubEvents --> WS_FindSub[查找 subscriptions 表]
+    WS_FindSub --> WS_UpdateSubData[更新 subscriptions 表]
+    
+    WS_Refunded --> WS_ReadRefundTrans[读取 transactions 表]
+    WS_ReadRefundTrans --> WS_UpdateRefundStatus[更新交易状态为退款]
+    WS_UpdateRefundStatus --> WS_DeductCredits[扣除积分]
+    WS_DeductCredits --> WS_UpdateRefundCredits[更新 credits 表]
+    WS_UpdateRefundCredits --> WS_RecordDeduction[写入 credit_usage 表]
+    
+    style WS_ReadTransaction fill:#e1f5fe
+    style WS_ReadSub fill:#e1f5fe
+    style WS_ReadFailedSub fill:#e1f5fe
+    style WS_FindSub fill:#e1f5fe
+    style WS_ReadRefundTrans fill:#e1f5fe
+    style WS_UpdateTransaction fill:#ffecb3
+    style WS_UpdateCredits fill:#ffecb3
+    style WS_RecordCredit fill:#ffecb3
+    style WS_CreateSub fill:#ffecb3
+    style WS_WriteRenewalTrans fill:#ffecb3
+    style WS_UpdateSubPeriod fill:#ffecb3
+    style WS_UpdateRenewalCredits fill:#ffecb3
+    style WS_RecordRenewal fill:#ffecb3
+    style WS_UpdateSubStatus fill:#ffecb3
+    style WS_WriteFailedTrans fill:#ffecb3
+    style WS_UpdateSubData fill:#ffecb3
+    style WS_UpdateRefundStatus fill:#ffecb3
+    style WS_UpdateRefundCredits fill:#ffecb3
+    style WS_RecordDeduction fill:#ffecb3
+```
+
+## 数据表关系总览
+```mermaid
+erDiagram
+    users {
+        string userId PK
+        string email
+        string clerkUserId
+        string fingerprintId
+        string status
     }
     
-    // 获取完整认证信息
-    const authContext = authUtils.getAuthContext();
-    console.log('User info:', authContext);
-    
-    // 使用 userId 进行业务处理
-    const user = await userService.findById(userId);
-    
-    // ... 业务逻辑
-    
-  } catch (error) {
-    if (error.message === 'Authentication required') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    // 其他错误处理
-  }
-}
-```
-
-### 方法二：直接从头部获取
-
-```typescript
-export async function GET(request: NextRequest) {
-  const userId = request.headers.get('x-user-id');
-  
-  if (!userId) {
-    return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
-  }
-  
-  // 使用 userId 进行业务处理
-  const user = await userService.findById(userId);
-  // ...
-}
-```
-
-### 方法三：在服务端组件中使用
-
-```typescript
-import { getUserIdFromHeaders, getAuthContext } from '@/lib/auth-utils';
-
-export default async function DashboardPage() {
-  // 获取用户ID
-  const userId = await getUserIdFromHeaders();
-  
-  if (!userId) {
-    redirect('/sign-in');
-  }
-  
-  // 获取完整认证信息
-  const authContext = await getAuthContext();
-  
-  // 使用 userId 获取用户数据
-  const user = await userService.findById(userId);
-  const credits = await creditService.getCredits(userId);
-  
-  return (
-    <div>
-      <h1>欢迎，{user.email || '匿名用户'}</h1>
-      <p>积分余额：{credits?.balanceFree + credits?.balancePaid}</p>
-    </div>
-  );
-}
-```
-
-## 可用的请求头信息
-
-中间件会设置以下请求头供后端使用：
-
-```typescript
-// 核心用户ID（最重要）
-'x-user-id': string
-
-// 认证状态
-'x-user-authenticated': 'true' | 'false'
-'x-user-registered': 'true' | 'false' 
-'x-user-status': 'anonymous' | 'registered' | 'frozen' | 'deleted'
-
-// 辅助信息
-'x-fingerprint-id': string | null
-'x-clerk-user-id': string | null  
-'x-user-email': string | null
-```
-
-## 路由保护配置
-
-在 `middleware.ts` 中配置路由保护：
-
-```typescript
-// 需要身份认证的路由
-const protectedRoutes = createRouteMatcher([
-  '/(.*)/(dashboard|settings|profile)/(.*)',
-  '/(.*)/(subscriptions|billing)/(.*)',
-]);
-
-// 公开路由，不需要认证
-const publicRoutes = createRouteMatcher([
-  '/(.*)/(sign-in|sign-up)',
-  '/(.*)/(legal|blog)/(.*)',
-  '/(.*)/waitlist',
-  '/',
-]);
-```
-
-## 业务场景示例
-
-### 场景1：订阅创建API
-
-```typescript
-// 原来需要复杂的用户识别逻辑
-export async function POST(request: NextRequest) {
-  // ❌ 原来的复杂逻辑
-  const { userId: clerkUserId } = await auth();
-  let user;
-  
-  if (clerkUserId) {
-    user = await userService.findByClerkUserId(clerkUserId);
-  } else {
-    const fingerprintId = extractFingerprint(request);
-    user = await userService.findByFingerprintId(fingerprintId);
-  }
-  // ... 更多复杂判断
-  
-  // ✅ 现在的简单逻辑
-  const authUtils = new ApiAuthUtils(request);
-  const userId = authUtils.requireAuth();
-  const user = await userService.findById(userId);
-  
-  // 直接进行业务逻辑
-  // ...
-}
-```
-
-### 场景2：积分查询API
-
-```typescript
-export async function GET(request: NextRequest) {
-  const authUtils = new ApiAuthUtils(request);
-  const userId = authUtils.requireAuth();
-  
-  // 直接使用 userId 查询积分
-  const credits = await creditService.getCredits(userId);
-  const usage = await creditUsageService.findByUserId(userId);
-  
-  return NextResponse.json({
-    credits,
-    usage,
-  });
-}
-```
-
-### 场景3：用户状态检查
-
-```typescript
-export async function GET(request: NextRequest) {
-  const authUtils = new ApiAuthUtils(request);
-  const authContext = authUtils.getAuthContext();
-  
-  if (!authContext.isRegistered) {
-    // 匿名用户，只返回基本信息
-    return NextResponse.json({
-      userType: 'anonymous',
-      features: ['basic'],
-    });
-  }
-  
-  // 注册用户，返回完整功能
-  return NextResponse.json({
-    userType: 'registered',
-    features: ['basic', 'premium', 'subscription'],
-    email: authContext.email,
-  });
-}
-```
-
-## 错误处理
-
-```typescript
-export async function POST(request: NextRequest) {
-  try {
-    const authUtils = new ApiAuthUtils(request);
-    const userId = authUtils.requireAuth();
-    
-    // 业务逻辑...
-    
-  } catch (error) {
-    if (error.message === 'Authentication required') {
-      return NextResponse.json(
-        { error: 'Please sign in to access this resource' }, 
-        { status: 401 }
-      );
+    credits {
+        string userId PK
+        integer balanceFree
+        integer balancePaid
+        integer totalFreeLimit
+        integer totalPaidLimit
+        datetime updatedAt
     }
     
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    );
-  }
-}
+    credit_usage {
+        string id PK
+        string userId FK
+        string feature
+        string orderId
+        string creditType
+        string operationType
+        integer creditsUsed
+        datetime createdAt
+    }
+    
+    transactions {
+        string id PK
+        string userId FK
+        string orderId
+        string orderStatus
+        string paySupplier
+        string paySessionId
+        string payTransactionId
+        string priceId
+        decimal amount
+        string currency
+        string type
+        integer creditsGranted
+        datetime orderCreatedAt
+    }
+    
+    subscriptions {
+        string id PK
+        string userId FK
+        string paySubscriptionId
+        string priceId
+        string priceName
+        string status
+        integer creditsAllocated
+        datetime subPeriodStart
+        datetime subPeriodEnd
+        datetime createdAt
+    }
+    
+    users ||--|| credits : "一对一"
+    users ||--o{ credit_usage : "一对多"
+    users ||--o{ transactions : "一对多"
+    users ||--o{ subscriptions : "一对多"
+    transactions ||--o{ credit_usage : "通过orderId关联"
 ```
 
-## 迁移指南
-
-### 从旧的认证系统迁移
-
-1. **移除复杂的用户识别逻辑**
-   ```typescript
-   // ❌ 删除这些代码
-   const { userId: clerkUserId } = await auth();
-   const fingerprintId = extractFingerprint(request);
-   // ... 复杂的if-else判断
-   ```
-
-2. **使用新的工具类**
-   ```typescript
-   // ✅ 替换为简单的工具类
-   const authUtils = new ApiAuthUtils(request);
-   const userId = authUtils.requireAuth();
-   ```
-
-3. **统一使用user_id**
-   ```typescript
-   // ✅ 所有业务逻辑都使用统一的user_id
-   const user = await userService.findById(userId);
-   const credits = await creditService.getCredits(userId);
-   const subscriptions = await subscriptionService.findByUserId(userId);
-   ```
-
-## 调试和监控
-
-在开发环境中，中间件会输出详细的日志：
-
-```bash
-Authenticated user found: { clerkUserId: 'user_xxx', userId: 'uuid-xxx' }
-Set user_id in headers: uuid-xxx
-Anonymous user found: { fingerprintId: 'fp_xxx', userId: 'uuid-yyy' }
-Registered user not logged in, redirecting to sign-in
-```
-
-这样可以帮助调试认证流程中的问题。
-
-## 总结
-
-新的统一身份认证系统的优势：
-
-1. **简化API开发**: 后端只需要关心 `user_id`
-2. **统一认证逻辑**: 所有复杂的ID关系处理都在中间件层
-3. **更好的可维护性**: 认证逻辑集中管理
-4. **灵活的路由保护**: 支持不同级别的认证要求
-5. **完整的错误处理**: 统一的错误处理机制
-
-所有的API都可以专注于业务逻辑，而不需要担心复杂的用户身份识别问题！
