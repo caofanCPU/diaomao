@@ -209,11 +209,3 @@ async function handleFingerprintRequest(request: NextRequest, options: { createI
 export async function POST(request: NextRequest) {
   return handleFingerprintRequest(request, { createIfNotExists: true });
 }
-
-/**
- * 获取匿名用户信息
- * GET /api/user/anonymous/init?fingerprintId=xxx
- */
-export async function GET(request: NextRequest) {
-  return handleFingerprintRequest(request);
-}
