@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { Apilogger } from '@/services/database';
 
 // Stripe Configuration
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -58,7 +59,26 @@ export const createCheckoutSession = async (params: {
     sessionParams.customer = customerId;
   }
 
-  return await stripe.checkout.sessions.create(sessionParams);
+  // Create log record with request
+  const logId = await Apilogger.logStripeOutgoing('createCheckoutSession', params);
+  
+  try {
+    const session = await stripe.checkout.sessions.create(sessionParams);
+    
+    // Update log record with response
+    Apilogger.updateResponse(logId, {
+      session_id: session.id,
+      url: session.url
+    });
+    
+    return session;
+  } catch (error) {
+    // Update log record with error
+    Apilogger.updateResponse(logId, {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
 };
 
 // Helper function to create or retrieve customer
@@ -96,7 +116,26 @@ export const createOrGetCustomer = async (params: {
     customerParams.name = name;
   }
 
-  return await stripe.customers.create(customerParams);
+  // Create log record with request
+  const logId = await Apilogger.logStripeOutgoing('createCustomer', params);
+  
+  try {
+    const customer = await stripe.customers.create(customerParams);
+    
+    // Update log record with response
+    Apilogger.updateResponse(logId, {
+      customer_id: customer.id,
+      email: customer.email
+    });
+    
+    return customer;
+  } catch (error) {
+    // Update log record with error
+    Apilogger.updateResponse(logId, {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
 };
 
 // Helper function to update subscription
@@ -109,15 +148,34 @@ export const updateSubscription = async (params: {
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
   
-  return await stripe.subscriptions.update(subscriptionId, {
-    items: [
-      {
-        id: subscription.items.data[0].id,
-        price: priceId,
-      },
-    ],
-    proration_behavior: prorationBehavior,
-  });
+  // Create log record with request
+  const logId = await Apilogger.logStripeOutgoing('updateSubscription', params);
+  
+  try {
+    const updatedSubscription = await stripe.subscriptions.update(subscriptionId, {
+      items: [
+        {
+          id: subscription.items.data[0].id,
+          price: priceId,
+        },
+      ],
+      proration_behavior: prorationBehavior,
+    });
+    
+    // Update log record with response
+    Apilogger.updateResponse(logId, {
+      subscription_id: updatedSubscription.id,
+      status: updatedSubscription.status
+    });
+    
+    return updatedSubscription;
+  } catch (error) {
+    // Update log record with error
+    Apilogger.updateResponse(logId, {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
 };
 
 // Helper function to cancel subscription
@@ -125,11 +183,36 @@ export const cancelSubscription = async (
   subscriptionId: string,
   cancelAtPeriodEnd: boolean = true
 ): Promise<Stripe.Subscription> => {
-  if (cancelAtPeriodEnd) {
-    return await stripe.subscriptions.update(subscriptionId, {
-      cancel_at_period_end: true,
+  // Create log record with request
+  const logId = await Apilogger.logStripeOutgoing('cancelSubscription', {
+    subscriptionId,
+    cancelAtPeriodEnd
+  });
+  
+  try {
+    let result: Stripe.Subscription;
+    
+    if (cancelAtPeriodEnd) {
+      result = await stripe.subscriptions.update(subscriptionId, {
+        cancel_at_period_end: true,
+      });
+    } else {
+      result = await stripe.subscriptions.cancel(subscriptionId);
+    }
+    
+    // Update log record with response
+    Apilogger.updateResponse(logId, {
+      subscription_id: result.id,
+      status: result.status,
+      cancel_at_period_end: result.cancel_at_period_end
     });
-  } else {
-    return await stripe.subscriptions.cancel(subscriptionId);
+    
+    return result;
+  } catch (error) {
+    // Update log record with error
+    Apilogger.updateResponse(logId, {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
   }
 };

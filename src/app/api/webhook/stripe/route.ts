@@ -18,7 +18,8 @@ import {
   TransactionType,
   CreditType,
   OperationType,
-  PaySupplier
+  PaySupplier,
+  Apilogger
 } from '@/services/database';
 
 export async function POST(request: NextRequest) {
@@ -47,6 +48,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Stripe webhook received:', event.type, event.id);
+
+    // Log the incoming webhook
+    Apilogger.logStripeIncoming(`webhook.${event.type}`, {
+      event_id: event.id,
+      event_type: event.type,
+      event_data: event.data.object
+    });
 
     // Handle the event
     switch (event.type) {

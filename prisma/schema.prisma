@@ -137,3 +137,15 @@ model UserBackup {
   @@index([originalUserId], map: "idx_user_backup_original_user_id")
   @@map("user_backup")
 }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Apilog {
+  id         BigInt    @id @default(autoincrement())
+  methodName String    @map("method_name") @db.VarChar(255)
+  request    String?
+  response   String?
+  apiType    String    @map("api_type") @db.VarChar(50)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("apilog")
+}

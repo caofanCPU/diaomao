@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { Webhook } from 'svix';
-import { userService, creditService, creditUsageService } from '@/services/database';
+import { userService, creditService, creditUsageService, Apilogger } from '@/services/database';
 import { UserStatus, CreditType, OperationType } from '@/services/database';
 
 // 定义Clerk Webhook事件类型
@@ -78,6 +78,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Log the incoming webhook
+    Apilogger.logClerkIncoming(`webhook.${event.type}`, {
+      event_type: event.type,
+      clerk_user_id: event.data.id,
+      email: event.data.email_addresses?.[0]?.email_address,
+      fingerprint_id: event.data.unsafe_metadata?.fingerprint_id
+    });
 
     // 处理不同的事件类型
     const { type } = event;

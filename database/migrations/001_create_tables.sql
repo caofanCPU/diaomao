@@ -165,6 +165,23 @@ COMMENT ON TABLE user_backup IS '用户备份表，存储注销用户数据';
 -- Column Comments
 COMMENT ON COLUMN users.fingerprint_id IS '浏览器指纹ID，用于标识设备，可重复（多用户共享设备）';
 
+-- API Logs
+CREATE TABLE api_log (
+    id BIGSERIAL PRIMARY KEY,
+    method_name VARCHAR(255) NOT NULL,
+    request TEXT,
+    response TEXT,
+    api_type VARCHAR(50) NOT NULL CHECK (api_type IN ('from_clerk_in', 'to_clerk_out', 'from_stripe_in', 'to_stripe_out')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Comments
+COMMENT ON TABLE api_logs IS 'API调用日志表，记录与第三方系统的交互';
+COMMENT ON COLUMN api_logs.method_name IS '功能描述/方法名';
+COMMENT ON COLUMN api_logs.request IS '请求内容JSON';
+COMMENT ON COLUMN api_logs.response IS '响应内容JSON';
+COMMENT ON COLUMN api_logs.api_type IS 'API类型：from_clerk_in=Clerk回调，to_clerk_out=调用Clerk，from_stripe_in=Stripe回调，to_stripe_out=调用Stripe';
+
 -- Column Comments for deleted fields
 COMMENT ON COLUMN subscriptions.deleted IS '软删除标记，0=正常，1=已删除';
 COMMENT ON COLUMN transactions.deleted IS '软删除标记，0=正常，1=已删除';
