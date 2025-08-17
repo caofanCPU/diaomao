@@ -159,3 +159,41 @@ export function getProductPricing(
   return providerConfig.products[productKey].plans[billingType];
 }
 
+// 辅助函数：根据查询参数获取价格配置
+export function getPriceConfig(
+  priceId?: string,
+  plan?: string,
+  billingType?: string,
+  provider?: string
+): (EnhancePricePlan & { priceName: string; description: string; interval?: string }) | null {
+  const targetProvider = provider || moneyPriceConfig.activeProvider;
+  const providerConfig = moneyPriceConfig.paymentProviders[targetProvider];
+  
+  if (!providerConfig) {
+    return null;
+  }
+
+  // 遍历所有产品和计划来查找匹配的配置
+  for (const [productKey, product] of Object.entries(providerConfig.products)) {
+    for (const [billingKey, planConfig] of Object.entries(product.plans)) {
+      // 根据提供的参数进行匹配
+      const matches = [
+        !priceId || planConfig.priceId === priceId,
+        !plan || productKey === plan,
+        !billingType || billingKey === billingType,
+      ].every(Boolean);
+
+      if (matches) {
+        return {
+          ...planConfig,
+          priceName: `${product.name} ${billingKey}`,
+          description: `${product.name.charAt(0).toUpperCase() + product.name.slice(1)} plan - ${billingKey} billing`,
+          interval: billingKey === 'yearly' ? 'year' : 'month',
+        };
+      }
+    }
+  }
+
+  return null;
+}
+

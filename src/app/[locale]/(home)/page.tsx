@@ -7,6 +7,7 @@ import { moneyPriceConfig } from '@/lib/money-price-config';
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const isDev = process.env.NODE_ENV !== 'production';
   const { locale } = await params;
+  
   return (
     <>
       {isDev && <FingerprintStatus />}
@@ -15,7 +16,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <Features locale={locale} />
       <Tips locale={locale} />
       <FAQ locale={locale} />
-      <MoneyPrice locale={locale} config={moneyPriceConfig} />
+      <MoneyPrice locale={locale} config={moneyPriceConfig} upgradeApiEndpoint="/api/subscriptions/create"/>
       <SeoContent locale={locale} />
       <CTA locale={locale} />
     </>

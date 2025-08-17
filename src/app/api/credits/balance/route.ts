@@ -3,7 +3,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { 
-  userService,
   creditService,
   creditUsageService 
 } from '@/services/database';
@@ -20,18 +19,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const includeUsageHistory = searchParams.get('includeUsageHistory') === 'true';
 
-    // 使用统一认证工具获取用户ID
+    // 使用统一认证工具获取用户信息（避免重复查询）
     const authUtils = new ApiAuthUtils(request);
-    const userId = authUtils.requireAuth();
-    
-    // 根据用户ID查询用户信息
-    const user = await userService.findByUserId(userId);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
+    const { user } = await authUtils.requireAuthWithUser();
 
     // Get user's credits
     const credits = await creditService.getCredit(user.userId);

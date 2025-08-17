@@ -3,7 +3,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { 
-  userService,
   creditUsageService,
   CreditType,
   OperationType 
@@ -44,18 +43,9 @@ export async function GET(request: NextRequest) {
       endDate,
     });
 
-    // 使用统一认证工具获取用户ID
+    // 使用统一认证工具获取用户信息（避免重复查询）
     const authUtils = new ApiAuthUtils(request);
-    const userId = authUtils.requireAuth();
-    
-    // 根据用户ID查询用户信息
-    const user = await userService.findByUserId(userId);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
+    const { user } = await authUtils.requireAuthWithUser();
 
     // Build filters
     const filters: any = {};

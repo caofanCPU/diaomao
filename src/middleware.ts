@@ -1,6 +1,5 @@
 import { appConfig } from "@/lib/appConfig";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { handleUserAuth, setAuthHeaders } from "@/lib/auth-utils";
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -13,21 +12,20 @@ const intlMiddleware = createMiddleware({
 
 // 需要身份认证的路由（页面路由）
 const protectedPageRoutes = createRouteMatcher([
-  '/(.*)/(dashboard|settings|profile)/(.*)',
-  '/(.*)/(subscriptions|billing)/(.*)',
+  // '/(.*)/(dashboard|settings|profile|billing)/(.*)',
 ]);
 
 // 需要身份认证的API路由
 const protectedApiRoutes = createRouteMatcher([
   // 订阅相关API
-  '/api/subscriptions/(.*)',
+  '/api/subscriptions(.*)',
   // 积分相关API  
-  '/api/credits/(.*)',
+  '/api/subscriptions(.*)',
   // 交易记录API
-  '/api/transactions/(.*)',
+  '/api/subscriptions(.*)',
   // 用户资料API
-  '/api/user/profile/(.*)',
-  '/api/user/settings/(.*)',
+  '/api/subscriptions(.*)',
+  '/api/subscriptions(.*)',
 ]);
 
 // 免认证的API路由（webhook、匿名用户初始化等）
@@ -40,46 +38,43 @@ const publicApiRoutes = createRouteMatcher([
   '/api/user/anonymous/init',
   // 健康检查等
   '/api/health',
+  '/api/legal',
+  '/api/blog'
 ]);
 
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   // 1. 处理需要认证的页面路由
   if (protectedPageRoutes(req)) {
-    const { userId, shouldRedirect, authContext } = await handleUserAuth(auth, req);
+    const { userId: clerkUserId } = await auth();
     
-    if (shouldRedirect) {
+    if (!clerkUserId) {
       const { redirectToSignIn } = await auth();
       return redirectToSignIn();
     }
     
-    if (userId && authContext) {
-      const response = intlMiddleware(req);
-      if (response) {
-        setAuthHeaders(response, authContext);
-        console.log('Set user_id for protected page:', userId);
-      }
-      return response;
+    // 对于页面路由，只设置 Clerk 用户信息
+    const response = intlMiddleware(req);
+    if (response) {
+      response.headers.set('x-clerk-user-id', clerkUserId);
+      console.log('Set clerk_user_id for protected page:', clerkUserId);
     }
+    return response;
   }
   
   // 2. 处理需要认证的API路由
   if (protectedApiRoutes(req)) {
-    const { userId, shouldRedirect, authContext } = await handleUserAuth(auth, req);
+    const { userId: clerkUserId, redirectToSignIn } = await auth();
     
-    if (shouldRedirect || !userId) {
-      return NextResponse.json(
-        { error: 'Authentication required' }, 
-        { status: 401 }
-      );
+    if (!clerkUserId) {
+      return redirectToSignIn();
     }
     
-    if (authContext) {
-      const response = NextResponse.next();
-      setAuthHeaders(response, authContext);
-      console.log('Set user_id for protected API:', userId);
-      return response;
-    }
+    // 只设置 Clerk 用户信息，让 API 自己处理数据库查询
+    const response = NextResponse.next();
+    response.headers.set('x-clerk-user-id', clerkUserId);
+    console.log('Set clerk_user_id for protected API:', clerkUserId);
+    return response;
   }
   
   // 3. 免认证的API路由，直接通过
@@ -88,7 +83,13 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.next();
   }
 
-  // 4. 其他路由使用默认的国际化中间件处理
+  // 4. 所有其他API路由都直接通过，不添加语言前缀
+  if (req.nextUrl.pathname.startsWith('/api/')) {
+    console.log('Other API route, no internationalization:', req.nextUrl.pathname);
+    return NextResponse.next();
+  }
+
+  // 5. 其他路由使用默认的国际化中间件处理
   
   // handle root path to default locale permanent redirect
   if (req.nextUrl.pathname === '/') {
@@ -109,7 +110,9 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params, skip api and trpc
-    "/((?!api|trpc|_next|sitemap.xml?|robots.txt?|[^?]*.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Skip Next.js internals and all static files, but include API routes
+    "/((?!_next|sitemap.xml?|robots.txt?|[^?]*.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Include API routes explicitly
+    "/api/(.*)",
   ],
 };

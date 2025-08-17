@@ -5,69 +5,6 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-07-30.basil',
 });
 
-// Stripe Price Configuration
-// 根据设计文档定义的价格计划
-export const STRIPE_PRICES = {
-  // 基础版计划 (￥70/月, 100积分)
-  BASIC_MONTHLY: {
-    priceId: process.env.STRIPE_PRICE_BASIC_MONTHLY!,
-    priceName: '基础版',
-    amount: 70,
-    currency: 'cny',
-    interval: 'month',
-    credits: 100,
-    description: '基础版计划 - 每月100积分',
-  },
-  
-  // 专业版计划 (￥140/月, 250积分)  
-  PRO_MONTHLY: {
-    priceId: process.env.STRIPE_PRICE_PRO_MONTHLY!,
-    priceName: '专业版',
-    amount: 140,
-    currency: 'cny',
-    interval: 'month',
-    credits: 250,
-    description: '专业版计划 - 每月250积分',
-  },
-  
-  // 企业版计划 (￥350/月, 1000积分)
-  ENTERPRISE_MONTHLY: {
-    priceId: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY!,
-    priceName: '企业版',
-    amount: 350,
-    currency: 'cny', 
-    interval: 'month',
-    credits: 1000,
-    description: '企业版计划 - 每月1000积分',
-  },
-  
-  // 一次性积分包
-  CREDITS_100: {
-    priceId: process.env.STRIPE_PRICE_CREDITS_100!,
-    priceName: '100积分包',
-    amount: 35,
-    currency: 'cny',
-    interval: null,
-    credits: 100,
-    description: '一次性购买100积分',
-  },
-  
-  CREDITS_500: {
-    priceId: process.env.STRIPE_PRICE_CREDITS_500!,
-    priceName: '500积分包', 
-    amount: 150,
-    currency: 'cny',
-    interval: null,
-    credits: 500,
-    description: '一次性购买500积分',
-  },
-} as const;
-
-// Price ID to Price Config mapping
-export const getPriceConfig = (priceId: string) => {
-  return Object.values(STRIPE_PRICES).find(config => config.priceId === priceId);
-};
-
 // Webhook Configuration
 export const STRIPE_WEBHOOK_EVENTS = [
   'checkout.session.completed',
@@ -114,11 +51,7 @@ export const createCheckoutSession = async (params: {
     metadata,
   };
 
-  // 如果是一次性支付（积分包），改为payment模式
-  const priceConfig = getPriceConfig(priceId);
-  if (priceConfig && !priceConfig.interval) {
-    sessionParams.mode = 'payment';
-  }
+  // TODO: 暂时不支持一次性付费方式
 
   // 如果有客户ID，添加到session
   if (customerId) {

@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { stripe } from '@/lib/stripe-config';
 import { 
-  userService,
   subscriptionService,
   creditService,
   SubscriptionStatus 
@@ -13,21 +12,15 @@ import { ApiAuthUtils } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {
+    // 使用统一认证工具获取用户信息（避免重复查询）
     const authUtils = new ApiAuthUtils(request);
-    const userId = authUtils.requireAuth(); // 自动处理三种ID关系，未认证会抛出错误
-    const user = await userService.findByUserId(userId)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
+    const { user } = await authUtils.requireAuthWithUser();
 
     // Get user's subscriptions
-    const subscriptions = await subscriptionService.findByUserId(userId);
+    const subscriptions = await subscriptionService.findByUserId(user.userId);
     
     // Get user's credits
-    const credits = await creditService.getCredit(userId);
+    const credits = await creditService.getCredit(user.userId);
 
     // Process subscription data
     const subscriptionData = await Promise.all(
