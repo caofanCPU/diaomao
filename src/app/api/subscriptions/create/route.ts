@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
 
     // Default URLs if not provided
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const defaultSuccessUrl = `${baseUrl}#pricing`;
-    const defaultCancelUrl = `${baseUrl}#pricing`;
+    const defaultSuccessUrl = `${baseUrl}`;
+    const defaultCancelUrl = `${baseUrl}`;
 
     // Create Stripe checkout session
     const session = await createCheckoutSession({

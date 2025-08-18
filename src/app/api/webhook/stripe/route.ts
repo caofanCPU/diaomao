@@ -26,25 +26,39 @@ export async function POST(request: NextRequest) {
   try {
     // Get the raw body
     const body = await request.text();
-    const headersList = await headers();
-    const signature = headersList.get('stripe-signature');
 
-    if (!signature) {
-      console.error('Missing Stripe signature');
-      return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
-    }
-
-    // Validate webhook signature
     let event: Stripe.Event;
-    try {
-      event = validateStripeWebhook(
-        body,
-        signature,
-        process.env.STRIPE_WEBHOOK_SECRET!
-      );
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err);
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+
+    // 开发环境跳过签名校验
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode: skipping Stripe webhook signature verification');
+      try {
+        event = JSON.parse(body) as Stripe.Event;
+      } catch (err) {
+        console.error('Failed to parse Stripe webhook body:', err);
+        return NextResponse.json({ error: 'Invalid webhook body' }, { status: 400 });
+      }
+    } else {
+      // 生产环境进行签名校验
+      const headersList = await headers();
+      const signature = headersList.get('stripe-signature');
+
+      if (!signature) {
+        console.error('Missing Stripe signature');
+        return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
+      }
+
+      // Validate webhook signature
+      try {
+        event = validateStripeWebhook(
+          body,
+          signature,
+          process.env.STRIPE_WEBHOOK_SECRET!
+        );
+      } catch (err) {
+        console.error('Webhook signature verification failed:', err);
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+      }
     }
 
     console.log('Stripe webhook received:', event.type, event.id);
