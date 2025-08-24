@@ -19,7 +19,7 @@
     "dev": "next dev --turbopack",
     "build": "pnpm generate-blog-index && next build",
     "build:dev": "pnpm generate-blog-index && next build",
-    "build:prod": "next build",
+    "build:prod": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "deep-clean": "dev-scripts deep-clean",
