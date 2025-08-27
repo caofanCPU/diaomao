@@ -142,6 +142,7 @@ export class TransactionService {
       ...additionalData,
     };
 
+    console.log(`orderId: ${orderId}\n updateData: ${JSON.stringify(updateData)}`)
     return await prisma.transaction.update({
       where: { orderId },
       data: updateData,

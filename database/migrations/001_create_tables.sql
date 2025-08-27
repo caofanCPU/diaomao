@@ -168,6 +168,7 @@ COMMENT ON COLUMN users.fingerprint_id IS '浏览器指纹ID，用于标识设�
 CREATE TABLE apilog (
     id BIGSERIAL PRIMARY KEY,
     method_name VARCHAR(255) NOT NULL,
+    summary TEXT,
     request TEXT,
     response TEXT,
     api_type VARCHAR(50) NOT NULL CHECK (api_type IN ('from_clerk_in', 'to_clerk_out', 'from_stripe_in', 'to_stripe_out')),
@@ -177,6 +178,7 @@ CREATE TABLE apilog (
 -- Comments
 COMMENT ON TABLE apilog IS 'API调用日志表，记录与第三方系统的交互';
 COMMENT ON COLUMN apilog.method_name IS '功能描述/方法名';
+COMMENT ON COLUMN apilog.summary IS '摘要信息';
 COMMENT ON COLUMN apilog.request IS '请求内容JSON';
 COMMENT ON COLUMN apilog.response IS '响应内容JSON';
 COMMENT ON COLUMN apilog.api_type IS 'API类型：from_clerk_in=Clerk回调，to_clerk_out=调用Clerk，from_stripe_in=Stripe回调，to_stripe_out=调用Stripe';

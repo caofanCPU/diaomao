@@ -95,28 +95,51 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the incoming webhook
-    Apilogger.logClerkIncoming(`webhook.${event.type}`, {
+    const logId = await Apilogger.logClerkIncoming(`webhook.${event.type}`, {
       event_type: event.type,
       clerk_user_id: event.data.id,
       email: event.data.email_addresses?.[0]?.email_address,
       fingerprint_id: event.data.unsafe_metadata?.fingerprint_id
-    });
+    }, event);
 
-    // 处理不同的事件类型
-    const { type } = event;
+    let processingResult = { success: true, message: 'Event processed successfully' };
 
-    switch (type) {
-      case 'user.created':
-        await handleUserCreated(event);
-        break;
-      case 'user.deleted':
-        await handleUserDeleted(event);
-        break;
-      default:
-        console.log(`Unhandled event type: ${type}`);
+    try {
+      // 处理不同的事件类型
+      const { type } = event;
+
+      switch (type) {
+        case 'user.created':
+          await handleUserCreated(event);
+          break;
+        case 'user.deleted':
+          await handleUserDeleted(event);
+          break;
+        default:
+          console.log(`Unhandled event type: ${type}`);
+          processingResult = { success: false, message: `Unhandled event type: ${type}` };
+      }
+
+      // Update response in log
+      Apilogger.updateResponse(logId, processingResult);
+
+      return NextResponse.json({ received: true });
+    } catch (error) {
+      console.error('Webhook processing error:', error);
+      
+      // Update error response in log
+      const errorResult = { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      };
+      Apilogger.updateResponse(logId, errorResult);
+      
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json({ received: true });
   } catch (error) {
     console.error('Webhook processing error:', error);
     return NextResponse.json(

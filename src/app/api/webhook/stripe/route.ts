@@ -23,6 +23,8 @@ import {
 } from '@/services/database';
 
 export async function POST(request: NextRequest) {
+  let logId: string | null = null;
+  
   try {
     // Get the raw body
     const body = await request.text();
@@ -64,11 +66,12 @@ export async function POST(request: NextRequest) {
     console.log('Stripe webhook received:', event.type, event.id);
 
     // Log the incoming webhook
-    Apilogger.logStripeIncoming(`webhook.${event.type}`, {
+    logId = await Apilogger.logStripeIncoming(`webhook.${event.type}`, {
       event_id: event.id,
-      event_type: event.type,
-      event_data: event.data.object
-    });
+      event_type: event.type
+    }, event);
+
+    let processingResult = { success: true, message: 'Event processed successfully' };
 
     // Handle the event
     switch (event.type) {
@@ -102,12 +105,25 @@ export async function POST(request: NextRequest) {
 
       default:
         console.log(`Unhandled event type: ${event.type}`);
+        processingResult = { success: false, message: `Unhandled event type: ${event.type}` };
     }
+
+    // Update response in log
+    Apilogger.updateResponse(logId, processingResult);
 
     return NextResponse.json({ received: true });
 
   } catch (error) {
     console.error('Stripe webhook error:', error);
+    
+    // Update error response in log
+    const errorResult = { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    };
+    Apilogger.updateResponse(logId, errorResult);
+    
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }
@@ -216,6 +232,9 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     const orderId = `order_renewal_${Date.now()}_${Math.random().toString(36).substring(2)}`;
     // const priceConfig = getPriceConfig(subscription.priceId || ''); // Not used
     
+    const periodStart = (stripeSubscription as any).current_period_start;
+    const periodEnd = (stripeSubscription as any).current_period_end;
+    
     const renewalTransaction = await transactionService.createTransaction({
       userId: user.userId,
       orderId,
@@ -229,8 +248,8 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       currency: invoice.currency,
       type: TransactionType.SUBSCRIPTION,
       creditsGranted: subscription.creditsAllocated,
-      subPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
-      subPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
+      subPeriodStart: periodStart ? new Date(periodStart * 1000) : new Date(),
+      subPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : undefined,
       orderDetail: `Subscription renewal: ${subscription.priceName}`,
       paidAt: new Date(invoice.status_transitions.paid_at! * 1000),
       payUpdatedAt: new Date(),
@@ -238,8 +257,8 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
     // Update subscription period
     await subscriptionService.updateSubscription(subscription.id, {
-      subPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
-      subPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
+      subPeriodStart: periodStart ? new Date(periodStart * 1000) : new Date(),
+      subPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : undefined,
       status: SubscriptionStatus.ACTIVE,
       updatedAt: new Date(),
     });
@@ -323,10 +342,13 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     // But we can update subscription details here if needed
     const dbSubscription = await subscriptionService.findByPaySubscriptionId(subscription.id);
     if (dbSubscription) {
+      const periodStart = (subscription as any).current_period_start;
+      const periodEnd = (subscription as any).current_period_end;
+      
       await subscriptionService.updateSubscription(dbSubscription.id, {
         status: subscription.status as SubscriptionStatus,
-        subPeriodStart: new Date((subscription as any).current_period_start * 1000),
-        subPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+        subPeriodStart: periodStart ? new Date(periodStart * 1000) : new Date(),
+        subPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : undefined,
         updatedAt: new Date(),
       });
     }
@@ -349,10 +371,13 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     }
 
     // Update subscription status and period
+    const periodStart = (subscription as any).current_period_start;
+    const periodEnd = (subscription as any).current_period_end;
+    
     await subscriptionService.updateSubscription(dbSubscription.id, {
       status: subscription.status as SubscriptionStatus,
-      subPeriodStart: new Date((subscription as any).current_period_start * 1000),
-      subPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+      subPeriodStart: periodStart ? new Date(periodStart * 1000) : new Date(),
+      subPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : undefined,
       updatedAt: new Date(),
     });
 
@@ -536,14 +561,20 @@ async function processSubscriptionFromSession(
     
     if (existingSubscription) {
       // Update existing subscription
+      const periodStart = (stripeSubscription as any).current_period_start;
+      const periodEnd = (stripeSubscription as any).current_period_end;
+      
       await subscriptionService.updateSubscription(existingSubscription.id, {
         status: stripeSubscription.status as SubscriptionStatus,
-        subPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
-        subPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
+        subPeriodStart: periodStart ? new Date(periodStart * 1000) : new Date(),
+        subPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : undefined,
         updatedAt: new Date(),
       });
     } else {
       // Create new subscription record
+      const periodStart = (stripeSubscription as any).current_period_start;
+      const periodEnd = (stripeSubscription as any).current_period_end;
+      
       await subscriptionService.createSubscription({
         userId,
         paySubscriptionId: stripeSubscription.id,
@@ -551,8 +582,8 @@ async function processSubscriptionFromSession(
         priceName: transaction.priceName,
         status: stripeSubscription.status as SubscriptionStatus,
         creditsAllocated: transaction.creditsGranted || 0,
-        subPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
-        subPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
+        subPeriodStart: periodStart ? new Date(periodStart * 1000) : new Date(),
+        subPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : undefined,
       });
     }
 

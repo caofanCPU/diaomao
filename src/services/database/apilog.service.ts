@@ -10,6 +10,7 @@ export type ApiType = 'from_clerk_in' | 'to_clerk_out' | 'from_stripe_in' | 'to_
 export interface CreateApiLogData {
   methodName: string;
   request?: any;
+  summary?: any;
   apiType: ApiType;
 }
 
@@ -20,6 +21,7 @@ export class ApilogService {
       data: {
         methodName: data.methodName,
         request: data.request ? JSON.stringify(data.request) : null,
+        summary: data.summary ? JSON.stringify(data.summary) : null,
         apiType: data.apiType,
       },
     });
@@ -130,34 +132,38 @@ export class Apilogger {
     }
   }
 
-  static logClerkIncoming(methodName: string, data?: any): void {
-    this.createLogAsync({
+  static async logClerkIncoming(methodName: string, summary?: any, originalRequest?: any): Promise<string | null> {
+    return await this.createLogAsync({
       methodName,
-      request: data,
+      request: originalRequest,
+      summary,
       apiType: 'from_clerk_in',
     });
   }
 
-  static async logClerkOutgoing(methodName: string, request?: any): Promise<string | null> {
+  static async logClerkOutgoing(methodName: string, request?: any, summary?: any): Promise<string | null> {
     return await this.createLogAsync({
       methodName,
       request,
+      summary,
       apiType: 'to_clerk_out',
     });
   }
 
-  static logStripeIncoming(methodName: string, data?: any): void {
-    this.createLogAsync({
+  static async logStripeIncoming(methodName: string, summary?: any, originalRequest?: any): Promise<string | null> {
+    return await this.createLogAsync({
       methodName,
-      request: data,
+      request: originalRequest,
+      summary,
       apiType: 'from_stripe_in',
     });
   }
 
-  static async logStripeOutgoing(methodName: string, request?: any): Promise<string | null> {
+  static async logStripeOutgoing(methodName: string, request?: any, summary?: any): Promise<string | null> {
     return await this.createLogAsync({
       methodName,
       request,
+      summary,
       apiType: 'to_stripe_out',
     });
   }
