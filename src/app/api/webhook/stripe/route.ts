@@ -137,8 +137,21 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     }
 
     // Update transaction with payment details
+    // For subscriptions, use invoice ID as transaction ID; for one-time payments, use payment_intent
+    let payTransactionId: string;
+    
+    if (session.mode === 'subscription') {
+      payTransactionId = session.invoice as string;
+    } else if (session.payment_intent && typeof session.payment_intent === 'string') {
+      payTransactionId = session.payment_intent;
+    } else {
+      // Fallback to order ID to ensure we always have a transaction ID
+      payTransactionId = transaction.orderId;
+      console.warn('Using order ID as fallback transaction ID for session:', session.id);
+    }
+    
     await transactionService.updateStatus(transaction.orderId, OrderStatus.SUCCESS, {
-      payTransactionId: session.payment_intent as string,
+      payTransactionId,
       payCreatedAt: new Date(),
       paidDetail: JSON.stringify({
         customer_details: session.customer_details,
