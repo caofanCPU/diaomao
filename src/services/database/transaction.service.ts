@@ -136,7 +136,6 @@ export class TransactionService {
       paidDetail?: string;
       payUpdatedAt?: Date;
       payCreatedAt?: Date;
-      payDetail?: string;
     }
   ): Promise<Transaction> {
     const updateData: Prisma.TransactionUpdateInput = {
