@@ -88,7 +88,6 @@ model Transaction {
   paidAt            DateTime? @map("paid_at") @db.Timestamptz(6)
   paidEmail         String?   @map("paid_email") @db.VarChar(255)
   paidDetail        String?   @map("paid_detail")
-  payCreatedAt      DateTime? @map("pay_created_at") @db.Timestamptz(6)
   payUpdatedAt      DateTime? @map("pay_updated_at") @db.Timestamptz(6)
   deleted           Int       @default(0)
   user              User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)

@@ -79,7 +79,6 @@ export async function POST(request: NextRequest) {
       orderStatus: OrderStatus.CREATED,
       paySupplier: PaySupplier.STRIPE,
       paySessionId: session.id,
-      payCreatedAt: new Date(),
       priceId,
       priceName: priceConfig.priceName,
       amount: priceConfig.amount,

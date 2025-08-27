@@ -81,7 +81,6 @@ CREATE TABLE transactions (
     paid_at TIMESTAMP WITH TIME ZONE,
     paid_email VARCHAR(255),
     paid_detail TEXT,
-    pay_created_at TIMESTAMP WITH TIME ZONE,
     pay_updated_at TIMESTAMP WITH TIME ZONE,
     deleted INTEGER DEFAULT 0 NOT NULL CHECK (deleted IN (0, 1))
 );

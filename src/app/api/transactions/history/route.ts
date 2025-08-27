@@ -97,7 +97,6 @@ export async function GET(request: NextRequest) {
       paidEmail: transaction.paidEmail,
       
       // Metadata
-      payCreatedAt: transaction.payCreatedAt,
       payUpdatedAt: transaction.payUpdatedAt,
       
       // Generate status display info

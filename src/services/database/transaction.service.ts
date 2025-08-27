@@ -29,7 +29,7 @@ export class TransactionService {
     subPeriodEnd?: Date;
     orderDetail?: string;
     orderExpiredAt?: Date;
-    payCreatedAt?: Date;
+    paidAt?: Date;
     payUpdatedAt?: Date;
   }): Promise<Transaction> {
     return await prisma.transaction.create({
@@ -54,7 +54,7 @@ export class TransactionService {
         subPeriodStart: data.subPeriodStart,
         subPeriodEnd: data.subPeriodEnd,
         orderDetail: data.orderDetail,
-        payCreatedAt: data.payCreatedAt,
+        paidAt: data.paidAt,
         payUpdatedAt: data.payUpdatedAt,
       },
     });
@@ -135,7 +135,6 @@ export class TransactionService {
       paidEmail?: string;
       paidDetail?: string;
       payUpdatedAt?: Date;
-      payCreatedAt?: Date;
     }
   ): Promise<Transaction> {
     const updateData: Prisma.TransactionUpdateInput = {

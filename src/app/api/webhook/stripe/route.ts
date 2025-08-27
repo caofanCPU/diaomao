@@ -152,7 +152,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     
     await transactionService.updateStatus(transaction.orderId, OrderStatus.SUCCESS, {
       payTransactionId,
-      payCreatedAt: new Date(),
+      paidAt: new Date(),
       paidDetail: JSON.stringify({
         customer_details: session.customer_details,
         payment_status: session.payment_status,
@@ -232,7 +232,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       subPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
       subPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
       orderDetail: `Subscription renewal: ${subscription.priceName}`,
-      payCreatedAt: new Date(invoice.status_transitions.paid_at! * 1000),
+      paidAt: new Date(invoice.status_transitions.paid_at! * 1000),
       payUpdatedAt: new Date(),
     });
 
@@ -303,7 +303,6 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
       currency: invoice.currency,
       type: TransactionType.SUBSCRIPTION,
       orderDetail: `Subscription payment failed: ${subscription?.priceName}`,
-      payCreatedAt: new Date(invoice.created * 1000),
       payUpdatedAt: new Date(),
     });
 
