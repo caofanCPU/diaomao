@@ -140,7 +140,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     await transactionService.updateStatus(transaction.orderId, OrderStatus.SUCCESS, {
       payTransactionId: session.payment_intent as string,
       payCreatedAt: new Date(),
-      payDetail: JSON.stringify({
+      paidDetail: JSON.stringify({
         customer_details: session.customer_details,
         payment_status: session.payment_status,
         total_details: session.total_details,
