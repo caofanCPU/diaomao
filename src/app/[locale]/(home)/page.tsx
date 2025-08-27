@@ -6,11 +6,12 @@ import { moneyPriceConfig } from '@/lib/money-price-config';
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const isDev = process.env.NODE_ENV !== 'production';
+  const forceShow = process.env.SHOW_FINGERPRINT_STATUS === 'true'
   const { locale } = await params;
   
   return (
     <>
-      {isDev && <FingerprintStatus />}
+      { (forceShow || isDev) && <FingerprintStatus />}
       <Hero locale={locale} />
       <Usage locale={locale} />
       <Features locale={locale} />
