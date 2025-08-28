@@ -6,6 +6,45 @@
 
 ## 数据库初始化
 
+### 0. Schema问题
+
+```
+有几个工具可以帮你自动生成第一版的驼峰schema：
+
+  1. prisma-case-format (推荐)
+
+  # 安装
+  npm install -D prisma-case-format
+
+  # 先正常拉取蛇形schema
+  npx prisma db pull
+
+  # 然后转换为驼峰
+  npx prisma-case-format --file prisma/schema.prisma
+
+  2. prisma-schema-transformer
+
+  npm install -D prisma-schema-transformer
+  npx prisma-schema-transformer --camelCase
+
+  3. 自定义脚本方案
+
+  创建一个转换脚本，在每次db pull后自动运行：
+
+  # package.json scripts
+  "db-pull-camel": "prisma db pull && prisma-case-format --file prisma/schema.prisma"
+
+  4. Prisma Studio + 导出
+
+  虽然不直接支持，但可以用来验证结构。
+
+  最佳工作流：
+  1. npx prisma init
+  2. npx prisma db pull (得到蛇形)
+  3. npx prisma-case-format --file prisma/schema.prisma (转为驼峰)
+  4. 以后用npx prisma db pull就会保持驼峰格式
+```
+
 ### 1. 创建数据库
 
 * psql -U your_username -c "CREATE DATABASE diaomao;"
