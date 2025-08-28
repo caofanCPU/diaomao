@@ -8,149 +8,144 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model apilog {
-  id          BigInt    @id @default(autoincrement())
-  method_name String    @db.VarChar(255)
-  summary     String?
-  request     String?
-  response    String?
-  api_type    String    @db.VarChar(50)
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-}
+model User {
+  id            BigInt         @id @default(autoincrement())
+  userId        String         @unique @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
+  fingerprintId String?        @map("fingerprint_id") @db.VarChar(255)
+  clerkUserId   String?        @unique @map("clerk_user_id") @db.VarChar(255)
+  email         String?        @db.VarChar(255)
+  status        String         @default("anonymous") @db.VarChar(20)
+  createdAt     DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime?      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  creditUsage   CreditUsage[]
+  credits       Credit?
+  subscriptions Subscription[]
+  transactions  Transaction[]
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model credit_usage {
-  id             BigInt    @id @default(autoincrement())
-  user_id        String    @db.Uuid
-  feature        String?   @db.VarChar(255)
-  order_id       String?   @db.VarChar(255)
-  credit_type    String    @db.VarChar(10)
-  operation_type String    @db.VarChar(20)
-  credits_used   Int
-  created_at     DateTime? @default(now()) @db.Timestamptz(6)
-  deleted        Int       @default(0)
-  users          users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([credit_type], map: "idx_credit_usage_credit_type")
-  @@index([operation_type], map: "idx_credit_usage_operation_type")
-  @@index([order_id], map: "idx_credit_usage_order_id")
-  @@index([user_id], map: "idx_credit_usage_user_id")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model credits {
-  id               BigInt    @id @default(autoincrement())
-  user_id          String    @unique @db.Uuid
-  balance_free     Int       @default(0)
-  total_free_limit Int       @default(0)
-  balance_paid     Int       @default(0)
-  total_paid_limit Int       @default(0)
-  created_at       DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
-  users            users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([user_id], map: "idx_credits_user_id")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model subscriptions {
-  id                  BigInt    @id @default(autoincrement())
-  user_id             String    @db.Uuid
-  pay_subscription_id String?   @db.VarChar(255)
-  price_id            String?   @db.VarChar(255)
-  price_name          String?   @db.VarChar(255)
-  status              String    @default("incomplete") @db.VarChar(20)
-  credits_allocated   Int       @default(0)
-  sub_period_start    DateTime? @db.Timestamptz(6)
-  sub_period_end      DateTime? @db.Timestamptz(6)
-  created_at          DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime? @default(now()) @db.Timestamptz(6)
-  deleted             Int       @default(0)
-  users               users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([pay_subscription_id], map: "idx_subscriptions_pay_subscription_id")
-  @@index([user_id], map: "idx_subscriptions_user_id")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model transactions {
-  id                  BigInt    @id @default(autoincrement())
-  user_id             String    @db.Uuid
-  order_id            String    @unique @db.VarChar(255)
-  order_status        String    @default("created") @db.VarChar(20)
-  order_created_at    DateTime? @default(now()) @db.Timestamptz(6)
-  order_expired_at    DateTime? @db.Timestamptz(6)
-  order_updated_at    DateTime? @default(now()) @db.Timestamptz(6)
-  pay_supplier        String?   @db.VarChar(50)
-  pay_transaction_id  String?   @unique @db.VarChar(255)
-  pay_subscription_id String?   @db.VarChar(255)
-  pay_session_id      String?   @db.VarChar(255)
-  pay_invoice_id      String?   @db.VarChar(255)
-  price_id            String?   @db.VarChar(255)
-  price_name          String?   @db.VarChar(255)
-  sub_interval_count  Int?
-  sub_cycle_anchor    DateTime? @db.Timestamptz(6)
-  amount              Decimal?  @db.Decimal(10, 2)
-  currency            String?   @db.VarChar(10)
-  type                String?   @db.VarChar(20)
-  credits_granted     Int?      @default(0)
-  sub_period_start    DateTime? @db.Timestamptz(6)
-  sub_period_end      DateTime? @db.Timestamptz(6)
-  order_detail        String?
-  paid_at             DateTime? @db.Timestamptz(6)
-  paid_email          String?   @db.VarChar(255)
-  paid_detail         String?
-  pay_updated_at      DateTime? @db.Timestamptz(6)
-  deleted             Int       @default(0)
-  users               users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([order_id], map: "idx_transactions_order_id")
-  @@index([order_status], map: "idx_transactions_order_status")
-  @@index([pay_subscription_id], map: "idx_transactions_pay_subscription_id")
-  @@index([user_id], map: "idx_transactions_user_id")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model user_backup {
-  id               BigInt    @id @default(autoincrement())
-  original_user_id String    @db.Uuid
-  fingerprint_id   String?   @db.VarChar(255)
-  clerk_user_id    String?   @db.VarChar(255)
-  email            String?   @db.VarChar(255)
-  status           String?   @db.VarChar(50)
-  backup_data      Json?
-  deleted_at       DateTime? @default(now()) @db.Timestamptz(6)
-  created_at       DateTime? @default(now()) @db.Timestamptz(6)
-  deleted          Int       @default(0)
-
-  @@index([clerk_user_id], map: "idx_user_backup_clerk_user_id")
-  @@index([email], map: "idx_user_backup_email")
-  @@index([fingerprint_id], map: "idx_user_backup_fingerprint_id")
-  @@index([original_user_id], map: "idx_user_backup_original_user_id")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model users {
-  id             BigInt          @id @default(autoincrement())
-  user_id        String          @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  fingerprint_id String?         @db.VarChar(255)
-  clerk_user_id  String?         @unique @db.VarChar(255)
-  email          String?         @db.VarChar(255)
-  status         String          @default("anonymous") @db.VarChar(20)
-  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
-  credit_usage   credit_usage[]
-  credits        credits?
-  subscriptions  subscriptions[]
-  transactions   transactions[]
-
-  @@index([fingerprint_id], map: "idx_users_fingerprint_id")
   @@index([status], map: "idx_users_status")
+  @@index([fingerprintId], map: "idx_users_fingerprint_id")
+  @@map("users")
+}
+
+model Subscription {
+  id                BigInt    @id @default(autoincrement())
+  userId            String    @map("user_id") @db.Uuid
+  paySubscriptionId String?   @map("pay_subscription_id") @db.VarChar(255)
+  priceId           String?   @map("price_id") @db.VarChar(255)
+  priceName         String?   @map("price_name") @db.VarChar(255)
+  status            String    @default("incomplete") @db.VarChar(20)
+  creditsAllocated  Int       @default(0) @map("credits_allocated")
+  subPeriodStart    DateTime? @map("sub_period_start") @db.Timestamptz(6)
+  subPeriodEnd      DateTime? @map("sub_period_end") @db.Timestamptz(6)
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deleted           Int       @default(0)
+  user              User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([paySubscriptionId], map: "idx_subscriptions_pay_subscription_id")
+  @@index([userId], map: "idx_subscriptions_user_id")
+  @@map("subscriptions")
+}
+
+model Credit {
+  id             BigInt    @id @default(autoincrement())
+  userId         String    @unique @map("user_id") @db.Uuid
+  balanceFree    Int       @default(0) @map("balance_free")
+  totalFreeLimit Int       @default(0) @map("total_free_limit")
+  balancePaid    Int       @default(0) @map("balance_paid")
+  totalPaidLimit Int       @default(0) @map("total_paid_limit")
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user           User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId], map: "idx_credits_user_id")
+  @@map("credits")
+}
+
+model Transaction {
+  id                BigInt    @id @default(autoincrement())
+  userId            String    @map("user_id") @db.Uuid
+  orderId           String    @unique @map("order_id") @db.VarChar(255)
+  orderStatus       String    @default("created") @map("order_status") @db.VarChar(20)
+  orderCreatedAt    DateTime? @default(now()) @map("order_created_at") @db.Timestamptz(6)
+  orderExpiredAt    DateTime? @map("order_expired_at") @db.Timestamptz(6)
+  orderUpdatedAt    DateTime? @default(now()) @updatedAt @map("order_updated_at") @db.Timestamptz(6)
+  paySupplier       String?   @map("pay_supplier") @db.VarChar(50)
+  payTransactionId  String?   @unique @map("pay_transaction_id") @db.VarChar(255)
+  paySubscriptionId String?   @map("pay_subscription_id") @db.VarChar(255)
+  paySessionId      String?   @map("pay_session_id") @db.VarChar(255)
+  payInvoiceId      String?   @map("pay_invoice_id") @db.VarChar(255)
+  priceId           String?   @map("price_id") @db.VarChar(255)
+  priceName         String?   @map("price_name") @db.VarChar(255)
+  subIntervalCount  Int?      @map("sub_interval_count")
+  subCycleAnchor    DateTime? @map("sub_cycle_anchor") @db.Timestamptz(6)
+  amount            Decimal?  @db.Decimal(10, 2)
+  currency          String?   @db.VarChar(10)
+  type              String?   @db.VarChar(20)
+  creditsGranted    Int?      @default(0) @map("credits_granted")
+  subPeriodStart    DateTime? @map("sub_period_start") @db.Timestamptz(6)
+  subPeriodEnd      DateTime? @map("sub_period_end") @db.Timestamptz(6)
+  orderDetail       String?   @map("order_detail")
+  paidAt            DateTime? @map("paid_at") @db.Timestamptz(6)
+  paidEmail         String?   @map("paid_email") @db.VarChar(255)
+  paidDetail        String?   @map("paid_detail")
+  payUpdatedAt      DateTime? @map("pay_updated_at") @db.Timestamptz(6)
+  deleted           Int       @default(0)
+  user              User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([orderId], map: "idx_transactions_order_id")
+  @@index([orderStatus], map: "idx_transactions_order_status")
+  @@index([paySubscriptionId], map: "idx_transactions_pay_subscription_id")
+  @@index([userId], map: "idx_transactions_user_id")
+  @@map("transactions")
+}
+
+model CreditUsage {
+  id            BigInt    @id @default(autoincrement())
+  userId        String    @map("user_id") @db.Uuid
+  feature       String?   @db.VarChar(255)
+  orderId       String?   @map("order_id") @db.VarChar(255)
+  creditType    String    @map("credit_type") @db.VarChar(10)
+  operationType String    @map("operation_type") @db.VarChar(20)
+  creditsUsed   Int       @map("credits_used")
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  deleted       Int       @default(0)
+  user          User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([creditType], map: "idx_credit_usage_credit_type")
+  @@index([operationType], map: "idx_credit_usage_operation_type")
+  @@index([orderId], map: "idx_credit_usage_order_id")
+  @@index([userId], map: "idx_credit_usage_user_id")
+  @@map("credit_usage")
+}
+
+model UserBackup {
+  id             BigInt    @id @default(autoincrement())
+  originalUserId String    @map("original_user_id") @db.Uuid
+  fingerprintId  String?   @map("fingerprint_id") @db.VarChar(255)
+  clerkUserId    String?   @map("clerk_user_id") @db.VarChar(255)
+  email          String?   @db.VarChar(255)
+  status         String?   @db.VarChar(50)
+  backupData     Json?     @map("backup_data")
+  deletedAt      DateTime? @default(now()) @map("deleted_at") @db.Timestamptz(6)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  deleted        Int       @default(0)
+
+  @@index([clerkUserId], map: "idx_user_backup_clerk_user_id")
+  @@index([email], map: "idx_user_backup_email")
+  @@index([fingerprintId], map: "idx_user_backup_fingerprint_id")
+  @@index([originalUserId], map: "idx_user_backup_original_user_id")
+  @@map("user_backup")
+}
+
+model Apilog {
+  id         BigInt    @id @default(autoincrement())
+  methodName String    @map("method_name") @db.VarChar(255)
+  summary    String?
+  request    String?
+  response   String?
+  apiType    String    @map("api_type") @db.VarChar(50)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("apilog")
 }

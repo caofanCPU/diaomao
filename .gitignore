@@ -132,3 +132,5 @@ dist
 .source/index.ts
 .source/source.config.mjs
 
+
+/generated/prisma
