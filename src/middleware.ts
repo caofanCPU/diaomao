@@ -1,3 +1,8 @@
+// Fix BigInt serialization issue globally
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 import { appConfig } from "@/lib/appConfig";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import createMiddleware from 'next-intl/middleware';
