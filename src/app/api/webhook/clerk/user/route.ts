@@ -1,3 +1,9 @@
+// Fix BigInt serialization issue
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { Webhook } from 'svix';

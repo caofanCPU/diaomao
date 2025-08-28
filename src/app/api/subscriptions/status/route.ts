@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+// Fix BigInt serialization issue
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { stripe } from '@/lib/stripe-config';
