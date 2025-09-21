@@ -60,6 +60,136 @@
   这种设计确保了从支付到订阅管理的完整流程覆盖。
 
 
+## checkout.session.completed
+
+```json
+{
+  "id": "evt_1RxHxtGaouLfVOpULBZ13qu3",
+  "object": "event",
+  "api_version": "2025-07-30.basil",
+  "created": 1755480865,
+  "data": {
+    "object": {
+      "id": "cs_test_a1Xsxf4nY21vBzIPJWXDIg4MjcztRPIzdQva2PXUN9L11KcCZF0pf1exsf",
+      "object": "checkout.session",
+      "adaptive_pricing": {
+        "enabled": false
+      },
+      "after_expiration": null,
+      "allow_promotion_codes": null,
+      "amount_subtotal": 19200,
+      "amount_total": 19200,
+      "automatic_tax": {
+        "enabled": false,
+        "liability": null,
+        "provider": null,
+        "status": null
+      },
+      "billing_address_collection": null,
+      "cancel_url": "http://localhost:3000",
+      "client_reference_id": "e4c56c8c-7bab-4ad1-a210-df683817bbdf",
+      "client_secret": null,
+      "collected_information": {
+        "shipping_details": null
+      },
+      "consent": null,
+      "consent_collection": null,
+      "created": 1755480704,
+      "currency": "usd",
+      "currency_conversion": null,
+      "custom_fields": [],
+      "custom_text": {
+        "after_submit": null,
+        "shipping_address": null,
+        "submit": null,
+        "terms_of_service_acceptance": null
+      },
+      "customer": "cus_SsllV761J0q08n",
+      "customer_creation": null,
+      "customer_details": {
+        "address": {
+          "city": null,
+          "country": "HK",
+          "line1": null,
+          "line2": null,
+          "postal_code": null,
+          "state": null
+        },
+        "email": "xyb5to0zcy@gmail.com",
+        "name": "xyb5to0zcy",
+        "phone": null,
+        "tax_exempt": "none",
+        "tax_ids": []
+      },
+      "customer_email": null,
+      "discounts": [],
+      "expires_at": 1755567104,
+      "invoice": "in_1RxHxSGaouLfVOpUyWFwGR1y",
+      "invoice_creation": null,
+      "livemode": false,
+      "locale": null,
+      "metadata": {
+        "user_id": "e4c56c8c-7bab-4ad1-a210-df683817bbdf",
+        "order_id": "order_1755480703892_wp2738k89d",
+        "credits_granted": "3000",
+        "price_name": "ultra yearly"
+      },
+      "mode": "subscription",
+      "origin_context": null,
+      "payment_intent": null,
+      "payment_link": null,
+      "payment_method_collection": "always",
+      "payment_method_configuration_details": null,
+      "payment_method_options": {
+        "card": {
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card"
+      ],
+      "payment_status": "paid",
+      "permissions": null,
+      "phone_number_collection": {
+        "enabled": false
+      },
+      "recovered_from": null,
+      "saved_payment_method_options": {
+        "allow_redisplay_filters": [
+          "always"
+        ],
+        "payment_method_remove": "disabled",
+        "payment_method_save": null
+      },
+      "setup_intent": null,
+      "shipping_address_collection": null,
+      "shipping_cost": null,
+      "shipping_options": [],
+      "status": "complete",
+      "submit_type": null,
+      "subscription": "sub_1RxHxrGaouLfVOpUpfTWqbjM",
+      "success_url": "http://localhost:3000",
+      "total_details": {
+        "amount_discount": 0,
+        "amount_shipping": 0,
+        "amount_tax": 0
+      },
+      "ui_mode": "hosted",
+      "url": null,
+      "wallet_options": null
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "checkout.session.completed"
+}
+
+```
+
 ## invoice.paid
 
 ```json
@@ -237,136 +367,6 @@
   },
   "type": "invoice.paid"
 }
-```
-
-## checkout.session.completed
-
-```json
-{
-  "id": "evt_1RxHxtGaouLfVOpULBZ13qu3",
-  "object": "event",
-  "api_version": "2025-07-30.basil",
-  "created": 1755480865,
-  "data": {
-    "object": {
-      "id": "cs_test_a1Xsxf4nY21vBzIPJWXDIg4MjcztRPIzdQva2PXUN9L11KcCZF0pf1exsf",
-      "object": "checkout.session",
-      "adaptive_pricing": {
-        "enabled": false
-      },
-      "after_expiration": null,
-      "allow_promotion_codes": null,
-      "amount_subtotal": 19200,
-      "amount_total": 19200,
-      "automatic_tax": {
-        "enabled": false,
-        "liability": null,
-        "provider": null,
-        "status": null
-      },
-      "billing_address_collection": null,
-      "cancel_url": "http://localhost:3000",
-      "client_reference_id": "e4c56c8c-7bab-4ad1-a210-df683817bbdf",
-      "client_secret": null,
-      "collected_information": {
-        "shipping_details": null
-      },
-      "consent": null,
-      "consent_collection": null,
-      "created": 1755480704,
-      "currency": "usd",
-      "currency_conversion": null,
-      "custom_fields": [],
-      "custom_text": {
-        "after_submit": null,
-        "shipping_address": null,
-        "submit": null,
-        "terms_of_service_acceptance": null
-      },
-      "customer": "cus_SsllV761J0q08n",
-      "customer_creation": null,
-      "customer_details": {
-        "address": {
-          "city": null,
-          "country": "HK",
-          "line1": null,
-          "line2": null,
-          "postal_code": null,
-          "state": null
-        },
-        "email": "xyb5to0zcy@gmail.com",
-        "name": "xyb5to0zcy",
-        "phone": null,
-        "tax_exempt": "none",
-        "tax_ids": []
-      },
-      "customer_email": null,
-      "discounts": [],
-      "expires_at": 1755567104,
-      "invoice": "in_1RxHxSGaouLfVOpUyWFwGR1y",
-      "invoice_creation": null,
-      "livemode": false,
-      "locale": null,
-      "metadata": {
-        "user_id": "e4c56c8c-7bab-4ad1-a210-df683817bbdf",
-        "order_id": "order_1755480703892_wp2738k89d",
-        "credits_granted": "3000",
-        "price_name": "ultra yearly"
-      },
-      "mode": "subscription",
-      "origin_context": null,
-      "payment_intent": null,
-      "payment_link": null,
-      "payment_method_collection": "always",
-      "payment_method_configuration_details": null,
-      "payment_method_options": {
-        "card": {
-          "request_three_d_secure": "automatic"
-        }
-      },
-      "payment_method_types": [
-        "card"
-      ],
-      "payment_status": "paid",
-      "permissions": null,
-      "phone_number_collection": {
-        "enabled": false
-      },
-      "recovered_from": null,
-      "saved_payment_method_options": {
-        "allow_redisplay_filters": [
-          "always"
-        ],
-        "payment_method_remove": "disabled",
-        "payment_method_save": null
-      },
-      "setup_intent": null,
-      "shipping_address_collection": null,
-      "shipping_cost": null,
-      "shipping_options": [],
-      "status": "complete",
-      "submit_type": null,
-      "subscription": "sub_1RxHxrGaouLfVOpUpfTWqbjM",
-      "success_url": "http://localhost:3000",
-      "total_details": {
-        "amount_discount": 0,
-        "amount_shipping": 0,
-        "amount_tax": 0
-      },
-      "ui_mode": "hosted",
-      "url": null,
-      "wallet_options": null
-    }
-  },
-  "livemode": false,
-  "pending_webhooks": 1,
-  "request": {
-    "id": null,
-    "idempotency_key": null
-  },
-  "type": "checkout.session.completed"
-}
-
 ```
 
 ## customer.subscription.created

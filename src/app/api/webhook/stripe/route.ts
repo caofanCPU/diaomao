@@ -135,6 +135,10 @@ export async function POST(request: NextRequest) {
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   try {
     console.log('Processing checkout.session.completed:', session.id);
+    if(session.status !== 'complete') {
+      console.log(`Checkout session [${session.id}] status is [${session.status}], not complete, skipping!`);
+      return;
+    }
 
     const userId = session.client_reference_id;
     const sessionId = session.id;
@@ -205,15 +209,17 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   try {
     console.log('Processing invoice.paid:', invoice.id);
 
-    if (!(invoice as any).subscription) {
+    // Check if invoice is associated with subscription
+    if (!invoice.parent || invoice.parent.type !== 'subscription_details' || !invoice.parent.subscription_details?.subscription) {
       console.log('Invoice not associated with subscription, skipping');
       return;
     }
 
-    // Get subscription details
-    const stripeSubscription = await stripe.subscriptions.retrieve((invoice as any).subscription as string);
+    // Get subscription ID from the correct path
+    const subscriptionId = invoice.parent.subscription_details.subscription as string;
+    const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
     const customerId = invoice.customer as string;
-    
+
     // Find user by customer ID or subscription ID
     const user = await findUserByStripeData(customerId, stripeSubscription.id);
     if (!user) {
@@ -230,10 +236,22 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
     // Create transaction record for renewal
     const orderId = `order_renewal_${Date.now()}_${Math.random().toString(36).substring(2)}`;
-    // const priceConfig = getPriceConfig(subscription.priceId || ''); // Not used
-    
-    const periodStart = (stripeSubscription as any).current_period_start;
-    const periodEnd = (stripeSubscription as any).current_period_end;
+
+    // Get period information from invoice lines (first line item)
+    let periodStart: number | undefined;
+    let periodEnd: number | undefined;
+
+    if (invoice.lines?.data && invoice.lines.data.length > 0) {
+      const firstLineItem = invoice.lines.data[0];
+      periodStart = firstLineItem.period?.start;
+      periodEnd = firstLineItem.period?.end;
+    }
+
+    // Fallback to subscription period if not available in lines
+    if (!periodStart || !periodEnd) {
+      periodStart = (stripeSubscription as any).current_period_start;
+      periodEnd = (stripeSubscription as any).current_period_end;
+    }
     
     const renewalTransaction = await transactionService.createTransaction({
       userId: user.userId,
@@ -286,11 +304,15 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   try {
     console.log('Processing invoice.payment_failed:', invoice.id);
 
-    if (!(invoice as any).subscription) {
+    // Check if invoice is associated with subscription
+    if (!invoice.parent || invoice.parent.type !== 'subscription_details' || !invoice.parent.subscription_details?.subscription) {
+      console.log('Invoice not associated with subscription, skipping');
       return;
     }
 
-    const stripeSubscription = await stripe.subscriptions.retrieve((invoice as any).subscription as string);
+    // Get subscription ID from the correct path
+    const subscriptionId = invoice.parent.subscription_details.subscription as string;
+    const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
     const user = await findUserByStripeData(invoice.customer as string, stripeSubscription.id);
     
     if (!user) {

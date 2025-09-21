@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 2.8.0
+
+### Minor Changes
+
+- fix(money): v2.0
+
 ## 2.7.0
 
 ### Minor Changes
