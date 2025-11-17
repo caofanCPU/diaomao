@@ -1,5 +1,20 @@
 # @windrun-huaiin/diaomao
 
+## 10.0.0
+
+### Major Changes
+
+- chore(upgrade): update project configuration and dependencies
+
+  - Added new entries to .gitignore for Claude and Codex files.
+  - Updated TypeScript configuration to use 'react-jsx' for JSX transformation.
+  - Modified package.json to update patched dependencies for fumadocs-ui and fumadocs-core.
+  - Added new SQL schema for user and API log tables.
+  - Removed outdated database migration files and documentation.
+  - Refactored middleware to proxy for BigInt serialization.
+  - Introduced new aggregate services for billing and user management.
+  - Updated various components and services to improve functionality and maintainability.
+
 ## 2.8.0
 
 ### Minor Changes
