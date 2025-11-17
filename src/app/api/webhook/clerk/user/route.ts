@@ -4,11 +4,12 @@
   return this.toString();
 };
 
-import { NextRequest, NextResponse } from 'next/server';
+import { userAggregateService } from '@/agg/index';
+import { UserStatus } from '@/db/constants';
+import { Apilogger, userService } from '@/db/index';
 import { headers } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
-import { userService, creditService, creditUsageService, Apilogger } from '@/services/database';
-import { UserStatus, CreditType, OperationType } from '@/services/database';
 
 // 定义Clerk Webhook事件类型
 interface ClerkWebhookEvent {
@@ -17,6 +18,9 @@ interface ClerkWebhookEvent {
     email_addresses?: Array<{
       email_address: string;
     }>;
+    first_name?: string;
+    last_name?: string,
+    username?: string,
     unsafe_metadata?: {
       user_id?: string;
       fingerprint_id?: string;
@@ -35,10 +39,6 @@ interface ClerkWebhookEvent {
   timestamp: number;
   type: 'user.created' | 'user.deleted';
 }
-
-// 免费积分配置
-const FREE_CREDITS_AMOUNT = 50;
-
 export async function POST(request: NextRequest) {
   try {
     // 获取原始请求体
@@ -101,8 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the incoming webhook
-    const logId = await Apilogger.logClerkIncoming(`webhook.${event.type}`, {
-      event_type: event.type,
+    const logId = await Apilogger.logClerkIncoming(`${event.type}`, {
       clerk_user_id: event.data.id,
       email: event.data.email_addresses?.[0]?.email_address,
       fingerprint_id: event.data.unsafe_metadata?.fingerprint_id
@@ -123,7 +122,7 @@ export async function POST(request: NextRequest) {
           break;
         default:
           console.log(`Unhandled event type: ${type}`);
-          processingResult = { success: false, message: `Unhandled event type: ${type}` };
+          processingResult = { success: false, message: `Unhandled event type: ${type}`};
       }
 
       // Update response in log
@@ -164,11 +163,15 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
   const email = data.email_addresses?.[0]?.email_address;
   const unsafeMetadata = data.unsafe_metadata;
   const fingerprintId = unsafeMetadata?.fingerprint_id;
+  const userName = data.username 
+    ? data.username 
+    : [data.first_name, data.last_name].filter(Boolean).join(' ') || undefined;
 
   console.log('Processing user.created event:', {
     clerkUserId,
     email,
-    fingerprintId
+    fingerprintId,
+    userName
   });
 
   // 检查必要参数
@@ -183,7 +186,7 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
   }
 
   try {
-    // 按fingerprintId查询该设备的所有用户记录
+    // 按fingerprintId查询该设备的所有未注销过的用户记录，注销过的记录相当于是死数据
     const existingUsers = await userService.findListByFingerprintId(fingerprintId);
     if (!existingUsers || existingUsers.length === 0) {
       console.error('Invalid fingerprintId in webhook data, process flow error');
@@ -195,7 +198,7 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
     if (sameEmailUser) {
       // 同一账号，检查是否需要更新clerkUserId
       if (sameEmailUser.clerkUserId !== clerkUserId) {
-        await userService.updateUser(sameEmailUser.userId, { clerkUserId });
+        await userService.updateUser(sameEmailUser.userId, { clerkUserId, userName: userName, status: UserStatus.REGISTERED });
         console.log(`Updated clerkUserId for user ${sameEmailUser.userId}`);
       } else {
         console.log(`User with email ${email} already exists, skipping duplicate message`);
@@ -204,21 +207,16 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
     }
 
     // 查找匿名用户（email为空且clerkUserId为空）
-    const anonymousUser = existingUsers.find(user => 
-      !user.email && !user.clerkUserId && user.status === UserStatus.ANONYMOUS
-    );
+    const anonymousUser = existingUsers.find(user => !user.email && !user.clerkUserId && user.status === UserStatus.ANONYMOUS );
     if (anonymousUser) {
       // 匿名用户升级
-      await userService.upgradeToRegistered(anonymousUser.userId, {
-        email,
-        clerkUserId
-      });
+      await userAggregateService.upgradeToRegistered(anonymousUser.userId, email, clerkUserId, userName);
       console.log(`Successfully upgraded anonymous user ${anonymousUser.userId} to registered user`);
       return;
     }
 
     // 同设备新账号，创建新用户
-    await createNewRegisteredUser(clerkUserId, email, fingerprintId);
+    await userAggregateService.createNewRegisteredUser(clerkUserId, email, fingerprintId, userName);
     console.log(`Created new user for device ${fingerprintId} with email ${email}`);
     
   } catch (error) {
@@ -237,56 +235,15 @@ async function handleUserDeleted(event: ClerkWebhookEvent) {
   console.log('Processing user.deleted event:', { clerkUserId });
 
   try {
-    // 根据clerkUserId查找用户
-    const user = await userService.findByClerkUserId(clerkUserId);
-    
-    if (!user) {
-      console.log(`User with clerkUserId ${clerkUserId} not found`);
-      return;
+    const userId = await userAggregateService.handleUserUnregister(clerkUserId);
+    if (!userId) {
+      console.warn(`User not found, skipping oprate , (clerkUserId: ${clerkUserId})`);
+    } else {
+      console.log(`Successfully deleted user ${userId} , (clerkUserId: ${clerkUserId})`);
     }
-
-    // 备份用户数据并硬删除用户
-    await userService.hardDeleteUser(user.userId);
-    
-    console.log(`Successfully deleted user ${user.userId} (clerkUserId: ${clerkUserId})`);
-    
   } catch (error) {
     console.error('Error handling user.deleted event:', error);
     throw error;
   }
 }
 
-/**
- * 创建新的注册用户
- */
-async function createNewRegisteredUser(
-  clerkUserId: string, 
-  email?: string, 
-  fingerprintId?: string
-) {
-  // 创建新用户
-  const newUser = await userService.createUser({
-    clerkUserId,
-    email,
-    fingerprintId,
-    status: UserStatus.REGISTERED
-  });
-
-  // 初始化积分记录
-  await creditService.initializeCredit(
-    newUser.userId,
-    FREE_CREDITS_AMOUNT,
-    0 // 注册时只给免费积分，付费积分为0
-  );
-
-  // 记录免费积分充值记录
-  await creditUsageService.recordCreditOperation({
-    userId: newUser.userId,
-    feature: 'user_registration',
-    creditType: CreditType.FREE,
-    operationType: OperationType.RECHARGE,
-    creditsUsed: FREE_CREDITS_AMOUNT
-  });
-
-  console.log(`Created new registered user ${newUser.userId} with ${FREE_CREDITS_AMOUNT} free credits`);
-}

@@ -1,13 +1,10 @@
 import { baseOptions, homeNavLinks, levelNavLinks } from '@/app/[locale]/layout.config';
-import { GoToTop } from '@windrun-huaiin/third-ui/main';
-import { Footer } from '@windrun-huaiin/third-ui/main/server';
-import { HomeLayout, type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
-import { FumaBannerSuit } from '@windrun-huaiin/third-ui/fuma/server';
-import type { ReactNode } from 'react';
 import { showBanner } from '@/lib/appConfig';
-import { ClerkProviderClient } from '@windrun-huaiin/third-ui/clerk';
-import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
 import { fingerprintConfig } from '@/lib/fingerprint-config';
+import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
+import { CustomHomeLayout } from '@windrun-huaiin/third-ui/fuma/base';
+import { type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
+import type { ReactNode } from 'react';
 
 async function homeOptions(locale: string): Promise<HomeLayoutProps> {
   return {
@@ -28,28 +25,28 @@ export default async function Layout({
 }) {
   const { locale } = await params;
   const customeOptions = await homeOptions(locale);
-  
+  const homeLayoutOptions: HomeLayoutProps = {
+    ...customeOptions,
+    searchToggle: {
+      enabled: false,
+    },
+    themeSwitch: {
+      enabled: true,
+      mode: 'light-dark-system',
+    },
+  };
+
   return (
-    <ClerkProviderClient locale={locale}>
-      <FingerprintProvider config={fingerprintConfig}>
-        <HomeLayout
-          {...customeOptions}
-          searchToggle={{
-            enabled: false,
-          }}
-          themeSwitch={{
-            enabled: true,
-            mode: 'light-dark-system',
-          }}
-          className={`min-h-screen flex flex-col bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300 ${showBanner ? 'pt-30 has-banner' : 'pt-15 no-banner'}`}
-          >
-          <FumaBannerSuit locale={locale} showBanner={showBanner}/>
-          {children}
-          <Footer locale={locale} />
-          <GoToTop />
-        </HomeLayout>
+    <FingerprintProvider config={fingerprintConfig}>
+      <CustomHomeLayout
+        locale={locale}
+        options={homeLayoutOptions}
+        showBanner={showBanner}
+        floatingNav={true}
+      >
+        {children}
+      </CustomHomeLayout>
       </FingerprintProvider>
-    </ClerkProviderClient>
   );
 }
 

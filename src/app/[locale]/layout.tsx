@@ -2,9 +2,10 @@ import { appConfig, generatedLocales } from "@/lib/appConfig";
 import { montserrat } from '@/lib/fonts';
 import { GoogleAnalyticsScript, MicrosoftClarityScript } from "@windrun-huaiin/base-ui/components/server";
 import { cn } from '@windrun-huaiin/lib/utils';
-import { fumaI18nCn } from '@windrun-huaiin/third-ui/lib/server';
+import { getFumaTranslations } from '@windrun-huaiin/third-ui/fuma/server';
 import { NProgressBar } from '@windrun-huaiin/third-ui/main';
-import { RootProvider } from "fumadocs-ui/provider";
+import { RootProvider } from "fumadocs-ui/provider/next";
+import { ClerkProviderClient } from '@windrun-huaiin/third-ui/clerk';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import React from 'react';
@@ -51,20 +52,24 @@ export default async function RootLayout({
   const { locale } = await paramsPromise;
   setRequestLocale(locale);
   const messages = await getMessages();
+  const fumaTranslations = await getFumaTranslations(locale);
+  console.log(appConfig.i18n);
   return (
     <html lang={locale} suppressHydrationWarning>
       <NextIntlClientProvider messages={messages}>
         <body className={cn(montserrat.className)}>
           <NProgressBar />
-          <RootProvider
-            i18n={{
-              locale: locale,
-              locales: generatedLocales,
-              translations: { fumaI18nCn }[locale],
-            }}
-          >
-            {children}
-          </RootProvider>
+          <ClerkProviderClient locale={locale}>
+            <RootProvider
+              i18n={{
+                locale: locale,
+                locales: generatedLocales,
+                translations: fumaTranslations,
+              }}
+            >
+              {children}
+            </RootProvider>
+          </ClerkProviderClient>
         </body>
         <GoogleAnalyticsScript />
         <MicrosoftClarityScript />

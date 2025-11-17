@@ -15,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -24,16 +24,32 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [ "./src/*" ],
-      "@/db/*": [ "./src/services/database/*" ],
-      ".source/*": ["./.source/*"],
+      "@/*": [
+        "./src/*"
+      ],
+      "@/.source": [
+        ".source"
+      ],
+      "@/db/*": [
+        "./src/services/database/*"
+      ],
+      "@/agg/*": [
+        "./src/services/aggregate/*"
+      ],
+      "@/context/*": [
+        "./src/services/context/*"
+      ]
     }
   },
   "include": [
     "apps/zhengchengyan/next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "eslint.config.mjs"]
+  "exclude": [
+    "node_modules",
+    "eslint.config.mjs"
+  ]
 }

@@ -1,8 +1,7 @@
 
 import { Hero } from "@/components/hero";
 import { FingerprintStatus } from "@windrun-huaiin/third-ui/fingerprint";
-import { CTA, FAQ, Features, MoneyPrice, SeoContent, Tips, Usage } from "@windrun-huaiin/third-ui/main/server";
-import { moneyPriceConfig } from '@/lib/money-price-config';
+import { CTA, FAQ, Features, SeoContent, Tips, Usage } from "@windrun-huaiin/third-ui/main/server";
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const isDev = process.env.NODE_ENV !== 'production';
@@ -17,7 +16,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <Features locale={locale} />
       <Tips locale={locale} />
       <FAQ locale={locale} />
-      <MoneyPrice locale={locale} config={moneyPriceConfig} upgradeApiEndpoint="/api/subscriptions/create"/>
       <SeoContent locale={locale} />
       <CTA locale={locale} />
     </>

@@ -5,15 +5,21 @@
   return this.toString();
 };
 
-import { NextRequest, NextResponse } from 'next/server';
-import { userService, creditService, creditUsageService, User, Credit, Subscription} from '@/services/database';
-import { subscriptionService } from '@/services/database/subscription.service';
-import { UserStatus, CreditType, OperationType } from '@/services/database';
+import { userAggregateService } from '@/agg/index';
+import { XCredit, XSubscription, XUser } from '@windrun-huaiin/third-ui/fingerprint';
 import { extractFingerprintFromNextRequest } from '@windrun-huaiin/third-ui/fingerprint/server';
-import { XUser, XCredit, XSubscription } from '@windrun-huaiin/third-ui/fingerprint';
+import { auth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  applyUserMockContext,
+  fetchLatestUserContextByFingerprintId,
+  fetchUserContextByClerkUserId,
+  mapCreditToXCredit,
+  mapSubscriptionToXSubscription,
+  mapUserToXUser,
+  type UserContextEntities,
+} from '@/context/user-context-service';
 
-// 免费积分配置
-const FREE_CREDITS_AMOUNT = 50;
 
 // ==================== 类型定义 ====================
 
@@ -35,61 +41,25 @@ interface ErrorResponse {
 
 // ==================== 工具函数 ====================
 
-/** 创建用户信息对象 */
-function createUserInfo(user: User): XUser {
-  return {
-    userId: user.userId,
-    fingerprintId: user.fingerprintId || '',
-    clerkUserId: user.clerkUserId || '',
-    email: user.email || '',
-    status: user.status,
-    createdAt: user.createdAt?.toISOString() || '',
-  };
-}
-
-/** 创建积分信息对象 */
-function createCreditsInfo(credit: Credit): XCredit {
-  return {
-    balanceFree: credit.balanceFree,
-    balancePaid: credit.balancePaid,
-    totalBalance: credit.balanceFree + credit.balancePaid,
-  };
-}
-
-/** 创建订阅信息对象 */
-function createSubscriptionInfo(subscription: Subscription): XSubscription {
-  return {
-    id: subscription.id,
-    userId: subscription.userId || '',
-    paySubscriptionId: subscription.paySubscriptionId || '',
-    priceId: subscription.priceId || '',
-    priceName: subscription.priceName || '',
-    status: subscription.status || '',
-    creditsAllocated: subscription.creditsAllocated,
-    subPeriodStart: subscription.subPeriodStart?.toISOString() || '',
-    subPeriodEnd: subscription.subPeriodEnd?.toISOString() || '' 
-  };
-}
-
 /** 创建成功响应对象 */
-function createSuccessResponse(
-  user: User,
-  credit: Credit | null,
-  subscription: Subscription | null,
-  isNewUser: boolean,
-  options: {
+function createSuccessResponse(params: {
+  entities: UserContextEntities;
+  isNewUser: boolean;
+  options?: {
     totalUsersOnDevice?: number;
     hasAnonymousUser?: boolean;
-  } = {}
-): XUserResponse {
-  return {
-    success: true,
-    xUser: createUserInfo(user),
-    xCredit: credit ? createCreditsInfo(credit) : null,
-    xSubscription: subscription ? createSubscriptionInfo(subscription) : null,
-    isNewUser,
-    ...options,
   };
+}): XUserResponse {
+  const response: XUserResponse = {
+    success: true,
+    xUser: mapUserToXUser(params.entities.user),
+    xCredit: params.entities.credit ? mapCreditToXCredit(params.entities.credit) : null,
+    xSubscription: mapSubscriptionToXSubscription(params.entities.subscription),
+    isNewUser: params.isNewUser,
+    ...params.options,
+  };
+
+  return applyUserMockContext(response);
 }
 
 /** 创建错误响应 */
@@ -98,72 +68,73 @@ function createErrorResponse(message: string, status = 400): NextResponse {
   return NextResponse.json(errorResponse, { status });
 }
 
+
 /**
  * 根据fingerprint_id查询用户并返回响应数据
- * 共用逻辑：优先返回匿名用户，只有匿名用户才返回积分数据
  */
-async function getUserByFingerprintId(fingerprintId: string): Promise<XUserResponse | null> {
-  const existingUsers = await userService.findListByFingerprintId(fingerprintId);
-  
-  if (existingUsers.length === 0) {
+async function getUserByClerkId(clerkUserId: string): Promise<XUserResponse | null> {
+  const entities = await fetchUserContextByClerkUserId(clerkUserId);
+  if (!entities) {
     return null;
   }
 
-  // 查找最新的匿名用户
-  const anonymousUsers = existingUsers.filter(u => u.status === UserStatus.ANONYMOUS);
-  const latestAnonymousUser = anonymousUsers.length > 0 ? anonymousUsers[0] : null;
-  
-  if (latestAnonymousUser) {
-    // 找到匿名用户，返回匿名用户信息和积分
-    const credit = await creditService.getCredit(latestAnonymousUser.userId);
-    const subscription = await subscriptionService.getActiveSubscription(latestAnonymousUser.userId);
-    
-    return createSuccessResponse(
-      latestAnonymousUser,
-      credit,
-      subscription,
-      false,
-      {
-        totalUsersOnDevice: existingUsers.length,
-        hasAnonymousUser: true,
-      }
-    );
-  } else {
-    // 没有匿名用户，说明该设备用户都已注册，不返回积分数据
-    const latestUser = existingUsers[0];
-    const subscription = await subscriptionService.getActiveSubscription(latestUser.userId);
-    
-    return createSuccessResponse(
-      latestUser,
-      null, // 注册用户不返回积分数据
-      subscription,
-      false,
-      {
-        totalUsersOnDevice: existingUsers.length,
-        hasAnonymousUser: false,
-      }
-    );
+  return createSuccessResponse({
+    entities,
+    isNewUser: false,
+  });
+}
+
+/**
+ * 根据fingerprint_id查询用户并返回响应数据
+ */
+async function getUserByFingerprintId(fingerprintId: string): Promise<XUserResponse | null> {
+  const result = await fetchLatestUserContextByFingerprintId(fingerprintId);
+  if (!result) {
+    return null;
   }
+
+  const { totalUsersOnDevice, hasAnonymousUser, ...entities } = result;
+
+  return createSuccessResponse({
+    entities,
+    isNewUser: false,
+    options: {
+      totalUsersOnDevice,
+      hasAnonymousUser,
+    },
+  });
 }
 
 /**
  * 通用的fingerprint处理逻辑
  */
 async function handleFingerprintRequest(request: NextRequest, options: { createIfNotExists?: boolean; } = {}) {
+  // 从请求中提取fingerprint ID
+  const fingerprintId = extractFingerprintFromNextRequest(request);
+  // 验证fingerprint ID
+  if (!fingerprintId) {
+    return createErrorResponse('Invalid or missing fingerprint ID');
+  }
+  console.log('Received fingerprintId:', fingerprintId);
+
+  const { userId: clerkUserId } = await auth();
   try {
-    // 从请求中提取fingerprint ID
-    const fingerprintId = extractFingerprintFromNextRequest(request);
-
-    // 验证fingerprint ID
-    if (!fingerprintId) {
-      return createErrorResponse('Invalid or missing fingerprint ID');
+    // 优先根据 Clerk ID 查询（如果已登录）
+    let existingUserResult: XUserResponse | null = null;
+    if (clerkUserId) {
+      // 已登录一律按照clerkUserId去查
+      existingUserResult = await getUserByClerkId(clerkUserId);
+      if (existingUserResult && existingUserResult.xUser.fingerprintId !== fingerprintId) {
+        // 说明当前用户的指纹ID发生了改变，为什么呢？因为它使用同一账号去注册Clerk，Clerk判定是同一用户！
+        // 这个时候一定以登录用户clerkUserId为准
+        // 但是考虑到同一指纹ID本身可以绑定多个账号，所以这里什么都不做
+        // 就是以当前登录用户去查他自己的数据就行！
+        console.warn(`Current login user used diff fp_ids: ${clerkUserId}, db_fp_id=${existingUserResult.xUser.fingerprintId}, req_fp_id=${fingerprintId}`);
+      }
+    } else {
+      // 其次才是检查是否已存在该fingerprint的用户
+      existingUserResult = await getUserByFingerprintId(fingerprintId);
     }
-
-    console.log('Received fingerprintId:', fingerprintId);
-
-    // 检查是否已存在该fingerprint的用户
-    const existingUserResult = await getUserByFingerprintId(fingerprintId);
-    
     if (existingUserResult) {
       return NextResponse.json(existingUserResult);
     }
@@ -174,31 +145,19 @@ async function handleFingerprintRequest(request: NextRequest, options: { createI
     }
 
     // 创建新的匿名用户
-    const newUser = await userService.createUser({
-      fingerprintId,
-      status: UserStatus.ANONYMOUS,
-    });
-
-    // 初始化积分记录
-    const credit = await creditService.initializeCredit(
-      newUser.userId,
-      FREE_CREDITS_AMOUNT,
-      0 // 匿名用户只给免费积分
-    );
-
-    // 记录免费积分充值记录
-    await creditUsageService.recordCreditOperation({
-      userId: newUser.userId,
-      feature: 'anonymous_user_init',
-      creditType: CreditType.FREE,
-      operationType: OperationType.RECHARGE,
-      creditsUsed: FREE_CREDITS_AMOUNT,
-    });
+    const { newUser, credit } = await userAggregateService.initAnonymousUser(fingerprintId);
 
     console.log(`Created new anonymous user ${newUser.userId} with fingerprint ${fingerprintId}`);
 
     // 返回创建结果
-    const response = createSuccessResponse(newUser, credit, null, true);
+    const response = createSuccessResponse({
+      entities: {
+        user: newUser,
+        credit,
+        subscription: null,
+      },
+      isNewUser: true,
+    });
     return NextResponse.json(response);
 
   } catch (error) {

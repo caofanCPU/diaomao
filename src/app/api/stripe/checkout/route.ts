@@ -1,20 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { 
-  createCheckoutSession, 
-  createOrGetCustomer, 
+import {
+  createCheckoutSession,
+  createOrGetCustomer,
+  ActiveSubscriptionExistsError,
 } from '@/lib/stripe-config';
-import { 
-  transactionService, 
+import {
+  transactionService,
   TransactionType,
   OrderStatus,
-  PaySupplier 
-} from '@/services/database';
+  PaySupplier,
+  PaymentStatus
+} from '@/db/index';
 import { ApiAuthUtils } from '@/lib/auth-utils';
 import { getPriceConfig } from '@/lib/money-price-config';
 
-// Request validation schema - 使用统一认证后大大简化了用户识别
-const createSubscriptionSchema = z.object({
+// Request validation schema
+const createCheckoutSchema = z.object({
   priceId: z.string().min(1, 'PriceID is required'),
   plan: z.string().min(1, 'Plan is required'),
   billingType: z.string().min(1, 'BillingType is required'),
@@ -25,11 +27,11 @@ export async function POST(request: NextRequest) {
   try {
     // Parse request body
     const body = await request.json();
-    const { priceId, plan, billingType, provider } = createSubscriptionSchema.parse(body);
+    const { priceId, plan, billingType, provider } = createCheckoutSchema.parse(body);
 
-    console.log(`Create Subscription: ${priceId} | ${plan} | ${billingType} | ${provider}`);
+    console.log(`Create Checkout: ${priceId} | ${plan} | ${billingType} | ${provider}`);
 
-    // 使用统一认证工具获取用户信息（避免重复查询）
+    // Use unified authentication to get user info
     const authUtils = new ApiAuthUtils(request);
     const { user } = await authUtils.requireAuthWithUser();
 
@@ -43,10 +45,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create or get Stripe customer
-    const customer = await createOrGetCustomer({
-      email: user.email || undefined,
+    const customerId = await createOrGetCustomer({
       userId: user.userId,
-      name: user.email ? user.email.split('@')[0] : undefined,
     });
 
     // Generate order ID
@@ -57,35 +57,48 @@ export async function POST(request: NextRequest) {
     const defaultSuccessUrl = `${baseUrl}`;
     const defaultCancelUrl = `${baseUrl}`;
 
-    // Create Stripe checkout session
-    const session = await createCheckoutSession({
+    // Create Stripe checkout session with interval for dynamic mode
+
+    const basciParams = {
       priceId,
-      customerId: customer.id,
+      customerId,
       clientReferenceId: user.userId,
       successUrl: defaultSuccessUrl,
       cancelUrl: defaultCancelUrl,
+      interval: priceConfig.interval, // ✅ Pass interval to auto-determine mode
       metadata: {
         order_id: orderId,
         user_id: user.userId,
         price_name: priceConfig.priceName,
         credits_granted: priceConfig.credits?.toString() || '',
+      }
+    }
+
+    const subscriptionData = {
+      metadata: {
+        order_id: orderId,
+        user_id: user.userId,
       },
-    });
+    };
+    const session = await createCheckoutSession(basciParams,subscriptionData);
 
     // Create transaction record with session info
-    const _transaction = await transactionService.createTransaction({
+    const orderType = priceConfig.interval && priceConfig.interval !== 'onetime' ? TransactionType.SUBSCRIPTION : TransactionType.ONE_TIME;
+    await transactionService.createTransaction({
       userId: user.userId,
       orderId,
       orderStatus: OrderStatus.CREATED,
+      paymentStatus: PaymentStatus.UN_PAID,
       paySupplier: PaySupplier.STRIPE,
       paySessionId: session.id,
       priceId,
       priceName: priceConfig.priceName,
       amount: priceConfig.amount,
       currency: priceConfig.currency,
-      type: priceConfig.interval ? TransactionType.SUBSCRIPTION : TransactionType.ONE_TIME,
+      type: orderType,
       creditsGranted: priceConfig.credits,
       orderDetail: priceConfig.description,
+      paidEmail: null
     });
 
     return NextResponse.json({
@@ -105,17 +118,27 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Create subscription error:', error);
-    
+    console.error('Create checkout error:', error);
+
+    if (error instanceof ActiveSubscriptionExistsError) {
+      return NextResponse.json(
+        {
+          error: 'Active subscription exists',
+          detail: 'Please use the customer portal to manage your existing subscription.',
+        },
+        { status: 409 }
+      );
+    }
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { error: 'Failed to create subscription' },
+      { error: 'Failed to create checkout session' },
       { status: 500 }
     );
   }

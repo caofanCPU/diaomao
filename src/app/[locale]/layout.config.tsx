@@ -6,9 +6,11 @@ import { ClerkUser } from '@windrun-huaiin/third-ui/clerk/server';
 import { type LinkItemType } from 'fumadocs-ui/layouts/docs';
 import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { getTranslations } from 'next-intl/server';
+import { CreditPopover } from '@/components/credit-popover';
 
+type ExtendedLinkItem = LinkItemType & { mobilePinned?: boolean };
 // home page normal menu
-export async function homeNavLinks(locale: string): Promise<LinkItemType[]> {
+export async function homeNavLinks(locale: string): Promise<ExtendedLinkItem[]> {
   const t1 = await getTranslations({ locale: locale, namespace: 'linkPreview' });
   return [
     {
@@ -19,20 +21,27 @@ export async function homeNavLinks(locale: string): Promise<LinkItemType[]> {
     {
       icon: <icons.BTC />,
       text: t1('pricing'),
-      url: `/${locale}#money-pricing`,
+      url: `/${locale}/pricing`,
     },
     {
       type: 'custom',
-      // false to put the menu on the left, true to put the button on the right
       secondary: true,
-      // NicknameFilter is also used in its internal useNickname
-      children: <ClerkUser locale={locale} clerkAuthInModal={appConfig.style.clerkAuthInModal} />
+      mobilePinned: true,
+      children: <CreditPopover locale={locale} />,
+    },
+    {
+      type: 'custom',
+      // false就先排左边的菜单, true就先排右边的按钮
+      secondary: true,
+      // true代表在移动端也会出现在主菜单栏上，不会被折叠
+      mobilePinned: true,
+      children: <ClerkUser locale={locale} clerkAuthInModal={appConfig.style.clerkAuthInModal} showSignUp={true}/>
     },
   ];
 }
 
 // level special menu
-export async function levelNavLinks(locale: string): Promise<LinkItemType[]> {
+export async function levelNavLinks(locale: string): Promise<ExtendedLinkItem[]> {
   console.log('levelNavLinks TODO: add links here', locale);
   return [];
 }
@@ -45,7 +54,7 @@ export async function baseOptions(locale: string): Promise<BaseLayoutProps> {
       title: (
         <>
           <SiteIcon />
-          <span className="font-medium [.uwu_&]:hidden [header_&]:text-[15px]">
+          <span className="font-medium in-[.uwu]:hidden in-[header]:text-[15px]">
             {t('title')}
           </span>
         </>

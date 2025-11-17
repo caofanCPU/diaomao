@@ -1,13 +1,35 @@
-import { PrismaClient, Prisma } from '@prisma/client';
-import type { Subscription } from '@prisma/client';
 import { SubscriptionStatus } from '@/db/constants';
-
-const prisma = new PrismaClient();
+import { checkAndFallbackWithNonTCClient } from '@/db/prisma';
+import type { Prisma, Subscription } from '@/db/prisma-model-type';
 
 export class SubscriptionService {
+
+  /**
+   * Initialize a placeholder subscription record for new users
+   * This allows Stripe webhook handlers to UPDATE instead of CREATE,
+   * ensuring consistent logic across all subscription scenarios.
+   *
+   * The record will be updated once the user subscribes via Stripe.
+   *
+   * @param userId - The user ID to initialize subscription for
+   * @returns The created placeholder subscription record
+   */
+  async initializeSubscription(userId: string, tx?: Prisma.TransactionClient): Promise<Subscription> {
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.create({
+      data: {
+        userId,
+        status: SubscriptionStatus.INCOMPLETE,
+        creditsAllocated: 0,
+      },
+    });
+  }
+
   // Create a new subscription
   async createSubscription(data: {
     userId: string;
+    orderId: string;
     paySubscriptionId?: string;
     priceId?: string;
     priceName?: string;
@@ -15,10 +37,13 @@ export class SubscriptionService {
     creditsAllocated: number;
     subPeriodStart?: Date;
     subPeriodEnd?: Date;
-  }): Promise<Subscription> {
-    return await prisma.subscription.create({
+  }, tx?: Prisma.TransactionClient): Promise<Subscription> {
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.create({
       data: {
         userId: data.userId,
+        orderId: data.orderId,
         paySubscriptionId: data.paySubscriptionId,
         priceId: data.priceId,
         priceName: data.priceName,
@@ -26,84 +51,57 @@ export class SubscriptionService {
         creditsAllocated: data.creditsAllocated,
         subPeriodStart: data.subPeriodStart,
         subPeriodEnd: data.subPeriodEnd,
-      },
-    });
-  }
-
-  // Find subscription by ID
-  async findById(id: bigint): Promise<Subscription | null> {
-    return await prisma.subscription.findFirst({
-      where: { id, deleted: 0 },
-      include: {
-        user: true,
-      },
+      }
     });
   }
 
   // Find subscription by pay subscription ID
   async findByPaySubscriptionId(
-    paySubscriptionId: string
+    paySubscriptionId: string,
+    tx?: Prisma.TransactionClient
   ): Promise<Subscription | null> {
-    return await prisma.subscription.findFirst({
-      where: { paySubscriptionId, deleted: 0 },
-      include: {
-        user: true,
-      },
-    });
-  }
+    const client = checkAndFallbackWithNonTCClient(tx);
 
-  // Get user's subscription list
-  async findByUserId(
-    userId: string,
-    params?: {
-      status?: string;
-      includeExpired?: boolean;
-    }
-  ): Promise<Subscription[]> {
-    const where: Prisma.SubscriptionWhereInput = {
-      userId,
-      deleted: 0,
-    };
-
-    if (params?.status) {
-      where.status = params.status;
-    }
-
-    if (!params?.includeExpired) {
-      where.OR = [
-        { subPeriodEnd: { gte: new Date() } },
-        { subPeriodEnd: null },
-      ];
-    }
-
-    return await prisma.subscription.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
+    return await client.subscription.findFirst({
+      where: { paySubscriptionId, deleted: 0 }
     });
   }
 
   // Get user's active subscription
-  async getActiveSubscription(userId: string): Promise<Subscription | null> {
-    return await prisma.subscription.findFirst({
+  async getActiveSubscription(userId: string, tx?: Prisma.TransactionClient): Promise<Subscription | null> {
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.findUnique({
       where: {
         userId,
         status: SubscriptionStatus.ACTIVE,
-        deleted: 0,
-        OR: [
-          { subPeriodEnd: { gte: new Date() } },
-          { subPeriodEnd: null },
-        ],
-      },
-      orderBy: { createdAt: 'desc' },
+        deleted: 0
+      }
     });
   }
+
+  async getNonActiveSubscription(userId: string, tx?: Prisma.TransactionClient): Promise<Subscription | null> {
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.findUnique({
+      where: {
+        userId,
+        status: { not: SubscriptionStatus.ACTIVE },
+        deleted: 0
+      }
+    });
+  }
+
 
   // Update subscription
   async updateSubscription(
     id: bigint,
-    data: Prisma.SubscriptionUpdateInput
+    data: Prisma.SubscriptionUpdateInput,
+    tx?: Prisma.TransactionClient
   ): Promise<Subscription> {
-    return await prisma.subscription.update({
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.update({
       where: { id },
       data,
     });
@@ -112,9 +110,12 @@ export class SubscriptionService {
   // Update subscription status
   async updateStatus(
     id: bigint,
-    status: string
+    status: string,
+    tx?: Prisma.TransactionClient
   ): Promise<Subscription> {
-    return await prisma.subscription.update({
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.update({
       where: { id },
       data: { status },
     });
@@ -124,9 +125,12 @@ export class SubscriptionService {
   async updatePeriod(
     id: bigint,
     subPeriodStart: Date,
-    subPeriodEnd: Date
+    subPeriodEnd: Date,
+    tx?: Prisma.TransactionClient
   ): Promise<Subscription> {
-    return await prisma.subscription.update({
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.update({
       where: { id },
       data: {
         subPeriodStart,
@@ -138,7 +142,8 @@ export class SubscriptionService {
   // Cancel subscription
   async cancelSubscription(
     id: bigint,
-    cancelAtPeriodEnd: boolean = true
+    cancelAtPeriodEnd: boolean = true,
+    tx?: Prisma.TransactionClient
   ): Promise<Subscription> {
     const updateData: Prisma.SubscriptionUpdateInput = {
       status: SubscriptionStatus.CANCELED,
@@ -148,7 +153,9 @@ export class SubscriptionService {
       updateData.subPeriodEnd = new Date();
     }
 
-    return await prisma.subscription.update({
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.update({
       where: { id },
       data: updateData,
     });
@@ -158,9 +165,12 @@ export class SubscriptionService {
   async renewSubscription(
     id: bigint,
     newPeriodEnd: Date,
-    creditsToAdd?: number
+    creditsToAdd?: number,
+    tx?: Prisma.TransactionClient
   ): Promise<Subscription> {
-    const subscription = await prisma.subscription.findFirst({
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    const subscription = await client.subscription.findFirst({
       where: { id },
     });
 
@@ -168,7 +178,7 @@ export class SubscriptionService {
       throw new Error('Subscription not found');
     }
 
-    return await prisma.subscription.update({
+    return await client.subscription.update({
       where: { id },
       data: {
         status: SubscriptionStatus.ACTIVE,
@@ -182,20 +192,24 @@ export class SubscriptionService {
   }
 
   // Soft Delete subscription
-  async deleteSubscription(id: bigint): Promise<void> {
-    await prisma.subscription.update({
+  async deleteSubscription(id: bigint, tx?: Prisma.TransactionClient): Promise<void> {
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    await client.subscription.update({
       where: { id },
-      data: { deleted: 1 },
+      data: { deleted: 1, status: SubscriptionStatus.INCOMPLETE },
     });
   }
 
   // Get expiring subscriptions (within 7 days)
-  async getExpiringSubscriptions(days: number = 7): Promise<Subscription[]> {
+  async getExpiringSubscriptions(days: number = 7, tx?: Prisma.TransactionClient): Promise<Subscription[]> {
     const now = new Date();
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + days);
 
-    return await prisma.subscription.findMany({
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.findMany({
       where: {
         status: SubscriptionStatus.ACTIVE,
         deleted: 0,
@@ -203,32 +217,30 @@ export class SubscriptionService {
           gte: now,
           lte: expiryDate,
         },
-      },
-      include: {
-        user: true,
-      },
+      }
     });
   }
 
   // Get expired subscriptions
-  async getExpiredSubscriptions(): Promise<Subscription[]> {
-    return await prisma.subscription.findMany({
+  async getExpiredSubscriptions(tx?: Prisma.TransactionClient): Promise<Subscription[]> {
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    return await client.subscription.findMany({
       where: {
         status: SubscriptionStatus.ACTIVE,
         deleted: 0,
         subPeriodEnd: {
           lt: new Date(),
         },
-      },
-      include: {
-        user: true,
-      },
+      }
     });
   }
 
   // Update expired subscriptions status
-  async updateExpiredSubscriptions(): Promise<number> {
-    const result = await prisma.subscription.updateMany({
+  async updateExpiredSubscriptions(tx?: Prisma.TransactionClient): Promise<number> {
+    const client = checkAndFallbackWithNonTCClient(tx);
+
+    const result = await client.subscription.updateMany({
       where: {
         status: SubscriptionStatus.ACTIVE,
         deleted: 0,
@@ -245,7 +257,7 @@ export class SubscriptionService {
   }
 
   // Get subscription statistics
-  async getSubscriptionStats(): Promise<{
+  async getSubscriptionStats(tx?: Prisma.TransactionClient): Promise<{
     total: number;
     active: number;
     canceled: number;
@@ -254,35 +266,36 @@ export class SubscriptionService {
     trialing: number;
     revenue: number;
   }> {
+    const client = checkAndFallbackWithNonTCClient(tx);
     const [total, active, canceled, pastDue, incomplete, trialing] =
       await Promise.all([
-        prisma.subscription.count({ where: { deleted: 0 } }),
-        prisma.subscription.count({
+        client.subscription.count({ where: { deleted: 0 } }),
+        client.subscription.count({
           where: { status: SubscriptionStatus.ACTIVE, deleted: 0 }
         }),
-        prisma.subscription.count({
+        client.subscription.count({
           where: { status: SubscriptionStatus.CANCELED, deleted: 0 }
         }),
-        prisma.subscription.count({
+        client.subscription.count({
           where: { status: SubscriptionStatus.PAST_DUE, deleted: 0 }
         }),
-        prisma.subscription.count({
+        client.subscription.count({
           where: { status: SubscriptionStatus.INCOMPLETE, deleted: 0 }
         }),
-        prisma.subscription.count({
+        client.subscription.count({
           where: { status: SubscriptionStatus.TRIALING, deleted: 0 }
         }),
       ]);
 
     // Calculate active subscription revenue (need to combine with transaction table)
-    const activeSubscriptions = await prisma.subscription.findMany({
+    const activeSubscriptions = await client.subscription.findMany({
       where: { status: SubscriptionStatus.ACTIVE, deleted: 0 },
       select: { paySubscriptionId: true },
     });
 
     let revenue = 0;
     if (activeSubscriptions.length > 0) {
-      const transactions = await prisma.transaction.findMany({
+      const transactions = await client.transaction.findMany({
         where: {
           paySubscriptionId: {
             in: activeSubscriptions

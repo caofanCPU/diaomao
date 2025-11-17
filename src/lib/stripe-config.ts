@@ -1,21 +1,10 @@
 import Stripe from 'stripe';
-import { Apilogger } from '@/services/database';
+import { Apilogger, userService, subscriptionService } from '@/db/index';
 
 // Stripe Configuration
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
+  apiVersion: '2025-10-29.clover',
 });
-
-// Webhook Configuration
-export const STRIPE_WEBHOOK_EVENTS = [
-  'checkout.session.completed',
-  'invoice.paid',
-  'invoice.payment_failed',
-  'customer.subscription.created',
-  'customer.subscription.updated',
-  'customer.subscription.deleted',
-  'charge.refunded',
-] as const;
 
 // Helper function to validate webhook signature
 export const validateStripeWebhook = (
@@ -26,19 +15,50 @@ export const validateStripeWebhook = (
   return stripe.webhooks.constructEvent(payload, signature, secret);
 };
 
-// Helper function to create checkout session
-export const createCheckoutSession = async (params: {
+export interface BasicCheckoutSessionParams {
   priceId: string;
   customerId?: string;
   clientReferenceId: string; // user_id
   successUrl: string;
   cancelUrl: string;
   metadata?: Record<string, string>;
-}): Promise<Stripe.Checkout.Session> => {
-  const { priceId, customerId, clientReferenceId, successUrl, cancelUrl, metadata } = params;
+  // ✅ New: Auto-determine mode based on interval
+  interval?: string; // 'month' | 'year' | 'onetime' | undefined
+  // ✅ New: Subscription metadata for webhook processing
   
+}
+
+// Helper function to create checkout session
+export const createCheckoutSession = async (
+  params: BasicCheckoutSessionParams,
+  subscriptionData?: Stripe.Checkout.SessionCreateParams.SubscriptionData
+): Promise<Stripe.Checkout.Session> => {
+  const {
+    priceId,
+    customerId,
+    clientReferenceId,
+    successUrl,
+    cancelUrl,
+    metadata,
+    interval
+  } = params;
+
+  // ✅ Dynamic mode determination: subscription if interval is not 'onetime'
+  const mode: 'subscription' | 'payment' = interval && interval !== 'onetime' ? 'subscription' : 'payment';
+  const isSubscriptionMode = mode === 'subscription';
+
+  if (isSubscriptionMode) {
+    if (!subscriptionData) { 
+      throw new Error('Subscription data is required for subscription mode');
+    }
+    const activeSubscription = await subscriptionService.getActiveSubscription(clientReferenceId);
+    if (activeSubscription) {
+      throw new ActiveSubscriptionExistsError();
+    }
+  }
+
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
-    mode: 'subscription',
+    mode, // ✅ Dynamic mode
     payment_method_types: ['card'],
     line_items: [
       {
@@ -49,28 +69,41 @@ export const createCheckoutSession = async (params: {
     success_url: successUrl,
     cancel_url: cancelUrl,
     client_reference_id: clientReferenceId,
-    metadata,
+    metadata: {
+      ...metadata,
+      mode, // Record mode for webhook processing
+    },
   };
 
-  // TODO: 暂时不支持一次性付费方式
-
-  // 如果有客户ID，添加到session
+  // Add customer if provided
   if (customerId) {
     sessionParams.customer = customerId;
   }
 
+  // One-time payment specific configuration
+  if (isSubscriptionMode) {
+    // 在这里注入订单元数据，以保证后续事件处理能根据订单去匹配处理，只能在订阅模式里设置数据，否则Stripe报错
+    sessionParams.subscription_data = subscriptionData;
+  } else {
+    // One-time payments don't create invoices
+    sessionParams.invoice_creation = {
+      enabled: false, 
+    };
+  }
+
   // Create log record with request
   const logId = await Apilogger.logStripeOutgoing('createCheckoutSession', params);
-  
+
   try {
     const session = await stripe.checkout.sessions.create(sessionParams);
-    
+
     // Update log record with response
     Apilogger.updateResponse(logId, {
       session_id: session.id,
-      url: session.url
+      url: session.url,
+      mode: session.mode
     });
-    
+
     return session;
   } catch (error) {
     // Update log record with error
@@ -81,23 +114,67 @@ export const createCheckoutSession = async (params: {
   }
 };
 
+// 根据发票ID去查支付ID
+export const fetchPaymentId = async (invoiceId: string ): Promise<string> => {
+  const fullInvoice = await stripe.invoices.retrieve(invoiceId, {
+    expand: ['payments']
+  });
+  const payment = fullInvoice.payments?.data[0];
+  const paymentIntentInfo = payment?.payment?.payment_intent;
+  const paymentIntentId = typeof paymentIntentInfo === 'string' ? paymentIntentInfo : (paymentIntentInfo as Stripe.PaymentIntent)?.id;
+  return paymentIntentId;
+}
+
 // Helper function to create or retrieve customer
 export const createOrGetCustomer = async (params: {
-  email?: string;
   userId: string;
-  name?: string;
-}): Promise<Stripe.Customer> => {
-  const { email, userId, name } = params;
+}): Promise<string> => {
+  const { userId } = params;
 
-  // 先尝试查找现有客户
-  if (email) {
+  const user = await userService.findByUserId(userId);
+
+  if (!user) {
+    throw new Error(`User not found for userId: ${userId}`);
+  }
+
+  const setStripeCustomerId = async (stripeCusId: string | null) => {
+    try {
+      await userService.updateStripeCustomerId(userId, stripeCusId);
+    } catch (error) {
+      console.error('Failed to update stripe customer id', { userId, stripeCusId, error });
+    }
+  };
+
+  if (user.stripeCusId) {
+    try {
+      const customer = await stripe.customers.retrieve(user.stripeCusId);
+      if ('deleted' in customer) {
+        await setStripeCustomerId(null);
+      } else {
+        return customer.id;
+      }
+    } catch (error) {
+      await setStripeCustomerId(null);
+      console.warn('Failed to retrieve Stripe customer, fallback to lookup by email', {
+        userId,
+        stripeCusId: user.stripeCusId,
+        error,
+      });
+    }
+  }
+
+  if (user.email) {
     const existingCustomers = await stripe.customers.list({
-      email,
+      email: user.email,
       limit: 1,
     });
 
     if (existingCustomers.data.length > 0) {
-      return existingCustomers.data[0];
+      const stripeCustomer = existingCustomers.data[0];
+      if (!user.stripeCusId || user.stripeCusId !== stripeCustomer.id) {
+        await setStripeCustomerId(stripeCustomer.id);
+      }
+      return stripeCustomer.id;
     }
   }
 
@@ -108,19 +185,24 @@ export const createOrGetCustomer = async (params: {
     },
   };
 
-  if (email) {
-    customerParams.email = email;
+  if (user.email) {
+    customerParams.email = user.email;
   }
-
-  if (name) {
-    customerParams.name = name;
+  const derivedName = user.email ? user.email.split('@')[0] : undefined;
+  if (derivedName) {
+    customerParams.name = derivedName;
   }
 
   // Create log record with request
-  const logId = await Apilogger.logStripeOutgoing('createCustomer', params);
+  const logId = await Apilogger.logStripeOutgoing('createCustomer', {
+    userId,
+    email: customerParams.email,
+    name: customerParams.name,
+  });
   
   try {
     const customer = await stripe.customers.create(customerParams);
+    await setStripeCustomerId(customer.id);
     
     // Update log record with response
     Apilogger.updateResponse(logId, {
@@ -128,7 +210,7 @@ export const createOrGetCustomer = async (params: {
       email: customer.email
     });
     
-    return customer;
+    return customer.id;
   } catch (error) {
     // Update log record with error
     Apilogger.updateResponse(logId, {
@@ -178,6 +260,32 @@ export const updateSubscription = async (params: {
   }
 };
 
+export const createCustomerPortalSession = async (params: {
+  customerId: string;
+  returnUrl: string;
+}): Promise<Stripe.BillingPortal.Session> => {
+  const logId = await Apilogger.logStripeOutgoing('createCustomerPortalSession', params);
+
+  try {
+    const session = await stripe.billingPortal.sessions.create({
+      customer: params.customerId,
+      return_url: params.returnUrl,
+    });
+
+    Apilogger.updateResponse(logId, {
+      session_id: session.id,
+      url: session.url,
+    });
+
+    return session;
+  } catch (error) {
+    Apilogger.updateResponse(logId, {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+};
+
 // Helper function to cancel subscription
 export const cancelSubscription = async (
   subscriptionId: string,
@@ -216,3 +324,10 @@ export const cancelSubscription = async (
     throw error;
   }
 };
+
+export class ActiveSubscriptionExistsError extends Error {
+  constructor() {
+    super('ACTIVE_SUBSCRIPTION_EXISTS');
+    this.name = 'ActiveSubscriptionExistsError';
+  }
+}

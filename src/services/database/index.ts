@@ -2,20 +2,9 @@ export { userService } from './user.service';
 export { subscriptionService } from './subscription.service';
 export { creditService } from './credit.service';
 export { transactionService } from './transaction.service';
-export { creditUsageService } from './creditUsage.service';
+export { creditAuditLogService } from './creditAuditLog.service';
 export { userBackupService } from './userBackup.service';
 export { apilogService, Apilogger } from './apilog.service';
-
-// Export Prisma Model Types
-export type {
-  User,
-  Subscription,
-  Credit,
-  Transaction,
-  CreditUsage,
-  UserBackup,
-  Apilog,
-} from '@prisma/client';
 
 // Export Enums and Types
 export {
@@ -26,12 +15,16 @@ export {
   CreditType,
   OperationType,
   PaySupplier,
+  BillingReason,
+  PaymentStatus,
   isValidUserStatus,
   isValidSubscriptionStatus,
   isValidOrderStatus,
   isValidTransactionType,
   isValidCreditType,
   isValidOperationType,
+  isValidBillingReason,
+  isValidPaymentStatus,
 } from './constants';
 
 // Export Enum Type Definitions
@@ -43,4 +36,6 @@ export type {
   CreditType as CreditTypeType,
   OperationType as OperationTypeType,
   PaySupplier as PaySupplierType,
+  BillingReason as BillingReasonType,
+  PaymentStatus as PaymentStatusType,
 } from './constants';

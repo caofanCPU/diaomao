@@ -8,13 +8,12 @@
  */
 
 import { baseOptions } from '@/app/[locale]/layout.config';
-import { HomeLayout, type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
-import { FumaBannerSuit } from '@windrun-huaiin/third-ui/fuma/server';
-import { ReactNode } from 'react';
 import { clerkPageBanner } from '@/lib/appConfig';
-import { ClerkProviderClient } from '@windrun-huaiin/third-ui/clerk';
-import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
 import { fingerprintConfig } from '@/lib/fingerprint-config';
+import { CustomHomeLayout } from '@windrun-huaiin/third-ui/fuma/base';
+import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
+import { type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
+import { ReactNode } from 'react';
 
 async function homeOptions(locale: string): Promise<HomeLayoutProps>{
   const resolvedBaseOptions = await baseOptions(locale);
@@ -32,25 +31,28 @@ export default async function RootLayout({
 }) {
   const { locale } = await params;
   const customeOptions = await homeOptions(locale);
-
+  const homeLayoutOptions: HomeLayoutProps = {
+    ...customeOptions,
+    searchToggle: {
+      enabled: false,
+    },
+    themeSwitch: {
+      enabled: true,
+      mode: 'light-dark-system',
+    },
+  };
   return (
-    <ClerkProviderClient locale={locale}>
-      <FingerprintProvider config={fingerprintConfig}>
-        <HomeLayout
-          {...customeOptions}
-          searchToggle={{
-            enabled: false,
-          }}
-          themeSwitch={{
-            enabled: true,
-            mode: 'light-dark-system',
-          }}
-          className={`min-h-screen flex flex-col bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300 ${clerkPageBanner ? 'pt-30 has-banner' : 'pt-20 no-banner'}`}
-          >
-          <FumaBannerSuit locale={locale} showBanner={clerkPageBanner}/>
+    <FingerprintProvider config={fingerprintConfig}>
+      <CustomHomeLayout
+          locale={locale}
+          options={homeLayoutOptions}
+          showBanner={clerkPageBanner}
+          showFooter={false}
+          showGoToTop={false}
+          floatingNav={true}
+        >
           {children}
-        </HomeLayout>
-      </FingerprintProvider>
-    </ClerkProviderClient>
+        </CustomHomeLayout>
+    </FingerprintProvider>
   );
 }

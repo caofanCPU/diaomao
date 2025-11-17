@@ -1,4 +1,4 @@
-import { blog } from '.source';
+import { blog } from '@/.source';
 import { getIconElement } from '@windrun-huaiin/base-ui/components/server';
 import { i18n } from '@/i18n';
 import { loader } from 'fumadocs-core/source';

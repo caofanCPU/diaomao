@@ -1,4 +1,4 @@
-import { legal } from '.source';
+import { legal } from '@/.source';
 import { i18n } from '@/i18n';
 import { getIconElement } from '@windrun-huaiin/base-ui/components/server';
 import { loader } from 'fumadocs-core/source';

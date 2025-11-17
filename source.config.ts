@@ -41,7 +41,6 @@ export default defineConfig({
     remarkImageOptions: false,
     rehypeCodeOptions: {
       lazy: true,
-      experimentalJSEngine: true,
       inline: 'tailing-curly-colon',
       themes: {
         light: 'catppuccin-latte',
