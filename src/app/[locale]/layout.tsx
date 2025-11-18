@@ -53,7 +53,6 @@ export default async function RootLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
   const fumaTranslations = await getFumaTranslations(locale);
-  console.log(appConfig.i18n);
   return (
     <html lang={locale} suppressHydrationWarning>
       <NextIntlClientProvider messages={messages}>

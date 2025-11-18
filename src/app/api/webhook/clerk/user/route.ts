@@ -43,63 +43,46 @@ export async function POST(request: NextRequest) {
   try {
     // 获取原始请求体
     const rawBody = await request.text();
-
     let event: ClerkWebhookEvent;
+    // 生产环境进行签名校验
+    const headerPayload = await headers();
+    const svix_id = headerPayload.get('svix-id');
+    const svix_timestamp = headerPayload.get('svix-timestamp');
+    const svix_signature = headerPayload.get('svix-signature');
 
-    // 开发环境跳过签名校验
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Development mode: skipping webhook signature verification');
-      try {
-        event = JSON.parse(rawBody) as ClerkWebhookEvent;
-      } catch (err) {
-        console.error('Failed to parse webhook body:', err);
-        return NextResponse.json(
-          { error: 'Invalid webhook body' },
-          { status: 400 }
-        );
-      }
-    } else {
-      // 生产环境进行签名校验
-      const headerPayload = await headers();
-      const svix_id = headerPayload.get('svix-id');
-      const svix_timestamp = headerPayload.get('svix-timestamp');
-      const svix_signature = headerPayload.get('svix-signature');
-
-      // 如果缺少必要的header，返回错误
-      if (!svix_id || !svix_timestamp || !svix_signature) {
-        return NextResponse.json(
-          { error: 'Missing webhook headers' },
-          { status: 400 }
-        );
-      }
-
-      // 获取webhook signing secret
-      const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
-      if (!webhookSecret) {
-        console.error('CLERK_WEBHOOK_SECRET is not configured');
-        return NextResponse.json(
-          { error: 'Webhook configuration error' },
-          { status: 500 }
-        );
-      }
-
-      // 验证webhook签名
-      try {
-        const wh = new Webhook(webhookSecret);
-        event = wh.verify(rawBody, {
-          'svix-id': svix_id,
-          'svix-timestamp': svix_timestamp,
-          'svix-signature': svix_signature,
-        }) as ClerkWebhookEvent;
-      } catch (err) {
-        console.error('Webhook signature verification failed:', err);
-        return NextResponse.json(
-          { error: 'Webhook signature verification failed' },
-          { status: 400 }
-        );
-      }
+    // 如果缺少必要的header，返回错误
+    if (!svix_id || !svix_timestamp || !svix_signature) {
+      return NextResponse.json(
+        { error: 'Missing webhook headers' },
+        { status: 400 }
+      );
     }
 
+    // 获取webhook signing secret
+    const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.error('CLERK_WEBHOOK_SECRET is not configured');
+      return NextResponse.json(
+        { error: 'Webhook configuration error' },
+        { status: 500 }
+      );
+    }
+
+    // 验证webhook签名
+    try {
+      const wh = new Webhook(webhookSecret);
+      event = wh.verify(rawBody, {
+        'svix-id': svix_id,
+        'svix-timestamp': svix_timestamp,
+        'svix-signature': svix_signature,
+      }) as ClerkWebhookEvent;
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err);
+      return NextResponse.json(
+        { error: 'Webhook signature verification failed' },
+        { status: 400 }
+      );
+    }
     // Log the incoming webhook
     const logId = await Apilogger.logClerkIncoming(`${event.type}`, {
       clerk_user_id: event.data.id,

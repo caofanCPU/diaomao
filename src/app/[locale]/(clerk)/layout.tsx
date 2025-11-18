@@ -50,6 +50,11 @@ export default async function RootLayout({
           showFooter={false}
           showGoToTop={false}
           floatingNav={true}
+          actionOrders={{
+            desktop: ['search', 'theme', 'github', 'i18n', 'secondary'],
+            mobileBar: ['search', 'pinned', 'menu'],
+            mobileMenu: ['theme', 'i18n', 'separator', 'secondary', 'github'],
+          }}
         >
           {children}
         </CustomHomeLayout>
