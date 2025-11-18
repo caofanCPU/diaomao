@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 10.0.1
+
+### Patch Changes
+
+- feat(dependency): update `@windrun-huaiin/third-ui` version for custom header view order
+
 ## 10.0.0
 
 ### Major Changes
