@@ -1,5 +1,5 @@
 -- 第一步：彻底删除 diaomao schema（连里面的表、序列、权限全炸）
-DROP SCHEMA IF EXISTS diaomao CASCADE;
+-- DROP SCHEMA IF EXISTS diaomao CASCADE;
 
 -- 第二步：重新创建干净的 diaomao schema
 CREATE SCHEMA diaomao;
