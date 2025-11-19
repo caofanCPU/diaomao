@@ -5,9 +5,11 @@ import { CTA, FAQ, Features, SeoContent, Tips, Usage } from "@windrun-huaiin/thi
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  
+  const isDev = process.env.NODE_ENV !== 'production';
+  const forceShow = process.env.SHOW_FINGERPRINT_STATUS === 'true'
   return (
     <>
+      { (forceShow || isDev) && <FingerprintStatus /> }
       <FingerprintStatus />
       <Hero locale={locale} />
       <Usage locale={locale} />
