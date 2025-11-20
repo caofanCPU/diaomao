@@ -14,7 +14,7 @@
     "react"
   ],
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "pnpm generate-blog-index && next build",
     "build:dev": "pnpm generate-blog-index && next build",
     "build:prod": "prisma generate && next build",
