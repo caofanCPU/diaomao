@@ -1,5 +1,5 @@
 import { appConfig, generatedLocales } from "@/lib/appConfig";
-import { montserrat } from '@/lib/font/fonts';
+import { montserrat } from '@/lib/fonts';
 import { GoogleAnalyticsScript, MicrosoftClarityScript } from "@windrun-huaiin/base-ui/components/server";
 import { cn } from '@windrun-huaiin/lib/utils';
 import { getFumaTranslations } from '@windrun-huaiin/third-ui/fuma/server';
