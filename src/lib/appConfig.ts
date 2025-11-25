@@ -2,7 +2,7 @@ import { createCommonAppConfig, createI18nHelpers, LOCALE_PRESETS } from "@windr
 
 // create app config
 export const appConfig = {
-  ...createCommonAppConfig(LOCALE_PRESETS.EN_ONLY),
+  ...createCommonAppConfig(LOCALE_PRESETS.EN_ZH),
   creditsConfig: {
     freeAmount: 1,
     freeRegisterAmount: 2,

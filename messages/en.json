@@ -2,84 +2,64 @@
   "home": {
     "title": "Diaomao",
     "banner": "Rethink | Redefine | Rebuild",
-    "webTitle": "Diaomao Directory - Showcase Beautiful Images & Tips",
-    "webDescription": "Discover stunning AI-generated images and learn expert tips for creating beautiful visuals with Diaomao's powerful text-to-image technology.",
-    "keywords": "AI image generation, text-to-image, digital art, creative tools, Diaomao, free image generation"
+    "webTitle": "Diaomao AI-Orchestrated SaaS | Pricing, Credits, Docs & Stripe",
+    "webDescription": "Ship an AI-era product site fast: Diaomao packs Next.js + Prisma + PostgreSQL + Stripe with orchestrated pricing, credit gates, docs, and navigation—ready for real payments and growth.",
+    "keywords": "AI product template, Next.js SaaS, Stripe pricing, credit billing UI, Fumadocs, Prisma PostgreSQL, fingerprint onboarding, Money Price, Credit Overview"
   },
   "hero": {
-    "mainTitle": "Create Stunning Images with",
+    "mainTitle": "Build an AI-ready product with",
     "mainEyesOn": "Diaomao",
-    "description": "Transform your ideas into breathtaking visuals with Diaomao's AI-powered image generation. Unleash your creativity with the cutting-edge technology.",
+    "description": "An orchestrated template for the AI age: pricing that knows your users, credit engines that guide upgrades, docs and navigation that stay in sync, and Stripe flows that simply work.",
     "button": "Get Started",
-    "about": "Enjoy 20 free images daily with Diaomao",
-    "heroImageAlt": "Diaomao AI-generated artwork showcasing the power of the platform",
+    "about": "SSR-stable, mobile-respectful, with fingerprint-to-Clerk onboarding baked in",
+    "heroImageAlt": "Diaomao AI product template showing pricing, credits, docs navigation, and gradients",
     "heroImageUrl": "https://r2.d8ger.com/default.webp"
   },
   "usage": {
-    "title": "How to use",
-    "eyesOn": "Newspaper Template",
-    "description": "",
+    "title": "Make it yours",
+    "eyesOn": "in three moves",
+    "description": "An AI + product-orchestrated base—configure, ship, and sell.",
     "steps": [
       {
-        "title": "Select a Template",
-        "description": "Click on your favorite template on the left side to get started.",
+        "title": "Wire the stack",
+        "description": "Add Stripe secrets, PostgreSQL, and Clerk—InitUserContext + Prisma schema hydrate SSR pricing and credits on day one.",
         "iconKey": "MousePointerClick"
       },
       {
-        "title": "Customize Your Content",
-        "description": "Edit text directly in the text area and hover over images to upload new ones.",
+        "title": "Orchestrate the product",
+        "description": "Tune billing toggles, credit buckets, and CTA behaviors in config; Money Price and Credit Overview adapt to user state and device.",
         "iconKey": "Pencil"
       },
       {
-        "title": "Download & Share",
-        "description": "Download as an image, PDF, or share to X, Instagram, etc",
+        "title": "Launch the story",
+        "description": "Fumadocs + Header Mega Menu keep navigation and docs in sync; gradients and accessibility are pre-tuned across devices.",
         "iconKey": "Download"
       }
     ]
   },
   "faq": {
     "title": "Frequently Asked Questions",
-    "description": "",
+    "description": "Core flows are prebuilt—these answers clarify what ships out of the box.",
     "items":[
       {
-        "question": "What is this newspaper template website?",
-        "answer": "This newspaper template website allows you to create and customize professional-looking newspapers using easy-to-use templates. You can edit text, upload images, and download or share your creations."
+        "question": "What is Diaomao?",
+        "answer": "An AI-era product template: Next.js + Prisma + PostgreSQL + Stripe, with Money Price, Credit Overview, fingerprint-to-Clerk onboarding, and Fumadocs navigation/docs."
       },
       {
-        "question": "Is the newspaper template website free to use?",
-        "answer": "Yes, our newspaper template website is completely free! Access all features—templates, editing tools, and watermark-free downloads—without any cost or hidden fees. Perfect for commercial use!"
+        "question": "Does it support both subscriptions and one-time credit packs?",
+        "answer": "Yes. Money Price covers subscriptions and one-time credit packs; billing toggles are configurable, and upgrade buttons fall back to Portal/Checkout."
       },
       {
-        "question": "How do I edit the text and images?",
-        "answer": "To edit text, simply click into the text field and start typing your content. To change images, hover over the image placeholder and select the option to upload a new image from your device."
+        "question": "How are anonymous users handled?",
+        "answer": "First visit issues a fingerprint ID, starter credits, and records; after login the same context persists, balances stay intact, and SSR avoids first-screen flicker."
       },
       {
-        "question": "Do I need design experience to use the newspaper template website?",
-        "answer": "No design experience is required! Our intuitive interface and pre-designed templates make it easy for anyone to create a polished newspaper."
+        "question": "Can I change the navigation and docs layout?",
+        "answer": "Yes. Header supports mega menus, pinned mobile actions, and secondary buttons; Fumadocs is config-driven for cards, banners, and per-device ordering."
       },
       {
-        "question": "Can I preview my newspaper before downloading?",
-        "answer": "Yes, you can see real-time updates as you edit. The preview feature lets you review your newspaper to ensure it looks perfect before saving or sharing."
-      },
-      {
-        "question": "What file formats can I download my newspaper in?",
-        "answer": "You can download your newspaper as a high-quality PDF, PNG, JPG, WEBP, or SVG, suitable for printing or digital sharing."
-      },
-      {
-        "question": "Can I save my work and come back to it later?",
-        "answer": "Currently, you can complete your newspaper in one session. Future updates may include a save feature."
-      },
-      {
-        "question": "Are there limits to how many newspapers I can create?",
-        "answer": "No limits! You can create as many newspapers as you like, all for free."
-      },
-      {
-        "question": "Can I use my own fonts or colors?",
-        "answer": "You can use pre-set fonts and color schemes in our free online newspaper templates for a professional look. Custom font uploads may be available in future updates."
-      },
-      {
-        "question": "How can I share my finished newspaper?",
-        "answer": "After completing your newspaper, you can download it as a PDF, PNG, JPG, WEBP, or SVG and share it via email, social media, or print it for physical distribution."
+        "question": "What Stripe lifecycle is covered?",
+        "answer": "Checkout/Portal, async confirms, renewals, dunning, refunds, end-of-period cancel, and upgrade/downgrade all map to Transactions/Subscriptions with event.id + order_id idempotency."
       }
     ]
   },
@@ -248,21 +228,26 @@
   "features": {
     "title": "Why Choose",
     "eyesOn": "Diaomao",
-    "description": "Create stunning newspapers with our newspaper template website! Here's why you'll love it.",
+    "description": "An AI + product-orchestrated chassis: launch fast, charge with confidence.",
     "items": [
       {
-        "title": "High-Quality Output",
-        "description": "Diaomao produces stunning, detailed images that rival professional artwork.",
+        "title": "Money Price 2.0",
+        "description": "Monthly/yearly/onetime switching keyed to user state, with discount badges, upgrade guards, and SSR defaults aligned.",
         "iconKey": "Sparkles"
       },
       {
-        "title": "20 Free Images Daily",
-        "description": "Enjoy a generous daily allowance of 20 free images with your Diaomao account.",
+        "title": "Credit Overview UX",
+        "description": "Buckets, expiry hints, and a CTA matrix; desktop modals and mobile redirects each follow best practices.",
         "iconKey": "Gift"
       },
       {
-        "title": "Intuitive Prompting",
-        "description": "The advanced AI understands natural language, making it easy to describe your vision.",
+        "title": "Fingerprint to Clerk",
+        "description": "Anonymous visitors get IDs and starter credits; login upgrades seamlessly with no balance loss, no flicker.",
+        "iconKey": "MessageCircleMore"
+      },
+      {
+        "title": "Docs & Nav System",
+        "description": "Fumadocs + Header Mega Menu keep marketing and docs aligned; mobile can pin critical actions.",
         "iconKey": "MessageCircleMore"
       }
     ]
@@ -271,9 +256,9 @@
     "titleL": "Gallery of",
     "eyesOn": "Diaomao",
     "titleR": "Creations",
-    "description": "Explore the incredible possibilities with Diaomao. Each image below was generated using the AI technology with the accompanying prompt.",
+    "description": "Swipe through the built-in UI language: gradient CTAs, pill billing toggles, credit buckets, and docs hero visuals.",
     "button": {
-      "title": "Create Your Own Images",
+      "title": "Preview the template",
       "href": "https://preview.reve.art/",
       "align": "center"
     },
@@ -282,7 +267,27 @@
     "prompts": [
       {
         "url": "https://r2.d8ger.com/Reve-Image/1.webp",
-        "altMsg": "A futuristic cityscape with flying vehicles and neon lights"
+        "altMsg": "Pricing grid with Money Price gradients and discount badges"
+      },
+      {
+        "url": "https://r2.d8ger.com/Reve-Image/2.webp",
+        "altMsg": "Credit Overview dropdown showing buckets and CTA buttons"
+      },
+      {
+        "url": "https://r2.d8ger.com/Reve-Image/3.webp",
+        "altMsg": "Fumadocs hero with banner, cards, and responsive layout"
+      },
+      {
+        "url": "https://r2.d8ger.com/Reve-Image/4.webp",
+        "altMsg": "Header mega menu with pinned mobile actions and secondary buttons"
+      },
+      {
+        "url": "https://r2.d8ger.com/Reve-Image/5.webp",
+        "altMsg": "Fingerprint status panel summarizing anonymous onboarding"
+      },
+      {
+        "url": "https://r2.d8ger.com/Reve-Image/6.webp",
+        "altMsg": "Stripe lifecycle blueprint for subscriptions and one-time payments"
       }
     ]
   },
@@ -291,69 +296,69 @@
     "eyesOn": "Diaomao",
     "sections": [
       {
-        "title": "Be Specific in Your Prompts",
-        "description": "When using Diaomao, the more specific your prompt, the better the results. Include details about style, lighting, mood, and composition to guide the AI toward your vision."
+        "title": "Configure before coding",
+        "description": "Pricing, credits, navigation, and CTAs are config/translation-driven—tune parameters before touching code."
       },
       {
-        "title": "Experiment with Different Styles",
-        "description": "Diaomao can generate images in various artistic styles. Try adding style descriptors like \"oil painting,\" \"digital art,\" \"photorealistic,\" or \"watercolor\" to your prompts."
+        "title": "Keep billing options",
+        "description": "Even if you default to onetime, leave monthly/yearly available to avoid dead ends."
       },
       {
-        "title": "Use Reference Artists",
-        "description": "Mentioning specific artists in your Diaomao prompts can help achieve particular aesthetics. For example, \"in the style of Van Gogh\" or \"like a Wes Anderson film.\""
+        "title": "Honor device behaviors",
+        "description": "Mobile uses redirects/auth then closes; desktop can modal—follow the design guide for scroll and close timing."
       },
       {
-        "title": "Iterate and Refine",
-        "description": "Don't be afraid to generate multiple images with Diaomao and refine your prompt based on the results. Each iteration brings you closer to your perfect image."
+        "title": "Prefer SSR context",
+        "description": "Use InitUserContext to prehydrate user state—no first-screen jitter, billing defaults match reality."
       },
       {
-        "title": "Consider Composition Elements",
-        "description": "Include composition details in your Diaomao prompts, such as \"close-up,\" \"wide shot,\" \"from above,\" or \"symmetrical composition\" to control the framing."
+        "title": "Follow the schema",
+        "description": "Stick to Users/Subscriptions/Transactions/Credits; order_id + event.id keep webhooks idempotent."
       },
       {
-        "title": "Maximize Your Daily Allowance",
-        "description": "With Diaomao's generous 20 free images per day, plan your creative sessions to make the most of this allowance. Save your best results to build a personal inspiration library."
+        "title": "Tell the story in docs",
+        "description": "Use Fumadocs cards and banners to ship product narrative and releases without extra styling."
       }
     ]
   },
   "seoContent": {
-    "title": "Mastering AI Image Generation with",
+    "title": "The AI-era product chassis: choose",
     "eyesOn": "Diaomao",
-    "description": "Online & Free & Editable & Professional",
-    "intro": "Diaomao represents the cutting edge of AI image generation technology, offering users the ability to transform text descriptions into stunning visual content. Whether you're a designer seeking inspiration, a marketer creating content, or an artist exploring new mediums, Diaomao provides the tools to bring your imagination to life.",
+    "description": "Pricing, credits, docs, navigation, and Stripe orchestrated as one.",
+    "intro": "Diaomao compresses the slowest parts of shipping AI products into one template: Money Price runs subscription/onetime in parallel, Credit Overview governs buckets and CTA matrix, fingerprint-to-Clerk prevents funnel gaps, Stripe lifecycle and schema are pre-aligned, and Fumadocs + Header keep story and navigation consistent.",
     "sections": [
       {
-        "title": "Testing All HTML Tag Combinations",
-        "content": "This paragraph demonstrates all possible tag combinations. <strong><em>Important emphasized text</em></strong> shows the most common pattern. <strong><u>Important underlined text</u></strong> highlights key steps. <strong><mark>Important highlighted text</mark></strong> marks critical information. <em><u>Emphasized underlined text</u></em> draws attention to notes. <em><mark>Emphasized highlighted text</mark></em> emphasizes key points. <u><mark>Underlined highlighted text</mark></u> creates special markers. <strong><del>Important deleted text</del></strong> shows deprecated features. <em><del>Emphasized deleted text</del></em> indicates obsolete content. Chemical formulas like H<strong><sub>2</sub></strong>O use subscript. Mathematical expressions like X<strong><sup>2</sup></strong> use superscript. <em><sub>Emphasized subscript</sub></em> for variables. <em><sup>Emphasized superscript</sup></em> for annotations. Three-tag combinations: <strong><em><u>Important emphasized underlined</u></em></strong> for critical concepts. <strong><em><mark>Important emphasized highlighted</mark></em></strong> for core content. <strong><u><mark>Important underlined highlighted</mark></u></strong> for key identifiers. <em><u><mark>Emphasized underlined highlighted</mark></u></em> for special emphasis. Scientific notation: H<strong><em><sub>2</sub></em></strong>O and X<strong><em><sup>2</sup></em></strong>. Version identifiers: v<strong><u><sup>2.0</sup></u></strong> and v<strong><u><sub>0</sub></u></strong>. This comprehensive test covers all supported tag combinations."
+        "title": "Pricing that adapts to user state",
+        "content": "Billing pills switch monthly/yearly/onetime; SSR defaults to the user’s plan, and upgrade buttons honor enableSubscriptionUpgrade with Portal fallback."
       },
       {
-        "title": "Understanding How <strong>Diaomao</strong> Works",
-        "content": "When you enter a prompt, Diaomao analyzes the semantic meaning and generates corresponding imagery that matches your description. This process happens in seconds, allowing for rapid iteration and experimentation."
+        "title": "Credits with clear buckets and CTA matrix",
+        "content": "Buckets, expiry hints, and device-aware actions: desktop modals or auth-to-Portal, mobile redirects or custom handlers."
       },
       {
-        "title": "Crafting Effective Prompts for Diaomao",
-        "content": "The key to getting exceptional results from Diaomao lies in how you structure your prompts. Begin with a clear subject, then add modifiers for style, mood, lighting, and composition. For example, instead of simply writing \"a mountain,\" try \"a majestic snow-capped mountain at golden hour, with dramatic clouds, photorealistic style.\" The Diaomao AI responds particularly well to descriptive adjectives and specific visual references."
+        "title": "Anonymous-first onboarding",
+        "content": "Fingerprint issues `fp_xxx`, grants starter credits, and writes records; after login the same context continues with balances and audit intact."
       },
       {
-        "title": "Leveraging Diaomao for Different Creative Needs",
-        "content": "Diaomao excels across various use cases. For marketing professionals, it can generate eye-catching social media graphics or conceptual product visualizations. Designers can use Diaomao to quickly prototype ideas or create mood boards. Writers and storytellers might employ Diaomao to visualize characters and settings. The versatility of Diaomao makes it an invaluable tool across creative disciplines."
+        "title": "Stripe lifecycle baked in",
+        "content": "Checkout/Portal, async confirmation, renewal, past-due, refund, end-of-period cancel, upgrade/downgrade—all guarded by order_id metadata and webhook idempotency."
       },
       {
-        "title": "Maximizing Your Free Daily Images with Diaomao",
-        "content": "With Diaomao offering 20 free image generations daily, developing a strategic approach to your creative process becomes important. Consider starting with broader concepts and gradually refining your prompts based on the results. Save promising images and note the effective elements in your prompts. This methodical approach helps you make the most of Diaomao's generous free tier while continuously improving your results."
+        "title": "Navigation and docs that scale",
+        "content": "Header mega menu, pinned behaviors, and actionOrders keep Docs/pricing/auth buttons in place; Fumadocs cards and banners ship with no extra styling."
       },
       {
-        "title": "Combining Diaomao with Other Creative Tools",
-        "content": "While Diaomao produces impressive standalone images, its output can also serve as a starting point for further refinement. Many creators use Diaomao to generate initial concepts, then bring these images into editing software for additional customization. This hybrid workflow combines the imaginative power of Diaomao's AI with the precision of human-guided editing."
+        "title": "Schema-first reliability",
+        "content": "Users/Subscriptions/Credits/Transactions/CreditAuditLog indexed for fingerprint lookup, order routing, and audit stability."
       }
     ],
-    "conclusion": "As AI image generation continues to evolve, Diaomao remains at the forefront, constantly improving its capabilities and offering users new ways to express their creativity. By understanding how to effectively communicate with the Diaomao AI through well-crafted prompts, you can unlock extraordinary visual possibilities and transform how you approach creative projects."
+    "conclusion": "Plug in keys, tune config, fill copy—launch an AI-ready, revenue-ready, story-ready site in a week."
   },
   "cta": {
-    "title": "Ready to Create with",
+    "title": "Bring your AI product to life with",
     "eyesOn": "Diaomao",
-    "description1": "Start generating beautiful images today with your 20 free daily creations.",
-    "description2": "No credit card required.",
+    "description1": "One template for pricing, credits, docs, navigation, and Stripe.",
+    "description2": "Gradients, accessibility, and mobile behaviors are already tuned.",
     "button": "Get Started Now",
     "url": "https://preview.reve.art/"
   },
