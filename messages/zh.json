@@ -306,7 +306,7 @@
     ]
   },
   "seoContent": {
-    "title": "AI 时代的产品底盘，选择",
+    "title": "AI 时代的产品底盘",
     "eyesOn": "迪奥猫",
     "description": "定价、积分、文档、导航与 Stripe 一体化编排",
     "intro": "迪奥猫 把 AI 产品最耗时的环节收拢到一套模板：Money Price 同时跑订阅/一次性，Credit Overview 管控积分与 CTA 矩阵，指纹到 Clerk 避免漏斗断层，Stripe 生命周期与表结构预先对齐，Fumadocs + Header 让叙事与导航保持一致。",
@@ -333,7 +333,7 @@
       },
       {
         "title": "Schema-first 稳定性",
-        "content": "Users/Subscriptions/Credits/Transactions/CreditAuditLog 预布索引，指纹检索、订单路由、审计链路稳定。"
+        "content": "Users, Subscriptions, Credits, Transactions, CreditAuditLog 预布索引，指纹检索、订单路由、审计链路稳定。"
       }
     ],
     "conclusion": "接好密钥、调完配置、填入文案——一周交付可收款、能讲故事、能度量的 AI 产品站。"

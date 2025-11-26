@@ -322,14 +322,14 @@
     ]
   },
   "seoContent": {
-    "title": "The AI-era product chassis: choose",
+    "title": "The AI-era product chassis with",
     "eyesOn": "Diaomao",
     "description": "Pricing, credits, docs, navigation, and Stripe orchestrated as one.",
     "intro": "Diaomao compresses the slowest parts of shipping AI products into one template: Money Price runs subscription/onetime in parallel, Credit Overview governs buckets and CTA matrix, fingerprint-to-Clerk prevents funnel gaps, Stripe lifecycle and schema are pre-aligned, and Fumadocs + Header keep story and navigation consistent.",
     "sections": [
       {
         "title": "Pricing that adapts to user state",
-        "content": "Billing pills switch monthly/yearly/onetime; SSR defaults to the user’s plan, and upgrade buttons honor enableSubscriptionUpgrade with Portal fallback."
+        "content": "Billing pills switch monthly|yearly|onetime; SSR defaults to the user’s plan, and upgrade buttons honor enableSubscriptionUpgrade with Portal fallback."
       },
       {
         "title": "Credits with clear buckets and CTA matrix",
@@ -341,15 +341,15 @@
       },
       {
         "title": "Stripe lifecycle baked in",
-        "content": "Checkout/Portal, async confirmation, renewal, past-due, refund, end-of-period cancel, upgrade/downgrade—all guarded by order_id metadata and webhook idempotency."
+        "content": "Checkout|Portal, async confirmation, renewal, past-due, refund, end-of-period cancel, upgrade|downgrade—all guarded by order_id metadata and webhook idempotency."
       },
       {
         "title": "Navigation and docs that scale",
-        "content": "Header mega menu, pinned behaviors, and actionOrders keep Docs/pricing/auth buttons in place; Fumadocs cards and banners ship with no extra styling."
+        "content": "Header mega menu, pinned behaviors, and actionOrders keep Docs|pricing|auth buttons in place; Fumadocs cards and banners ship with no extra styling."
       },
       {
         "title": "Schema-first reliability",
-        "content": "Users/Subscriptions/Credits/Transactions/CreditAuditLog indexed for fingerprint lookup, order routing, and audit stability."
+        "content": "Users, Subscriptions, Credits, Transactions, CreditAuditLog indexed for fingerprint lookup, order routing, and audit stability."
       }
     ],
     "conclusion": "Plug in keys, tune config, fill copy—launch an AI-ready, revenue-ready, story-ready site in a week."
