@@ -19,6 +19,7 @@ import {
   mapUserToXUser,
   type UserContextEntities,
 } from '@/context/user-context-service';
+import type { Prisma } from '@/db/prisma-model-type';
 
 
 // ==================== 类型定义 ====================
@@ -68,7 +69,20 @@ function createErrorResponse(message: string, status = 400): NextResponse {
   return NextResponse.json(errorResponse, { status });
 }
 
+type SourceRefData = Prisma.InputJsonObject & {
+  httpRefer?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmTerm?: string;
+  utmContent?: string;
+  ref?: string;
+};
+
+type SourceRefKey = 'utmSource' | 'utmMedium' | 'utmCampaign' | 'utmTerm' | 'utmContent' | 'ref';
+
 const SOURCE_REF_MAX_LENGTH = 2048;
+const QUERY_PARAM_MAX_LENGTH = 512;
 
 function normalizeSourceRef(ref: string | null): string | null {
   if (!ref) {
@@ -85,21 +99,77 @@ function normalizeSourceRef(ref: string | null): string | null {
     : trimmed;
 }
 
+function normalizeQueryParam(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  return trimmed.length > QUERY_PARAM_MAX_LENGTH
+    ? trimmed.slice(0, QUERY_PARAM_MAX_LENGTH)
+    : trimmed;
+}
+
+function applySearchParams(sourceRef: SourceRefData, params: URLSearchParams) {
+  const setIfEmpty = (key: SourceRefKey, value: string | null) => {
+    if (sourceRef[key] !== undefined) {
+      return;
+    }
+    const normalized = normalizeQueryParam(value);
+    if (normalized) {
+      sourceRef[key] = normalized;
+    }
+  };
+
+  setIfEmpty('utmSource', params.get('utm_source'));
+  setIfEmpty('utmMedium', params.get('utm_medium'));
+  setIfEmpty('utmCampaign', params.get('utm_campaign'));
+  setIfEmpty('utmTerm', params.get('utm_term'));
+  setIfEmpty('utmContent', params.get('utm_content'));
+  setIfEmpty('ref', params.get('ref'));
+}
+
 // 提取用户首次访问来源
-function extractSourceRef(request: NextRequest): string | null {
+function extractSourceRef(request: NextRequest): SourceRefData | null {
   const headerRef = request.headers.get('referer') || request.headers.get('referrer');
   const customRef = request.headers.get('x-source-ref');
   const queryRef = request.nextUrl.searchParams.get('ref');
+  console.log({
+    headerRef,
+    customRef,
+    queryRef
+  })
 
+  const sourceRef: SourceRefData = {};
+
+  let normalizedHttpRef: string | null = null;
   const candidates = [headerRef, customRef, queryRef];
   for (const candidate of candidates) {
     const normalized = normalizeSourceRef(candidate);
     if (normalized) {
-      return normalized;
+      normalizedHttpRef = normalized;
+      sourceRef.httpRefer = normalized;
+      break;
     }
   }
 
-  return null;
+  const searchParams = request.nextUrl.searchParams;
+  applySearchParams(sourceRef, searchParams);
+
+  if (normalizedHttpRef) {
+    try {
+      const refererUrl = new URL(normalizedHttpRef);
+      applySearchParams(sourceRef, refererUrl.searchParams);
+    } catch (error) {
+      console.warn('Failed to parse referer url for utm/ref:', error);
+    }
+  }
+
+  return Object.keys(sourceRef).length > 0 ? sourceRef : null;
 }
 
 
