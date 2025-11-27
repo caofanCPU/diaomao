@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 11.0.0
+
+### Major Changes
+
+- feat(backend-core): integrate `@windrun-huaiin/backend-core` for LTS code update
+
 ## 10.0.1
 
 ### Patch Changes

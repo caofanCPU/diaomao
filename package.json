@@ -1,6 +1,6 @@
 {
   "name": "@windrun-huaiin/diaomao",
-  "version": "10.0.1",
+  "version": "11.0.0",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -30,9 +30,14 @@
     "check-translations": "dev-scripts check-translations -v",
     "clean-translations": "dev-scripts clean-translations -v",
     "remove-translations": "dev-scripts clean-translations --remove -v",
+    "core-list-route": "dev-scripts backend-core routes:list",
+    "core-sync-route": "dev-scripts backend-core routes:sync",
+    "core-sync-schema": "dev-scripts backend-core prisma:sync",
+    "core-sync-sql": "dev-scripts backend-core migrations:sync",
     "whoareyou": "dev-scripts generate-nextjs-architecture -v",
-    "windrun": "pnpm remove @windrun-huaiin/base-ui @windrun-huaiin/lib @windrun-huaiin/third-ui @windrun-huaiin/dev-scripts && pnpm add @windrun-huaiin/base-ui@latest @windrun-huaiin/lib@latest @windrun-huaiin/third-ui@latest && pnpm add -D @windrun-huaiin/dev-scripts@latest",
-    "windrun3": "pnpm remove @windrun-huaiin/third-ui && pnpm add @windrun-huaiin/third-ui@latest"
+    "windrun": "pnpm remove @windrun-huaiin/base-ui @windrun-huaiin/lib @windrun-huaiin/third-ui @windrun-huaiin/backend-core @windrun-huaiin/dev-scripts  && pnpm add @windrun-huaiin/base-ui@latest @windrun-huaiin/lib@latest @windrun-huaiin/third-ui@latest @windrun-huaiin/backend-core@latest && pnpm add -D @windrun-huaiin/dev-scripts@latest",
+    "windrun3": "pnpm remove @windrun-huaiin/third-ui && pnpm add @windrun-huaiin/third-ui@latest",
+    "windrunC": "pnpm remove @windrun-huaiin/backend-core && pnpm add @windrun-huaiin/backend-core@latest"
   },
   "dependencies": {
     "@clerk/localizations": "^3.28.0",
@@ -50,6 +55,7 @@
     "@windrun-huaiin/base-ui": "^10.1.0",
     "@windrun-huaiin/lib": "^10.1.0",
     "@windrun-huaiin/third-ui": "^10.1.3",
+    "@windrun-huaiin/backend-core": "^10.0.1",
     "autoprefixer": "^10.4.22",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -96,7 +102,7 @@
     "@types/react-medium-image-zoom": "^3.0.3",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/parser": "^8.46.4",
-    "@windrun-huaiin/dev-scripts": "^10.1.0",
+    "@windrun-huaiin/dev-scripts": "^10.2.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.0",
     "eslint-plugin-unused-imports": "^4.3.0",
