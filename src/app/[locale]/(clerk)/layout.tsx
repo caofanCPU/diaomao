@@ -9,7 +9,7 @@
 
 import { baseOptions } from '@/app/[locale]/layout.config';
 import { clerkPageBanner } from '@/lib/appConfig';
-import { fingerprintConfig } from '@/lib/fingerprint-config';
+import { fingerprintConfig } from '@windrun-huaiin/backend-core/lib';
 import { CustomHomeLayout } from '@windrun-huaiin/third-ui/fuma/base';
 import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
 import { type HomeLayoutProps } from 'fumadocs-ui/layouts/home';

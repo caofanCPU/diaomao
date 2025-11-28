@@ -1,5 +1,12 @@
 # @windrun-huaiin/diaomao
 
+## 11.1.0
+
+### Minor Changes
+
+- fix(backend-core): integrate `@windrun-huaiin/backend-core` for LTS code update
+  - optimize cli commander for sync init-sql
+
 ## 11.0.0
 
 ### Major Changes
