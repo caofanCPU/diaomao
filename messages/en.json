@@ -1,65 +1,65 @@
 {
   "home": {
     "title": "Diaomao",
-    "banner": "Rethink | Redefine | Rebuild",
-    "webTitle": "Diaomao AI-Orchestrated SaaS | Pricing, Credits, Docs & Stripe",
-    "webDescription": "Ship an AI-era product site fast: Diaomao packs Next.js + Prisma + PostgreSQL + Stripe with orchestrated pricing, credit gates, docs, and navigation—ready for real payments and growth.",
-    "keywords": "AI product template, Next.js SaaS, Stripe pricing, credit billing UI, Fumadocs, Prisma PostgreSQL, fingerprint onboarding, Money Price, Credit Overview"
+    "banner": "Ship Faster | Charge Smarter | Scale Fearlessly",
+    "webTitle": "Diaomao – The Ultimate AI SaaS Starter Kit with Stripe, Credits & Docs",
+    "webDescription": "Next.js 14 + Prisma + PostgreSQL + Stripe + Clerk + Fumadocs. Production-ready pricing tiers, credit system, anonymous-to-auth onboarding, and beautiful docs — everything you need to launch and monetize your AI product in days, not months.",
+    "keywords": "AI SaaS template, Next.js boilerplate, Stripe billing, credit-based pricing, anonymous onboarding, Fumadocs, Prisma PostgreSQL, Clerk authentication"
   },
   "hero": {
-    "mainTitle": "Build an AI-ready product with",
+    "mainTitle": "Ship a paid AI product with",
     "mainEyesOn": "Diaomao",
-    "description": "An orchestrated template for the AI age: pricing that knows your users, credit engines that guide upgrades, docs and navigation that stay in sync, and Stripe flows that simply work.",
-    "button": "Get Started",
-    "about": "SSR-stable, mobile-respectful, with fingerprint-to-Clerk onboarding baked in",
-    "heroImageAlt": "Diaomao AI product template showing pricing, credits, docs navigation, and gradients",
+    "description": "Pricing that upgrades itself. Credits that never leak. Docs that stay in sync. Stripe flows that just work. Diaomao is the full-stack chassis trusted by makers who refuse to waste another weekend on billing infrastructure.",
+    "button": "Get Diaomao →",
+    "about": "SSR-first • Mobile-perfected • Fingerprint → Clerk seamless onboarding",
+    "heroImageAlt": "Diaomao – Modern pricing, credit dashboard and documentation system",
     "heroImageUrl": "https://r2.d8ger.com/default.webp"
   },
   "usage": {
-    "title": "Make it yours",
-    "eyesOn": "in three moves",
-    "description": "An AI + product-orchestrated base—configure, ship, and sell.",
+    "title": "From zero to paid users",
+    "eyesOn": "in 3 stupidly simple steps",
+    "description": "Everything is pre-wired. You just turn the knobs.",
     "steps": [
       {
-        "title": "Wire the stack",
-        "description": "Add Stripe secrets, PostgreSQL, and Clerk—InitUserContext + Prisma schema hydrate SSR pricing and credits on day one.",
-        "iconKey": "MousePointerClick"
+        "title": "Connect your stack",
+        "description": "Drop in Stripe, PostgreSQL, and Clerk keys. Your pricing page and credit system instantly become user-aware on day one.",
+        "iconKey": "Zap"
       },
       {
-        "title": "Orchestrate the product",
-        "description": "Tune billing toggles, credit buckets, and CTA behaviors in config; Money Price and Credit Overview adapt to user state and device.",
-        "iconKey": "Pencil"
+        "title": "Tune your config",
+        "description": "Switch between monthly, yearly, and one-time credit packs with a single config flag. Upgrade paths, discounts, and CTAs auto-adapt to each user.",
+        "iconKey": "Settings"
       },
       {
-        "title": "Launch the story",
-        "description": "Fumadocs + Header Mega Menu keep navigation and docs in sync; gradients and accessibility are pre-tuned across devices.",
-        "iconKey": "Download"
+        "title": "Launch your story",
+        "description": "Beautiful docs, mega-menu navigation, and gradient-rich marketing pages — all driven by the same MDX files. Ship updates without touching CSS.",
+        "iconKey": "Rocket"
       }
     ]
   },
   "faq": {
-    "title": "Frequently Asked Questions",
-    "description": "Core flows are prebuilt—these answers clarify what ships out of the box.",
-    "items":[
+    "title": "Got questions?",
+    "description": "We’ve got answers.",
+    "items": [
       {
-        "question": "What is Diaomao?",
-        "answer": "An AI-era product template: Next.js + Prisma + PostgreSQL + Stripe, with Money Price, Credit Overview, fingerprint-to-Clerk onboarding, and Fumadocs navigation/docs."
+        "question": "What exactly is Diaomao?",
+        "answer": "The fastest way to launch a production-ready, monetized AI product. Next.js 14 + Prisma + PostgreSQL + Stripe + Clerk + beautiful docs — everything pre-built and battle-tested."
       },
       {
-        "question": "Does it support both subscriptions and one-time credit packs?",
-        "answer": "Yes. Money Price covers subscriptions and one-time credit packs; billing toggles are configurable, and upgrade buttons fall back to Portal/Checkout."
+        "question": "Can I sell both subscriptions AND one-time credit packs?",
+        "answer": "Absolutely. Toggle between monthly, yearly, and one-time purchases with a single config change. Upgrade buttons automatically route to Stripe Checkout or Customer Portal."
       },
       {
-        "question": "How are anonymous users handled?",
-        "answer": "First visit issues a fingerprint ID, starter credits, and records; after login the same context persists, balances stay intact, and SSR avoids first-screen flicker."
+        "question": "What happens to anonymous users?",
+        "answer": "They get a fingerprint ID and starter credits instantly. When they eventually sign in, their balance and history merge seamlessly — zero data loss, zero flicker."
       },
       {
-        "question": "Can I change the navigation and docs layout?",
-        "answer": "Yes. Header supports mega menus, pinned mobile actions, and secondary buttons; Fumadocs is config-driven for cards, banners, and per-device ordering."
+        "question": "How hard is it to customize navigation & docs?",
+        "answer": "Dead easy. Mega-menu, mobile pinning, and docs are all driven by simple JSON/MDX config. Change once, updates everywhere."
       },
       {
-        "question": "What Stripe lifecycle is covered?",
-        "answer": "Checkout/Portal, async confirms, renewals, dunning, refunds, end-of-period cancel, and upgrade/downgrade all map to Transactions/Subscriptions with event.id + order_id idempotency."
+        "question": "Is the entire Stripe lifecycle handled?",
+        "answer": "Yes. Checkout, Portal, webhooks, renewals, dunning, refunds, upgrades/downgrades — all idempotent and logged. You’ll never lose a payment event again."
       }
     ]
   },
@@ -226,29 +226,29 @@
     }
   },
   "features": {
-    "title": "Why Choose",
-    "eyesOn": "Diaomao",
-    "description": "An AI + product-orchestrated chassis: launch fast, charge with confidence.",
+    "title": "Everything you keep rebuilding",
+    "eyesOn": "Diaomao already solved",
+    "description": "Stop gluing together half-baked solutions. This is the template that ends the weekend billing nightmares.",
     "items": [
       {
         "title": "Money Price 2.0",
-        "description": "Monthly/yearly/onetime switching keyed to user state, with discount badges, upgrade guards, and SSR defaults aligned.",
+        "description": "Monthly / Yearly / One-time toggle that instantly reflects the user’s current plan. Discount badges, upgrade guards, and SSR defaults — all automatic.",
         "iconKey": "Sparkles"
       },
       {
-        "title": "Credit Overview UX",
-        "description": "Buckets, expiry hints, and a CTA matrix; desktop modals and mobile redirects each follow best practices.",
+        "title": "Credit System",
+        "description": "Buckets, expiration tags, and smart CTAs. Desktop = modals. Mobile = redirects. Zero confusion, maximum upsells.",
         "iconKey": "Gift"
       },
       {
-        "title": "Fingerprint to Clerk",
-        "description": "Anonymous visitors get IDs and starter credits; login upgrades seamlessly with no balance loss, no flicker.",
-        "iconKey": "MessageCircleMore"
+        "title": "Auth and Anonymous",
+        "description": "Fingerprint on first visit → starter credits → seamless merge on sign-in. No flicker, no balance loss, no support tickets.",
+        "iconKey": "Fingerprint"
       },
       {
-        "title": "Docs & Nav System",
-        "description": "Fumadocs + Header Mega Menu keep marketing and docs aligned; mobile can pin critical actions.",
-        "iconKey": "MessageCircleMore"
+        "title": "Docs & Navigation",
+        "description": "Fumadocs + mega-menu header. One source of truth for marketing and documentation. Mobile pinning, dark mode, and accessibility included.",
+        "iconKey": "BookOpen"
       }
     ]
   },
@@ -297,7 +297,7 @@
     "sections": [
       {
         "title": "Configure before coding",
-        "description": "Pricing, credits, navigation, and CTAs are config/translation-driven—tune parameters before touching code."
+        "description": "Pricing, credits, navigation, and CTAs are config-driven—tune parameters before touching code."
       },
       {
         "title": "Keep billing options",
@@ -305,7 +305,7 @@
       },
       {
         "title": "Honor device behaviors",
-        "description": "Mobile uses redirects/auth then closes; desktop can modal—follow the design guide for scroll and close timing."
+        "description": "Mobile uses redirects/auth then closes; desktop can modal—follow the design guide."
       },
       {
         "title": "Prefer SSR context",
@@ -355,11 +355,11 @@
     "conclusion": "Plug in keys, tune config, fill copy—launch an AI-ready, revenue-ready, story-ready site in a week."
   },
   "cta": {
-    "title": "Bring your AI product to life with",
+    "title": "Start shipping your AI idea with",
     "eyesOn": "Diaomao",
-    "description1": "One template for pricing, credits, docs, navigation, and Stripe.",
-    "description2": "Gradients, accessibility, and mobile behaviors are already tuned.",
-    "button": "Get Started Now",
+    "description1": "One template. Every hard part solved.",
+    "description2": "Stripe, credits, auth— all production-ready out of the box.",
+    "button": "Get Diaomao Now →",
     "url": "https://preview.reve.art/"
   },
   "languageDetection": {
