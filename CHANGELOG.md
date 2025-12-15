@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 11.1.2
+
+### Patch Changes
+
+- feature(upgrade): eslint upgrade, stripe API version upgrade and add sign-up bonus feature with tooltip
+
 ## 11.1.1
 
 ### Patch Changes

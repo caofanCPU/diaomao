@@ -51,7 +51,7 @@ export default async function Layout({
       >
         {children}
       </CustomHomeLayout>
-      </FingerprintProvider>
+    </FingerprintProvider>
   );
 }
 
