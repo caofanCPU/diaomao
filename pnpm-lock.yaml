@@ -62,8 +62,8 @@ importers:
         specifier: ^11.0.1
         version: 11.0.1(clsx@2.1.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(tailwind-merge@3.4.0)
       '@windrun-huaiin/third-ui':
-        specifier: ^11.0.2
-        version: 11.0.2(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(clsx@2.1.1)(lucide-react@0.525.0(react@19.2.0))(next-intl@4.5.3(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(next-themes@0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(nprogress@0.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(tailwind-merge@3.4.0)(tailwindcss@4.1.17)(typescript@5.9.3)
+        specifier: ^11.1.0
+        version: 11.1.0(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(clsx@2.1.1)(lucide-react@0.525.0(react@19.2.0))(next-intl@4.5.3(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(next-themes@0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(nprogress@0.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(tailwind-merge@3.4.0)(tailwindcss@4.1.17)(typescript@5.9.3)
       autoprefixer:
         specifier: ^10.4.22
         version: 10.4.22(postcss@8.5.6)
@@ -2185,8 +2185,8 @@ packages:
       react-dom: 19.2.0
       tailwind-merge: ^3.3.0
 
-  '@windrun-huaiin/third-ui@11.0.2':
-    resolution: {integrity: sha512-+kGkacGwMtlfFJWkcieTFhk8eWIUzq+ilcxKEK3T4xUk5XHIR0gcki4Q9ohRKAtcmMF/1Q5yPzBUcsGxCCZQEg==}
+  '@windrun-huaiin/third-ui@11.1.0':
+    resolution: {integrity: sha512-RWSd9GtyurCrCKgBAhKE8NBsgqQ6jUd+Ys12JVnT570p1euI6ahdt/Qugg93MLRA0EvGDH81+s2WDqUP/cNqaw==}
     peerDependencies:
       clsx: ^2.1.1
       next: 16.0.10
@@ -3079,8 +3079,8 @@ packages:
   fraction.js@5.3.4:
     resolution: {integrity: sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==}
 
-  fs-extra@11.3.2:
-    resolution: {integrity: sha512-Xr9F6z6up6Ws+NjzMCZc6WXg2YFRlrLP9NQDO3VQrWrfiojdhS56TzueT88ze0uBdCTwEIhQ3ptnmKeWGFAe0A==}
+  fs-extra@11.3.3:
+    resolution: {integrity: sha512-VWSRii4t0AFm6ixFFmLLx1t7wS1gh+ckoa84aOeapGum0h+EZd1EhEumSB+ZdDLnEPuucsVB9oB7cxJHap6Afg==}
     engines: {node: '>=14.14'}
 
   fs-extra@7.0.1:
@@ -6828,7 +6828,7 @@ snapshots:
       '@clerk/nextjs': 6.35.1(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@prisma/client': 6.19.0(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3)
       '@windrun-huaiin/lib': 11.0.1(clsx@2.1.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(tailwind-merge@3.4.0)
-      '@windrun-huaiin/third-ui': 11.0.2(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(clsx@2.1.1)(lucide-react@0.525.0(react@19.2.0))(next-intl@4.5.3(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(next-themes@0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(nprogress@0.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(tailwind-merge@3.4.0)(tailwindcss@4.1.17)(typescript@5.9.3)
+      '@windrun-huaiin/third-ui': 11.1.0(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(clsx@2.1.1)(lucide-react@0.525.0(react@19.2.0))(next-intl@4.5.3(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(next-themes@0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(nprogress@0.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(tailwind-merge@3.4.0)(tailwindcss@4.1.17)(typescript@5.9.3)
       next: 16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       prisma: 6.19.0(typescript@5.9.3)
       stripe: 20.0.0(@types/node@22.19.1)
@@ -6883,7 +6883,7 @@ snapshots:
     dependencies:
       commander: 12.1.0
       fast-glob: 3.3.3
-      fs-extra: 11.3.2
+      fs-extra: 11.3.3
       picocolors: 1.1.1
       typescript: 5.9.3
 
@@ -6902,7 +6902,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@windrun-huaiin/third-ui@11.0.2(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(clsx@2.1.1)(lucide-react@0.525.0(react@19.2.0))(next-intl@4.5.3(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(next-themes@0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(nprogress@0.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(tailwind-merge@3.4.0)(tailwindcss@4.1.17)(typescript@5.9.3)':
+  '@windrun-huaiin/third-ui@11.1.0(@types/react-dom@19.2.3(@types/react@19.2.5))(@types/react@19.2.5)(clsx@2.1.1)(lucide-react@0.525.0(react@19.2.0))(next-intl@4.5.3(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(next-themes@0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(nprogress@0.2.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(tailwind-merge@3.4.0)(tailwindcss@4.1.17)(typescript@5.9.3)':
     dependencies:
       '@clerk/localizations': 3.28.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@clerk/nextjs': 6.35.1(next@16.0.10(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -8030,7 +8030,7 @@ snapshots:
 
   fraction.js@5.3.4: {}
 
-  fs-extra@11.3.2:
+  fs-extra@11.3.3:
     dependencies:
       graceful-fs: 4.2.11
       jsonfile: 6.2.0

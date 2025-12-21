@@ -259,7 +259,7 @@
     "description": "Swipe through the built-in UI language: gradient CTAs, pill billing toggles, credit buckets, and docs hero visuals.",
     "button": {
       "title": "Preview the template",
-      "href": "https://preview.reve.art/",
+      "href": "https://newspaper-template.org/",
       "align": "center"
     },
     "defaultImgUrl": "https://r2.d8ger.com/default.webp",
@@ -360,7 +360,7 @@
     "description1": "One template. Every hard part solved.",
     "description2": "Stripe, credits, auth— all production-ready out of the box.",
     "button": "Get Diaomao Now →",
-    "url": "https://preview.reve.art/"
+    "url": "https://newspaper-template.org/"
   },
   "languageDetection": {
     "title": "Language Detection",
@@ -377,6 +377,8 @@
     "sitemap": "Sitemap",
     "contactUs": "Contact Us",
     "email": "xyb5to0zcy@gmail.com",
+    "clickToCopyText": "Click to copy",
+    "copiedText": "Copied!",
     "thanks": "Thanks to"
   },
   "clerk": {

@@ -3,12 +3,11 @@ import { appConfig } from '@/lib/appConfig';
 import { SiteIcon } from '@/lib/site-config';
 import { globalLucideIcons as icons } from '@windrun-huaiin/base-ui/components/server';
 import { ClerkUser } from '@windrun-huaiin/third-ui/clerk/server';
-import { type LinkItemType } from 'fumadocs-ui/layouts/docs';
 import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { getTranslations } from 'next-intl/server';
 import { CreditPopover } from '@/components/credit-popover';
+import { ExtendedLinkItem, HomeTitle } from '@windrun-huaiin/third-ui/fuma/base';
 
-type ExtendedLinkItem = LinkItemType & { mobilePinned?: boolean };
 // home page normal menu
 export async function homeNavLinks(locale: string): Promise<ExtendedLinkItem[]> {
   const t1 = await getTranslations({ locale: locale, namespace: 'linkPreview' });
@@ -54,9 +53,9 @@ export async function baseOptions(locale: string): Promise<BaseLayoutProps> {
       title: (
         <>
           <SiteIcon />
-          <span className="font-medium in-[.uwu]:hidden in-[header]:text-[15px]">
+          <HomeTitle>
             {t('title')}
-          </span>
+          </HomeTitle>
         </>
       ),
       transparentMode: 'none',

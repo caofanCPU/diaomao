@@ -243,7 +243,7 @@
     "description": "一眼看懂内置的 UI 语言：渐变 CTA、计费胶囊、积分桶与文档英雄区。",
     "button": {
       "title": "预览模板",
-      "href": "https://preview.reve.art/",
+      "href": "https://newspaper-template.org/",
       "align": "center"
     },
     "defaultImgUrl": "https://r2.d8ger.com/default.webp",
@@ -344,7 +344,7 @@
     "description1": "一套模板搞定定价、积分、文档、导航与 Stripe。",
     "description2": "渐变、可访问性、移动体验都已调好。",
     "button": "立即开始",
-    "url": "https://preview.reve.art/"
+    "url": "https://newspaper-template.org/"
   },
   "languageDetection": {
     "title": "语言切换",
@@ -361,6 +361,8 @@
     "sitemap": "站点地图",
     "contactUs": "联系我们",
     "email": "xyb5to0zcy@gmail.com",
+    "clickToCopyText": "点击复制",
+    "copiedText": "已复制!",
     "thanks": "特别感谢"
   },
   "clerk": {

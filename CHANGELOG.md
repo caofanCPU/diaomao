@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 11.2.0
+
+### Minor Changes
+
+- feature(upgrade): `**@windrun-huaiin/third-ui**` package upgrade fot better style
+
 ## 11.1.2
 
 ### Patch Changes

@@ -18,7 +18,7 @@ export async function Hero({ locale }: { locale: string }) {
         </p>
         <GradientButton
           title={t('button')}
-          href="https://preview.reve.art/"
+          href="https://newspaper-template.org/"
           align="center"
           className="md:w-full"
         />
