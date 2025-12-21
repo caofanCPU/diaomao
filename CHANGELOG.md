@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- feature(upgrade): `**@windrun-huaiin/third-ui**` package upgrade fot better style
+- feature(upgrade): **`@windrun-huaiin/third-ui`** package upgrade fot better style
 
 ## 11.1.2
 
