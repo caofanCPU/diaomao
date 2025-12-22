@@ -1,5 +1,14 @@
 # @windrun-huaiin/diaomao
 
+## 12.0.0
+
+### Major Changes
+
+- feature(locale): support as-needed localPrefix by `NEXT_PUBLIC_I18N_LOCALE_PREFIX_AS_NEEDED`
+  - clerk auth issue fixed
+  - localePrefix custom config
+  - mdx docs, DO NOT use name `why-docs`, `nextjs-architecture` cause ROUTE PROBLEMS
+
 ## 11.2.0
 
 ### Minor Changes

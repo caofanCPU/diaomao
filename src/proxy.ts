@@ -11,12 +11,10 @@ import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware({
-  // 多语言配置
   locales: appConfig.i18n.locales,
-  // 默认语言配置
   defaultLocale: appConfig.i18n.defaultLocale,
-  localePrefix: "always", // 改为 always，确保始终使用语言前缀
-  localeDetection: false  // 添加此配置以禁用自动语言检测
+  localePrefix: appConfig.i18n.localPrefixAsNeeded ? "as-needed" : "always", 
+  localeDetection: false
 });
 
 // 需要身份认证的路由（页面路由）
@@ -54,6 +52,29 @@ const publicApiRoutes = createRouteMatcher([
 // 完全不需要再包一层函数，也不需要手动 (req)
 export default clerkMiddleware(
   async (auth, req: NextRequest) => {
+    const { defaultLocale, locales } = appConfig.i18n;
+    const pathname = req.nextUrl.pathname;
+    const hasLocalePrefix = locales.some(
+      (loc) => pathname === `/${loc}` || pathname.startsWith(`/${loc}/`)
+    );
+
+    // 对于无语言前缀的页面请求，根据配置进行处理
+    // 避免落不到 [locale] 路由。
+    if (!hasLocalePrefix && !pathname.startsWith('/api/')) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/${defaultLocale}${pathname}`;
+
+      if (appConfig.i18n.localPrefixAsNeeded) {
+        // as-needed: 内部rewrite，用户URL保持无前缀
+        console.log('[middleware rewrite]', { from: pathname, to: url.pathname });
+        return NextResponse.rewrite(url);
+      } else {
+        // always: 重定向给用户，让他们看到前缀URL
+        console.log('[middleware redirect]', { from: pathname, to: url.pathname });
+        return NextResponse.redirect(url);
+      }
+    }
+
     // 1. 处理需要认证的页面路由
     if (protectedPageRoutes(req)) {
       const { userId: clerkUserId } = await auth();
@@ -93,13 +114,6 @@ export default clerkMiddleware(
     }
 
     // 5. 其他路由使用默认的国际化中间件处理
-    // handle root path to default locale permanent redirect
-    if (req.nextUrl.pathname === "/") {
-      return NextResponse.redirect(
-        new URL(`/${appConfig.i18n.defaultLocale}`, req.url),
-        301
-      );
-    }
 
     // handle trailing slash redirect
     if (req.nextUrl.pathname.length > 1 && req.nextUrl.pathname.endsWith("/")) {

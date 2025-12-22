@@ -7,6 +7,7 @@ import { CreditOverview, buildMoneyPriceData } from '@windrun-huaiin/third-ui/ma
 import { moneyPriceConfig } from '@windrun-huaiin/backend-core/lib';
 import { buildInitUserContextFromEntities } from '@windrun-huaiin/backend-core/context';
 import { getTranslations } from 'next-intl/server';
+import { getAsNeededLocalizedUrl } from '@windrun-huaiin/lib';
 
 interface CreditPopoverProps {
   locale: string;
@@ -88,7 +89,7 @@ export async function CreditPopover({ locale }: CreditPopoverProps) {
       : [])
   ];
 
-  const pricingPageBaseUrl = `/${locale}/pricing`;
+  const pricingPageBaseUrl = getAsNeededLocalizedUrl(locale, "/pricing");
 
   const data: CreditOverviewData = {
     totalBalance,
