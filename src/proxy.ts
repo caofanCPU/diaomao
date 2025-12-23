@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 const intlMiddleware = createMiddleware({
   locales: appConfig.i18n.locales,
   defaultLocale: appConfig.i18n.defaultLocale,
-  localePrefix: appConfig.i18n.localPrefixAsNeeded ? "as-needed" : "always", 
+  localePrefix: appConfig.i18n.localePrefixAsNeeded ? "as-needed" : "always", 
   localeDetection: false
 });
 
@@ -64,7 +64,7 @@ export default clerkMiddleware(
       const url = req.nextUrl.clone();
       url.pathname = `/${defaultLocale}${pathname}`;
 
-      if (appConfig.i18n.localPrefixAsNeeded) {
+      if (appConfig.i18n.localePrefixAsNeeded) {
         // as-needed: 内部rewrite，用户URL保持无前缀
         console.log('[middleware rewrite]', { from: pathname, to: url.pathname });
         return NextResponse.rewrite(url);

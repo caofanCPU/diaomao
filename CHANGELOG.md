@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 12.1.0
+
+### Minor Changes
+
+- fix(locale): `localPrefixAsNeeded` rename to `localePrefixAsNeeded` by `NEXT_PUBLIC_I18N_LOCALE_PREFIX_AS_NEEDED`
+
 ## 12.0.1
 
 ### Patch Changes
