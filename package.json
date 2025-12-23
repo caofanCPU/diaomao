@@ -1,6 +1,6 @@
 {
   "name": "@windrun-huaiin/diaomao",
-  "version": "12.0.0",
+  "version": "12.0.1",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -56,8 +56,8 @@
     "@types/mdx": "^2.0.13",
     "@windrun-huaiin/backend-core": "^12.0.0",
     "@windrun-huaiin/base-ui": "^12.0.0",
-    "@windrun-huaiin/lib": "^12.0.0",
-    "@windrun-huaiin/third-ui": "^12.0.0",
+    "@windrun-huaiin/lib": "^12.0.1",
+    "@windrun-huaiin/third-ui": "^12.0.2",
     "autoprefixer": "^10.4.22",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -104,7 +104,7 @@
     "@types/react-medium-image-zoom": "^3.0.3",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/parser": "^8.46.4",
-    "@windrun-huaiin/dev-scripts": "^12.0.0",
+    "@windrun-huaiin/dev-scripts": "^12.0.2",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.0",
     "eslint-plugin-unused-imports": "^4.3.0",

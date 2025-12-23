@@ -20,10 +20,6 @@
     "verbose": false
   },
   "architectureConfig": {
-    ".": "Diaomao Project",
-    "fumadocs-ui@15.3.3.patch": "fumadocs-ui版本15.3.3补丁",
-    "fumadocs-ui@16.0.9.patch": "fumadocs-ui版本16.0.9补丁",
-    "fumadocs-core@16.0.9.patch": "fumadocs-core版本16.0.9补丁",
-    ".env.local.txt": "config example"
+    ".": "Diaomao Project"
   }
 }

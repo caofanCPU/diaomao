@@ -2,7 +2,7 @@
 title: About Project Structure
 description: Show all source code directories and files
 icon: Gift
-date: 2025-12-21
+date: 2025-12-23
 ---
 
 ## Quick Started
@@ -14,6 +14,9 @@ date: 2025-12-21
       <ZiaFile name="d8-template.mdx" anotion="" href="" />
       <ZiaFile name="README.md" anotion="项目说明文档" href="" />
     </ZiaFolder>
+    <ZiaFolder name=".claude" anotion="" defaultOpen>
+      <ZiaFile name="settings.local.json" anotion="" href="" />
+    </ZiaFolder>
     <ZiaFile name=".env.local" anotion="本地环境变量配置" href="" />
     <ZiaFile name=".env.local.txt" anotion="config example" href="" />
     <ZiaFile name=".gitignore" anotion="Git忽略文件配置" href="" />
@@ -23,12 +26,12 @@ date: 2025-12-21
     </ZiaFolder>
     <ZiaFile name="CHANGELOG.md" anotion="变更记录" href="" />
     <ZiaFile name="components.json" anotion="组件依赖清单" href="" />
-    <ZiaFolder name="database" anotion="数据库SQL" defaultOpen>
+    <ZiaFolder name="database" anotion="" defaultOpen>
       <ZiaFile name="create.sql" anotion="" href="" />
       <ZiaFile name="init-schema.sql" anotion="" href="" />
     </ZiaFolder>
     <ZiaFile name="dev-scripts.config.json" anotion="dev-scripts脚本工具配置" href="" />
-    <ZiaFolder name="docs" anotion="项目设计文档" defaultOpen>
+    <ZiaFolder name="docs" anotion="文档" defaultOpen>
       <ZiaFolder name="design" anotion="" defaultOpen>
         <ZiaFile name="backend-core-integrate.md" anotion="" href="" />
         <ZiaFile name="codex-money.md" anotion="" href="" />
@@ -42,9 +45,9 @@ date: 2025-12-21
         <ZiaFile name="UI.md" anotion="" href="" />
         <ZiaFile name="user-integrate.md" anotion="" href="" />
       </ZiaFolder>
-      <ZiaFile name="WHO-AM-I.md" anotion="网站设计白皮书" href="" />
+      <ZiaFile name="WHO-AM-I.md" anotion="" href="" />
     </ZiaFolder>
-    <ZiaFile name="eslint.config.js" anotion="代码语法检查配置" href="" />
+    <ZiaFile name="eslint.config.js" anotion="" href="" />
     <ZiaFile name="LICENSE" anotion="开源许可证" href="" />
     <ZiaFolder name="messages" anotion="翻译目录" defaultOpen>
       <ZiaFile name="en.json" anotion="" href="" />
@@ -53,13 +56,13 @@ date: 2025-12-21
     <ZiaFile name="next-env.d.ts" anotion="Next.js环境类型声明" href="" />
     <ZiaFile name="next.config.ts" anotion="Next.js项目配置" href="" />
     <ZiaFile name="package.json" anotion="项目依赖与脚本" href="" />
-    <ZiaFolder name="patches" anotion="补丁包" defaultOpen>
+    <ZiaFolder name="patches" anotion="" defaultOpen>
       <ZiaFile name="fumadocs-core@16.0.9.patch" anotion="fumadocs-core版本16.0.9补丁" href="" />
       <ZiaFile name="fumadocs-ui@16.0.9.patch" anotion="fumadocs-ui版本16.0.9补丁" href="" />
     </ZiaFolder>
     <ZiaFile name="postcss.config.mjs" anotion="PostCSS 配置" href="" />
-    <ZiaFolder name="prisma" anotion="Prisma ORM框架" defaultOpen>
-      <ZiaFile name="schema.prisma" anotion="Prisma数据库模型定义" href="" />
+    <ZiaFolder name="prisma" anotion="" defaultOpen>
+      <ZiaFile name="schema.prisma" anotion="" href="" />
     </ZiaFolder>
     <ZiaFile name="README.md" anotion="项目说明文档" href="" />
     <ZiaFile name="source.config.ts" anotion="Fuma数据源扫描配置" href="" />
@@ -68,17 +71,17 @@ date: 2025-12-21
         <ZiaFolder name="[locale]" anotion="Nextjs i18n路由目录" defaultOpen>
           <ZiaFolder name="(clerk)" anotion="Clerk认证" defaultOpen>
             <ZiaFile name="layout.tsx" anotion="布局" href="" />
-            <ZiaFolder name="sign-in" anotion="登录" defaultOpen>
+            <ZiaFolder name="sign-in" anotion="" defaultOpen>
               <ZiaFolder name="[[...sign-in]]" anotion="" defaultOpen>
                 <ZiaFile name="page.tsx" anotion="" href="" />
               </ZiaFolder>
             </ZiaFolder>
-            <ZiaFolder name="sign-up" anotion="注册" defaultOpen>
+            <ZiaFolder name="sign-up" anotion="" defaultOpen>
               <ZiaFolder name="[[...sign-up]]" anotion="" defaultOpen>
                 <ZiaFile name="page.tsx" anotion="" href="" />
               </ZiaFolder>
             </ZiaFolder>
-            <ZiaFolder name="waitlist" anotion="白名单" defaultOpen>
+            <ZiaFolder name="waitlist" anotion="" defaultOpen>
               <ZiaFolder name="[[...waitlist]]" anotion="" defaultOpen>
                 <ZiaFile name="page.tsx" anotion="" href="" />
               </ZiaFolder>
@@ -102,7 +105,7 @@ date: 2025-12-21
               <ZiaFile name="layout.tsx" anotion="布局" href="" />
             </ZiaFolder>
             <ZiaFile name="page.tsx" anotion="" href="" />
-            <ZiaFolder name="pricing" anotion="价格" defaultOpen>
+            <ZiaFolder name="pricing" anotion="" defaultOpen>
               <ZiaFile name="page.tsx" anotion="" href="" />
             </ZiaFolder>
           </ZiaFolder>
@@ -122,28 +125,28 @@ date: 2025-12-21
               <ZiaFile name="route.ts" anotion="" href="" />
             </ZiaFolder>
           </ZiaFolder>
-          <ZiaFolder name="stripe" anotion="Stripe对接" defaultOpen>
-            <ZiaFolder name="checkout" anotion="创建订单API" defaultOpen>
+          <ZiaFolder name="stripe" anotion="" defaultOpen>
+            <ZiaFolder name="checkout" anotion="" defaultOpen>
               <ZiaFile name="route.ts" anotion="" href="" />
             </ZiaFolder>
-            <ZiaFolder name="customer-portal" anotion="客户门户API" defaultOpen>
+            <ZiaFolder name="customer-portal" anotion="" defaultOpen>
               <ZiaFile name="route.ts" anotion="" href="" />
             </ZiaFolder>
           </ZiaFolder>
-          <ZiaFolder name="user" anotion="用户系统" defaultOpen>
-            <ZiaFolder name="anonymous" anotion="匿名用户API" defaultOpen>
+          <ZiaFolder name="user" anotion="" defaultOpen>
+            <ZiaFolder name="anonymous" anotion="" defaultOpen>
               <ZiaFolder name="init" anotion="" defaultOpen>
                 <ZiaFile name="route.ts" anotion="" href="" />
               </ZiaFolder>
             </ZiaFolder>
           </ZiaFolder>
-          <ZiaFolder name="webhook" anotion="回调处理" defaultOpen>
-            <ZiaFolder name="clerk" anotion="Clerk回调" defaultOpen>
+          <ZiaFolder name="webhook" anotion="" defaultOpen>
+            <ZiaFolder name="clerk" anotion="" defaultOpen>
               <ZiaFolder name="user" anotion="" defaultOpen>
                 <ZiaFile name="route.ts" anotion="" href="" />
               </ZiaFolder>
             </ZiaFolder>
-            <ZiaFolder name="stripe" anotion="Stripe回调" defaultOpen>
+            <ZiaFolder name="stripe" anotion="" defaultOpen>
               <ZiaFile name="route.ts" anotion="" href="" />
             </ZiaFolder>
           </ZiaFolder>
@@ -152,17 +155,17 @@ date: 2025-12-21
         <ZiaFile name="sitemap.ts" anotion="网站地图" href="" />
       </ZiaFolder>
       <ZiaFolder name="components" anotion="页面组件" defaultOpen>
-        <ZiaFile name="credit-popover.tsx" anotion="积分组件" href="" />
+        <ZiaFile name="credit-popover.tsx" anotion="" href="" />
         <ZiaFile name="hero.tsx" anotion="首页大字组件" href="" />
         <ZiaFile name="mdx-components.tsx" anotion="FumaMDX组件库(自定义)" href="" />
       </ZiaFolder>
       <ZiaFile name="i18n.ts" anotion="多语言配置" href="" />
       <ZiaFolder name="lib" anotion="工具包" defaultOpen>
         <ZiaFile name="appConfig.ts" anotion="应用全局配置" href="" />
-        <ZiaFile name="fonts.ts" anotion="" href="网站字体" />
+        <ZiaFile name="fonts.ts" anotion="" href="" />
         <ZiaFile name="site-config.ts" anotion="网站图标配置" href="" />
-        <ZiaFile name="source-blog.ts" anotion="" href="博客MDX资源定义" />
-        <ZiaFile name="source-legal.ts" anotion="" href="法律MDX资源定义" />
+        <ZiaFile name="source-blog.ts" anotion="" href="" />
+        <ZiaFile name="source-legal.ts" anotion="" href="" />
       </ZiaFolder>
       <ZiaFolder name="mdx" anotion="FumaMDX文档" defaultOpen>
         <ZiaFolder name="blog" anotion="博客" defaultOpen>
@@ -170,6 +173,7 @@ date: 2025-12-21
           <ZiaFile name="index.mdx" anotion="" href="" />
           <ZiaFile name="ioc.mdx" anotion="月度/统计" href="" />
           <ZiaFile name="meta.json" anotion="FumaMDX元数据" href="" />
+          <ZiaFile name="readme.mdx" anotion="Next.js项目结构" href="" />
         </ZiaFolder>
         <ZiaFolder name="legal" anotion="法律" defaultOpen>
           <ZiaFile name="index.mdx" anotion="" href="" />
@@ -178,7 +182,7 @@ date: 2025-12-21
           <ZiaFile name="terms.mdx" anotion="" href="" />
         </ZiaFolder>
       </ZiaFolder>
-      <ZiaFile name="proxy.ts" anotion="中间件" href="" />
+      <ZiaFile name="proxy.ts" anotion="中间件入口" href="" />
     </ZiaFolder>
     <ZiaFile name="tsconfig.json" anotion="TypeScript配置" href="" />
     <ZiaFile name="tsconfig.node.json" anotion="Node.js相关TypeScript 配置" href="" />
