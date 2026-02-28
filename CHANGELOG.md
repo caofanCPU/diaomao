@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 13.0.0
+
+### Major Changes
+
+- feat(update): upgrade dependencies packages
+
 ## 12.1.0
 
 ### Minor Changes
