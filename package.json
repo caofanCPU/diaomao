@@ -1,6 +1,6 @@
 {
   "name": "@windrun-huaiin/diaomao",
-  "version": "13.0.0",
+  "version": "13.1.0",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -55,9 +55,9 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/mdx": "^2.0.13",
     "@windrun-huaiin/backend-core": "^13.0.0",
-    "@windrun-huaiin/base-ui": "^13.0.0",
+    "@windrun-huaiin/base-ui": "^13.1.0",
     "@windrun-huaiin/lib": "^13.0.0",
-    "@windrun-huaiin/third-ui": "^13.0.1",
+    "@windrun-huaiin/third-ui": "^13.1.2",
     "autoprefixer": "^10.4.27",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

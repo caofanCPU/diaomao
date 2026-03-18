@@ -1,6 +1,8 @@
  import Image from "next/image"
 import { getTranslations } from 'next-intl/server'
 import { globalLucideIcons as icons} from '@windrun-huaiin/base-ui/components/server'
+import { themeHeroEyesOnClass } from '@windrun-huaiin/base-ui/lib'
+import { cn } from "@windrun-huaiin/lib"
 import { GradientButton } from "@windrun-huaiin/third-ui/fuma/mdx"
 
 export async function Hero({ locale }: { locale: string }) {
@@ -11,7 +13,7 @@ export async function Hero({ locale }: { locale: string }) {
       <div className="flex-1 space-y-6">
         <h1 className="text-4xl md:text-6xl font-bold leading-tight">
           {t('mainTitle')}<br />{" "}
-          <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-pink-600">{t('mainEyesOn')}</span>
+          <span className={cn("text-transparent bg-clip-text", themeHeroEyesOnClass)}>{t('mainEyesOn')}</span>
         </h1>
         <p className="text-lg text-gray-400 max-w-2xl">
           {t('description')}

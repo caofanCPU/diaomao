@@ -1,5 +1,15 @@
 # @windrun-huaiin/diaomao
 
+## 13.1.0
+
+### Minor Changes
+
+- feat(theme): upgrade dependencies packages
+  - support 5 colors by env config
+  - purple, orange, indigo, emerald, rose by `NEXT_PUBLIC_STYLE_ICON_COLOR`
+  - remove `NEXT_PUBLIC_STYLE_SVG_ICON_COLOR` cause unuseful
+  - complete legal docs
+
 ## 13.0.0
 
 ### Major Changes
