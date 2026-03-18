@@ -10,7 +10,7 @@
     "mainTitle": "Ship a paid AI product with",
     "mainEyesOn": "Diaomao",
     "description": "Pricing that upgrades itself. Credits that never leak. Docs that stay in sync. Stripe flows that just work. Diaomao is the full-stack chassis trusted by makers who refuse to waste another weekend on billing infrastructure.",
-    "button": "Get Diaomao →",
+    "button": "Get Diaomao",
     "about": "SSR-first • Mobile-perfected • Fingerprint → Clerk seamless onboarding",
     "heroImageAlt": "Diaomao – Modern pricing, credit dashboard and documentation system",
     "heroImageUrl": "https://r2.d8ger.com/default.webp"
@@ -359,7 +359,7 @@
     "eyesOn": "Diaomao",
     "description1": "One template. Every hard part solved.",
     "description2": "Stripe, credits, auth— all production-ready out of the box.",
-    "button": "Get Diaomao Now →",
+    "button": "Get Diaomao Now",
     "url": "https://newspaper-template.org/"
   },
   "languageDetection": {
