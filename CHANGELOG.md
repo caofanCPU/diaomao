@@ -1,5 +1,12 @@
 # @windrun-huaiin/diaomao
 
+## 13.2.0
+
+### Minor Changes
+
+- fix(legal): fixed website name(IMPORTANT)
+  - fixed mermaid graph by upgrade dependency
+
 ## 13.1.0
 
 ### Minor Changes
