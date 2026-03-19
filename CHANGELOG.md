@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 14.0.0
+
+### Major Changes
+
+- feat(clerk): upgrade clerk dependency
+
 ## 13.2.1
 
 ### Patch Changes
