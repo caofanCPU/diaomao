@@ -13,7 +13,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   return (
     <>
       { (forceShow || isDev) && <FingerprintStatus /> }
-      <FingerprintStatus />
       <Hero locale={locale} />
       <Gallery
         locale={locale}

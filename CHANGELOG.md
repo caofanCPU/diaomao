@@ -1,5 +1,12 @@
 # @windrun-huaiin/diaomao
 
+## 14.1.0
+
+### Minor Changes
+
+- feat(cli): use cli for upgrade dependencies
+  - `@windrun-huaiin/dev-scripts`, from `14.1.2`
+
 ## 14.0.0
 
 ### Major Changes
