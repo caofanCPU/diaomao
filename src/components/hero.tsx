@@ -1,9 +1,9 @@
- import Image from "next/image"
 import { getTranslations } from 'next-intl/server'
 import { globalLucideIcons as icons} from '@windrun-huaiin/base-ui/components/server'
 import { themeHeroEyesOnClass } from '@windrun-huaiin/base-ui/lib'
 import { cn } from "@windrun-huaiin/lib"
 import { GradientButton } from "@windrun-huaiin/third-ui/fuma/mdx"
+import { DelayedImg } from "@windrun-huaiin/third-ui/main"
 
 export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'hero' });
@@ -31,15 +31,16 @@ export async function Hero({ locale }: { locale: string }) {
       </div>
       <div className="flex-1 relative flex justify-center md:justify-end">
         <div className="rounded-lg overflow-hidden shadow-purple-500/20 group">
-          <Image
-            src={t('heroImageUrl')}
-            alt={t('heroImageAlt')}
-            width={500}
-            height={500}
-            priority
-            className="h-auto w-full rounded-lg transition duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 35vw"
-          />
+        <DelayedImg
+              src={t('heroImageUrl')}
+              alt={t('heroImageAlt')}
+              fill
+              preload
+              sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 35vw"
+              className="rounded-lg object-cover group-hover:scale-105"
+              wrapperClassName="h-full w-full"
+              placeholderClassName="rounded-lg"
+            />
         </div>
       </div>
     </section>
