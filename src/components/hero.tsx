@@ -30,8 +30,9 @@ export async function Hero({ locale }: { locale: string }) {
         </div>
       </div>
       <div className="flex-1 relative flex justify-center md:justify-end">
-        <div className="rounded-lg overflow-hidden shadow-purple-500/20 group">
-        <DelayedImg
+        <div className="w-full max-w-[800px]">
+          <div className="group relative aspect-square overflow-hidden rounded-lg shadow-purple-500/20">
+            <DelayedImg
               src={t('heroImageUrl')}
               alt={t('heroImageAlt')}
               fill
@@ -41,6 +42,7 @@ export async function Hero({ locale }: { locale: string }) {
               wrapperClassName="h-full w-full"
               placeholderClassName="rounded-lg"
             />
+          </div>
         </div>
       </div>
     </section>

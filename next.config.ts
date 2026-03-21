@@ -31,10 +31,6 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'favicon.im',
-      },
-      {
-        protocol: 'https',
-        hostname: 'preview.reve.art',
       }
     ],
     // allow remote svg image
