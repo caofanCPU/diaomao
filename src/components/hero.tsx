@@ -9,8 +9,8 @@ export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'hero' });
 
   return (
-    <section className="mx-auto mt-12 max-w-6xl flex flex-col gap-10 px-4 py-8 md:flex-row md:items-center md:gap-12">
-      <div className="flex-1 space-y-6">
+    <section className="mx-auto mt-12 flex max-w-6xl flex-col gap-10 px-6 py-8 md:min-w-[calc(100vw-22rem)] md:px-4 md:flex-row md:items-center md:gap-12">
+      <div className="space-y-6 md:w-1/2">
         <h1 className="text-4xl md:text-6xl font-bold leading-tight">
           {t('mainTitle')}<br />{" "}
           <span className={cn("text-transparent bg-clip-text", themeHeroEyesOnClass)}>{t('mainEyesOn')}</span>
@@ -29,9 +29,9 @@ export async function Hero({ locale }: { locale: string }) {
           <span>{t('about')}</span>
         </div>
       </div>
-      <div className="flex-1 relative flex justify-center md:justify-end">
-        <div className="w-full max-w-[800px]">
-          <div className="group relative aspect-square overflow-hidden rounded-lg shadow-purple-500/20">
+      <div className="relative flex justify-center md:w-1/2 md:justify-end">
+        <div className="w-full max-w-[500px]">
+          <div className="group relative aspect-890/569 overflow-hidden rounded-lg shadow-purple-500/20">
             <DelayedImg
               src={t('heroImageUrl')}
               alt={t('heroImageAlt')}

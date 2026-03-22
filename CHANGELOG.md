@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 14.2.0
+
+### Minor Changes
+
+- feat(upgrade): user source and user init by upgrade dependences
+
 ## 14.1.1
 
 ### Patch Changes
