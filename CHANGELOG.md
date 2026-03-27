@@ -1,5 +1,14 @@
 # @windrun-huaiin/diaomao
 
+## 14.3.0
+
+### Minor Changes
+
+- feat(mdx): fuma TOC component customizability
+  - support theme color with mdx TOC
+  - use fluent svg path for good view
+  - remove fumadocs patch 'cause no need them at all after this version
+
 ## 14.2.0
 
 ### Minor Changes
