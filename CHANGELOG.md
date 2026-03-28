@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 14.3.1
+
+### Patch Changes
+
+- feat(mdx): fuma TOC component customizability
+
 ## 14.3.0
 
 ### Minor Changes
