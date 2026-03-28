@@ -184,8 +184,8 @@ importers:
         specifier: ^8.56.1
         version: 8.57.2(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
       '@windrun-huaiin/dev-scripts':
-        specifier: ^14.1.3
-        version: 14.1.3(typescript@5.9.3)
+        specifier: ^14.1.4
+        version: 14.1.4(typescript@5.9.3)
       baseline-browser-mapping:
         specifier: ^2.10.0
         version: 2.10.11
@@ -2261,8 +2261,8 @@ packages:
       tailwind-merge: ^3.5.0
       tailwindcss: ^4.2.1
 
-  '@windrun-huaiin/dev-scripts@14.1.3':
-    resolution: {integrity: sha512-nhyKdJiawEpi9iCg6gl43ZFG4Orx7yBR2nu1d2/gx0gI31BlmCmPrKcZ56D+I0C7r/F30+UgRed/GqDm9bFW2g==}
+  '@windrun-huaiin/dev-scripts@14.1.4':
+    resolution: {integrity: sha512-PxQSNeUAgZ9+FKiqM/Uy6gXoM781ggszEZN0svt+3autgngWD81yZSyXUXdi+alxx/78SQMjvDtLrd8hN8PWbg==}
     hasBin: true
     peerDependencies:
       typescript: ^5.8.3
@@ -7051,7 +7051,7 @@ snapshots:
       - '@types/react-dom'
       - supports-color
 
-  '@windrun-huaiin/dev-scripts@14.1.3(typescript@5.9.3)':
+  '@windrun-huaiin/dev-scripts@14.1.4(typescript@5.9.3)':
     dependencies:
       commander: 12.1.0
       fast-glob: 3.3.3

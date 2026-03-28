@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 14.3.3
+
+### Patch Changes
+
+- fix(update): gitignore issue
+
 ## 14.3.2
 
 ### Patch Changes
