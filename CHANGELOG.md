@@ -1,5 +1,15 @@
 # @windrun-huaiin/diaomao
 
+## 14.3.4
+
+### Patch Changes
+
+- fix(upgrade): Update package dependencies and improve authentication middleware
+
+  - Bump versions of `@windrun-huaiin/backend-core` to 14.6.0 and `@windrun-huaiin/third-ui` to 14.5.0
+  - Refactor authentication middleware in `src/proxy.ts` to utilize `buildProtectedPageRoutePatterns` for route matching
+  - Simplify `CreditPopover` component by using `getOptionalServerAuthUser` for user authentication
+
 ## 14.3.3
 
 ### Patch Changes

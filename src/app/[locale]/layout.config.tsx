@@ -7,13 +7,11 @@ import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { getTranslations } from 'next-intl/server';
 import { CreditPopover } from '@/components/credit-popover';
 import { ExtendedLinkItem, HomeTitle } from '@windrun-huaiin/third-ui/fuma/base';
-import { getOptionalAuth } from '@windrun-huaiin/third-ui/clerk/patch/optional-auth';
 import { getAsNeededLocalizedUrl } from '@windrun-huaiin/lib';
 
 // home page normal menu
 export async function homeNavLinks(locale: string): Promise<ExtendedLinkItem[]> {
   const t1 = await getTranslations({ locale: locale, namespace: 'linkPreview' });
-  const { userId } = await getOptionalAuth();
   return [
     {
       icon: <icons.BugOff />,
@@ -29,7 +27,7 @@ export async function homeNavLinks(locale: string): Promise<ExtendedLinkItem[]> 
       type: 'custom',
       secondary: true,
       mobilePinned: true,
-      children: userId ? <CreditPopover locale={locale} /> : null,
+      children: <CreditPopover locale={locale} />,
     },
     {
       type: 'custom',
