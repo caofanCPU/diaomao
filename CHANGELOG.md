@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 15.0.0
+
+### Major Changes
+
+- fix(upgrade): `@windrun-huaiin` dependencies now fix a serious build packages issue util version `15.1.0`
+
 ## 14.3.4
 
 ### Patch Changes
