@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 16.0.0
+
+### Major Changes
+
+- feat(i18n): `@windrun-huaiin` upgrade i18n handler for supporting custom biz translation json file
+
 ## 15.0.0
 
 ### Major Changes
