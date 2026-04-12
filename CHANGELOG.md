@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 16.0.1
+
+### Patch Changes
+
+- feat(hero): `@windrun-huaiin` upgrade hero components
+
 ## 16.0.0
 
 ### Major Changes

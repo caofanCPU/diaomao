@@ -1,6 +1,6 @@
 {
   "i18n": {
-    "locales": ["en", "zh"],
+    "locales": ["en"],
     "defaultLocale": "en",
     "messageRoot": "messages"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@windrun-huaiin/diaomao",
-  "version": "16.0.0",
+  "version": "16.0.1",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -54,7 +54,7 @@
     "@windrun-huaiin/backend-core": "15.1.0",
     "@windrun-huaiin/base-ui": "15.1.1",
     "@windrun-huaiin/lib": "15.1.1",
-    "@windrun-huaiin/third-ui": "15.1.0",
+    "@windrun-huaiin/third-ui": "15.1.1",
     "autoprefixer": "^10.4.27",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -99,7 +99,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/parser": "^8.56.1",
-    "@windrun-huaiin/dev-scripts": "^15.2.1",
+    "@windrun-huaiin/dev-scripts": "^15.3.0",
     "baseline-browser-mapping": "^2.10.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.1.6",
