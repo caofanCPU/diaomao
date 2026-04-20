@@ -140,3 +140,6 @@ dist
 
 
 /generated/prisma
+.gitnexus
+AGENTS.md
+CLAUDE.md

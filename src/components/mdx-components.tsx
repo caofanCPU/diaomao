@@ -18,30 +18,49 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import type { MDXComponents, MDXProps } from "mdx/types";
 import { TypeTable } from "fumadocs-ui/components/type-table";
 
-import { globalLucideIcons as icons } from "@windrun-huaiin/base-ui/components/server";
 import { appConfig } from "@/lib/appConfig";
+
+import {
+  CSSIcon,
+  CSVIcon,
+  DiffIcon,
+  HtmlIcon,
+  HttpIcon,
+  JavaIcon,
+  JsonIcon,
+  LogIcon,
+  MDXIcon,
+  RegexIcon,
+  SQLIcon,
+  SchemeIcon,
+  SquareDashedBottomCodeIcon,
+  TxtIcon,
+  XMLIcon,
+  YamlIcon,
+  globalLucideIcons
+} from "@windrun-huaiin/base-ui/icons";
 
 // create a mapping from language identifier to icon component
 const languageToIconMap: Record<string, React.ReactNode> = {
-  css: <icons.CSS />,
-  csv: <icons.CSV />,
-  diff: <icons.Diff />,
-  html: <icons.Html />,
-  http: <icons.Http />,
-  java: <icons.Java />,
-  json: <icons.Json />,
-  jsonc: <icons.SquareDashedBottomCode />,
-  log: <icons.Log />,
-  mdx: <icons.MDX />,
-  regex: <icons.Regex />,
-  sql: <icons.SQL />,
-  text: <icons.Txt />,
-  txt: <icons.Txt />,
-  plaintext: <icons.Txt />,
-  scheme: <icons.Scheme />,
-  xml: <icons.XML />,
-  yaml: <icons.Yaml />,
-  yml: <icons.Yaml />,
+  css: <CSSIcon />,
+  csv: <CSVIcon />,
+  diff: <DiffIcon />,
+  html: <HtmlIcon />,
+  http: <HttpIcon />,
+  java: <JavaIcon />,
+  json: <JsonIcon />,
+  jsonc: <SquareDashedBottomCodeIcon />,
+  log: <LogIcon />,
+  mdx: <MDXIcon />,
+  regex: <RegexIcon />,
+  sql: <SQLIcon />,
+  text: <TxtIcon />,
+  txt: <TxtIcon />,
+  plaintext: <TxtIcon />,
+  scheme: <SchemeIcon />,
+  xml: <XMLIcon />,
+  yaml: <YamlIcon />,
+  yml: <YamlIcon />,
 };
 
 // used in source.config.ts custom transformer:parse-code-language, used together
@@ -140,7 +159,7 @@ export function getMDXComponents(
     ...fumadocsUiComponents,
     ...customUiComponents,
     // use icons from the project's unified icon library
-    ...icons,
+    ...globalLucideIcons,
     ...components,
   };
 }
