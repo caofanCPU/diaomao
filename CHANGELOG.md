@@ -1,5 +1,13 @@
 # @windrun-huaiin/diaomao
 
+## 20.0.0
+
+### Major Changes
+
+- feat(upgrade): `@windrun-huaiin` upgrade
+  - stripe update
+  - site icon update
+
 ## 16.0.1
 
 ### Patch Changes
