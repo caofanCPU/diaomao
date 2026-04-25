@@ -1,5 +1,12 @@
 # @windrun-huaiin/diaomao
 
+## 26.0.0
+
+### Major Changes
+
+- feat(upgrade): `@windrun-huaiin` upgrade
+  - uniform version `26.0.0`
+
 ## 25.0.0
 
 ### Major Changes
