@@ -1,5 +1,12 @@
 # @windrun-huaiin/diaomao
 
+## 25.0.0
+
+### Major Changes
+
+- feat(upgrade): `@windrun-huaiin` upgrade
+  - use local-md
+
 ## 20.0.0
 
 ### Major Changes

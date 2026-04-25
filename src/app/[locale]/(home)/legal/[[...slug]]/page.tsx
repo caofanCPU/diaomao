@@ -17,7 +17,8 @@ const { Page, generateStaticParams, generateMetadata } = createFumaPage({
   supportedLocales: appConfig.i18n.locales as string[],
   showBreadcrumb: false,
   showTableOfContent: true,
-  showTableOfContentPopover: false
+  showTableOfContentPopover: false,
+  tocRenderMode: 'fumadocs-clerk'
 });
 
 export default Page;
