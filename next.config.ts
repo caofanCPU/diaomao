@@ -30,13 +30,21 @@ const nextConfig: NextConfig = {
   },
 
   // Ensuring outputFileTracingIncludes is a top-level property
+  // Ensure MDX files for the llm-content API route are included in the serverless function
+  // Adjust the key if your API route path is different in the output structure
   outputFileTracingIncludes: {
-    // Ensure MDX files for the llm-content API route are included in the serverless function
-    // Adjust the key if your API route path is different in the output structure
-    '/api/blog/llm-content': ['./src/mdx/blog/**/*'],  
-    '/api/legal/llm-content': ['./src/mdx/legal/**/*'],
-    '/[locale]/blog/[[...slug]]': ['./src/mdx/blog/**/*'],
-    '/[locale]/legal/[[...slug]]': ['./src/mdx/legal/**/*'],
+    '/api/blog/llm-content': ['./src/mdx/blog/**/*', './src/mdx/**/*'],
+    '/api/legal/llm-content': ['./src/mdx/legal/**/*', './src/mdx/**/*'],
+
+    '/blog': ['./src/mdx/blog/**/*', './src/mdx/**/*'],
+    '/blog/[[...slug]]': ['./src/mdx/blog/**/*', './src/mdx/**/*'],
+    '/[locale]/blog': ['./src/mdx/blog/**/*', './src/mdx/**/*'],
+    '/[locale]/blog/[[...slug]]': ['./src/mdx/blog/**/*', './src/mdx/**/*'],
+
+    '/legal': ['./src/mdx/legal/**/*', './src/mdx/**/*'],
+    '/legal/[[...slug]]': ['./src/mdx/legal/**/*', './src/mdx/**/*'],
+    '/[locale]/legal': ['./src/mdx/legal/**/*', './src/mdx/**/*'],
+    '/[locale]/legal/[[...slug]]': ['./src/mdx/legal/**/*', './src/mdx/**/*'],
   }
 };
 
