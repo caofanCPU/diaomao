@@ -1,17 +1,17 @@
 import { baseOptions, homeNavLinks, levelNavLinks } from '@/app/[locale]/layout.config';
-import { showBanner } from '@/lib/appConfig';
+import { showBanner, localePrefixAsNeeded, defaultLocale } from '@/lib/appConfig';
+import { i18n } from '@/i18n';
 import { fingerprintConfig } from '@windrun-huaiin/backend-core/lib';
 import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
-import { CustomHomeLayout } from '@windrun-huaiin/third-ui/fuma/base';
-import { type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
+import { SiteHomeLayout, type SiteHomeLayoutConfig } from '@windrun-huaiin/third-ui/fuma/base';
 import type { ReactNode } from 'react';
 
-async function homeOptions(locale: string): Promise<HomeLayoutProps> {
+async function homeOptions(locale: string): Promise<SiteHomeLayoutConfig> {
   return {
     ...(await baseOptions(locale)),
     links: [
-      ...(await levelNavLinks(locale)),
       ...(await homeNavLinks(locale)),
+      ...(await levelNavLinks(locale)),
     ]
   };
 }
@@ -25,8 +25,9 @@ export default async function Layout({
 }) {
   const { locale } = await params;
   const customeOptions = await homeOptions(locale);
-  const homeLayoutOptions: HomeLayoutProps = {
+  const homeLayoutOptions: SiteHomeLayoutConfig = {
     ...customeOptions,
+    i18n,
     searchToggle: {
       enabled: false,
     },
@@ -38,19 +39,23 @@ export default async function Layout({
 
   return (
     <FingerprintProvider config={fingerprintConfig}>
-      <CustomHomeLayout
+      <SiteHomeLayout
         locale={locale}
-        options={homeLayoutOptions}
-        showBanner={showBanner}
-        floatingNav={true}
-        actionOrders={{
-          desktop: ['search', 'theme', 'github', 'i18n', 'secondary'],
-          mobileBar: ['search', 'pinned', 'menu'],
-          mobileMenu: ['theme', 'i18n', 'separator', 'secondary', 'github'],
+        config={{
+          ...homeLayoutOptions,
+          localePrefixAsNeeded,
+          defaultLocale,
+          showBanner,
+          floatingNav: true,
+          actionOrders: {
+            desktop: ['search', 'theme', 'github', 'i18n', 'secondary'],
+            mobileBar: ['search', 'pinned', 'menu'],
+            mobileMenu: ['theme', 'i18n', 'separator', 'secondary', 'github'],
+          },
         }}
       >
         {children}
-      </CustomHomeLayout>
+      </SiteHomeLayout>
     </FingerprintProvider>
   );
 }

@@ -2,7 +2,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { legalSource } from '@/lib/source-legal';
+import { getContentSource } from '@/lib/content-source';
 import { appConfig } from '@/lib/appConfig';
 import { LLMCopyHandler } from '@windrun-huaiin/third-ui/fuma/server';
 
@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const locale = searchParams.get('locale') ?? appConfig.i18n.defaultLocale;
   const requestedPath = searchParams.get('path') || '';
+  const legalSource = await getContentSource('legal');
   
   const result = await LLMCopyHandler({
     sourceDir: appConfig.mdxSourceDir.legal,

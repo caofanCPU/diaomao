@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { blogSource } from '@/lib/source-blog';
+import { getContentSource } from '@/lib/content-source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 export default async function Layout({
@@ -10,6 +10,7 @@ export default async function Layout({
   children: ReactNode;
 }) {
   const { locale } = await params;
+  const blogSource = await getContentSource('blog');
   return (
     <DocsLayout sidebar={{enabled: false}} searchToggle={{enabled: false}} tree={blogSource.pageTree[locale]}>
       {children}

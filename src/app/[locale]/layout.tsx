@@ -1,66 +1,54 @@
-import { appConfig, generatedLocales } from "@/lib/appConfig";
-import { montserrat } from '@/lib/fonts';
-import { GoogleAnalyticsScript, MicrosoftClarityScript } from "@windrun-huaiin/base-ui/components/server";
-import { cn } from '@windrun-huaiin/lib/utils';
+import { appConfig, generatedLocales, localePrefixAsNeeded, defaultLocale } from "@/lib/appConfig";
 import { getFumaTranslations } from '@windrun-huaiin/third-ui/fuma/server';
+import { createLocalizedSiteMetadata } from '@windrun-huaiin/third-ui/lib/seo-metadata';
 import { NProgressBar } from '@windrun-huaiin/third-ui/main';
-import { RootProvider } from "fumadocs-ui/provider/next";
+import { DocsRootProvider } from '@windrun-huaiin/third-ui/fuma/base';
 import { ClerkProviderClient } from '@windrun-huaiin/third-ui/clerk';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
-import { getAsNeededLocalizedUrl } from '@windrun-huaiin/lib';
-import React from 'react';
+import { getMessages, setRequestLocale } from 'next-intl/server';
+import { montserrat } from "@/lib/fonts";
+import { cn } from '@windrun-huaiin/lib';
 import './globals.css';
+import React from 'react';
 
 export const dynamic = 'force-dynamic'
 
+// 网站元数据
 export async function generateMetadata({
   params: paramsPromise
 }: {
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await paramsPromise;
-  const t = await getTranslations({ locale, namespace: 'home' });
-
-  return {
-    title: t('webTitle'),
-    description: t('webDescription'),
-    keywords: t('keywords'),
-    alternates: {
-      canonical: `${appConfig.baseUrl}${getAsNeededLocalizedUrl(locale, '/')}`,
-      languages: {
-        "en": `${appConfig.baseUrl}${getAsNeededLocalizedUrl('en', '/')}`,
-        "zh": `${appConfig.baseUrl}${getAsNeededLocalizedUrl('zh', '/')}`,
-      }
-    },
-    icons: [
-      { rel: "icon", type: 'image/png', sizes: "16x16", url: "/favicon-16x16.png" },
-      { rel: "icon", type: 'image/png', sizes: "32x32", url: "/favicon-32x32.png" },
-      { rel: "icon", type: 'image/ico', url: "/favicon.ico" },
-      { rel: "apple-touch-icon", sizes: "180x180", url: "/favicon-180x180.png" },
-      { rel: "android-chrome", sizes: "512x512", url: "/favicon-512x512.png" },
-    ]
-  }
+  return createLocalizedSiteMetadata({
+    locale,
+    baseUrl: appConfig.baseUrl,
+    locales: appConfig.i18n.locales,
+    defaultLocale,
+    localePrefixAsNeeded,
+  });
 }
 
 export default async function RootLayout({
   children,
-  params: paramsPromise
+  params: paramsPromise  // 重命名参数
 }: {
   children: React.ReactNode
   params: Promise<{ locale: string }>
 }) {
-  const { locale } = await paramsPromise;
+  console.log('RootLayout-React version:', React.version);
+  const { locale } = await paramsPromise;  // 使用新名称
   setRequestLocale(locale);
   const messages = await getMessages();
   const fumaTranslations = await getFumaTranslations(locale);
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <NextIntlClientProvider messages={messages}>
         <body className={cn(montserrat.className)}>
           <NProgressBar />
-          <ClerkProviderClient locale={locale}>
-            <RootProvider
+          <ClerkProviderClient locale={locale} localePrefixAsNeeded={localePrefixAsNeeded} defaultLocale={defaultLocale}>
+            <DocsRootProvider
               i18n={{
                 locale: locale,
                 locales: generatedLocales,
@@ -68,11 +56,9 @@ export default async function RootLayout({
               }}
             >
               {children}
-            </RootProvider>
+            </DocsRootProvider>
           </ClerkProviderClient>
         </body>
-        <GoogleAnalyticsScript />
-        <MicrosoftClarityScript />
       </NextIntlClientProvider>
     </html>
   )

@@ -1,10 +1,7 @@
 import createNextIntlPlugin from 'next-intl/plugin';
-import { createMDX } from 'fumadocs-mdx/next';
 import { NextConfig } from 'next';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
-
-const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
@@ -13,14 +10,8 @@ const nextConfig: NextConfig = {
     '@windrun-huaiin/base-ui',
     '@windrun-huaiin/third-ui',
     '@windrun-huaiin/lib',
+    '@windrun-huaiin/fumadocs-local-md',
   ],
-  // eslint: {
-  //   ignoreDuringBuilds: true,
-  // },
-  // typescript: {
-  //   ignoreBuildErrors: true,
-  // },
-  
   // mdx config
   reactStrictMode: true,
 
@@ -37,12 +28,6 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
-  // experimental: {
-  //   webpackBuildWorker: true,
-  //   parallelServerBuildTraces: true,
-  //   parallelServerCompiles: true,
-  // },
 
   // Ensuring outputFileTracingIncludes is a top-level property
   outputFileTracingIncludes: {
@@ -50,7 +35,9 @@ const nextConfig: NextConfig = {
     // Adjust the key if your API route path is different in the output structure
     '/api/blog/llm-content': ['./src/mdx/blog/**/*'],  
     '/api/legal/llm-content': ['./src/mdx/legal/**/*'],
+    '/[locale]/blog/[[...slug]]': ['./src/mdx/blog/**/*'],
+    '/[locale]/legal/[[...slug]]': ['./src/mdx/legal/**/*'],
   }
 };
 
-export default withNextIntl(withMDX(nextConfig));
+export default withNextIntl(nextConfig);
