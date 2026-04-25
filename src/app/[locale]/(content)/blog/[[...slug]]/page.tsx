@@ -16,12 +16,17 @@ const { Page, generateStaticParams, generateMetadata } = createFumaPage({
   copyButtonComponent: <LLMCopyButton />,
   siteIcon: <SiteIcon />,
   FallbackPage: NotFoundPage,
-  supportedLocales: appConfig.i18n.locales as string[],
   showBreadcrumb: false,
   showTableOfContent: true,
   showTableOfContentPopover: false,
   tocRenderMode: 'portable-clerk'
 });
 
-export default Page;
+export default async function BlogPage(props: {
+  params: Promise<{ locale: string; slug?: string[] }>;
+}) {
+  const { locale, slug } = await props.params;
+  console.log('[blog page] entered', { locale, slug });
+  return <Page {...props} />;
+}
 export { generateStaticParams, generateMetadata };

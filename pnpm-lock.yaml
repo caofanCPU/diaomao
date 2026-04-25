@@ -54,8 +54,8 @@ importers:
         specifier: 22.0.0
         version: 22.0.0
       '@windrun-huaiin/fumadocs-local-md':
-        specifier: 26.0.0
-        version: 26.0.0(@types/estree-jsx@1.0.5)(@types/estree@1.0.8)(@types/hast@3.0.4)(@types/mdx@2.0.13)(@types/react@19.2.14)(@types/unist@3.0.3)(fumadocs-core@16.8.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@0.577.0(react@19.2.4))(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: 26.0.2
+        version: 26.0.2(@types/estree-jsx@1.0.5)(@types/estree@1.0.8)(@types/hast@3.0.4)(@types/mdx@2.0.13)(@types/react@19.2.14)(@types/unist@3.0.3)(fumadocs-core@16.8.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@0.577.0(react@19.2.4))(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@windrun-huaiin/lib':
         specifier: 26.0.0
         version: 26.0.0(clsx@2.1.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tailwind-merge@3.5.0)
@@ -1999,8 +1999,8 @@ packages:
     peerDependencies:
       typescript: ^5.8.3
 
-  '@windrun-huaiin/fumadocs-local-md@26.0.0':
-    resolution: {integrity: sha512-LoB/lH5eKt05vl6QnvtoY1zC9hFnotnA4IdyVr25uj7deSNsv7t/2k9n7vIG46EEI7A+Vlwd1ZioFQX6Rw/sHg==}
+  '@windrun-huaiin/fumadocs-local-md@26.0.2':
+    resolution: {integrity: sha512-xDgrY4hgbfkA4Xd6wkj9nJTqlSEPFRaR7EynJwLDMOZfdEfRn3Km7JSB4nHFWbGAxKIjfAATHBCoY1I9Zv/vKA==}
     peerDependencies:
       '@types/estree': '*'
       '@types/estree-jsx': '*'
@@ -6627,7 +6627,7 @@ snapshots:
       typescript: 5.9.3
       yaml: 2.8.3
 
-  '@windrun-huaiin/fumadocs-local-md@26.0.0(@types/estree-jsx@1.0.5)(@types/estree@1.0.8)(@types/hast@3.0.4)(@types/mdx@2.0.13)(@types/react@19.2.14)(@types/unist@3.0.3)(fumadocs-core@16.8.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@0.577.0(react@19.2.4))(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@windrun-huaiin/fumadocs-local-md@26.0.2(@types/estree-jsx@1.0.5)(@types/estree@1.0.8)(@types/hast@3.0.4)(@types/mdx@2.0.13)(@types/react@19.2.14)(@types/unist@3.0.3)(fumadocs-core@16.8.2(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@0.577.0(react@19.2.4))(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@mdx-js/mdx': 3.1.1
       '@standard-schema/spec': 1.1.0

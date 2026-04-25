@@ -10,6 +10,7 @@ export default async function Layout({
   children: ReactNode;
 }) {
   const { locale } = await params;
+  console.log('[blog layout] entered', { locale });
   const blogSource = await getContentSource('blog');
   return (
     <DocsLayout sidebar={{enabled: false}} searchToggle={{enabled: false}} tree={blogSource.pageTree[locale]}>
