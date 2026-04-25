@@ -37,8 +37,6 @@ const nextConfig: NextConfig = {
     '/api/legal/llm-content': ['./src/mdx/legal/**/*'],
     '/[locale]/blog/[[...slug]]': ['./src/mdx/blog/**/*'],
     '/[locale]/legal/[[...slug]]': ['./src/mdx/legal/**/*'],
-    // '/[locale]/(content)/blog/[[...slug]]': ['./src/mdx/blog/**/*'],
-    // '/[locale]/(home)/legal/[[...slug]]': ['./src/mdx/legal/**/*'],
   }
 };
 
