@@ -10,8 +10,8 @@ async function homeOptions(locale: string): Promise<SiteHomeLayoutConfig> {
   return {
     ...(await baseOptions(locale)),
     links: [
-      ...(await homeNavLinks(locale)),
       ...(await levelNavLinks(locale)),
+      ...(await homeNavLinks(locale)),
     ]
   };
 }

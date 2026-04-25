@@ -1,15 +1,31 @@
-import { toSiteMdxFeatures } from '@windrun-huaiin/contracts/mdx';
-import { createSiteMdxComponents } from '@windrun-huaiin/third-ui/fuma/server/site-mdx-components';
+import { createSiteMdxComponents } from '@windrun-huaiin/third-ui/fuma/server/site-mdx/base';
+// import { createCodeMdxComponents } from '@windrun-huaiin/third-ui/fuma/server/site-mdx/features/code';
+// import { createMathMdxComponents } from '@windrun-huaiin/third-ui/fuma/server/site-mdx/features/math';
+import { createMermaidMdxComponents } from '@windrun-huaiin/third-ui/fuma/server/site-mdx/features/mermaid';
+// import { createTypeTableMdxComponents } from '@windrun-huaiin/third-ui/fuma/server/site-mdx/features/type-table';
 import { globalLucideIcons } from '@windrun-huaiin/base-ui/icons';
 import { appConfig } from '@/lib/appConfig';
-import { ddaasMdxCapabilities } from '@/lib/mdx-capabilities';
 
 export const getMDXComponents = createSiteMdxComponents({
-  features: toSiteMdxFeatures(ddaasMdxCapabilities),
-  imageFallbackSrc: appConfig.style.placeHolder.image,
-  cdnBaseUrl: appConfig.style.cdnBaseUrl,
-  watermarkEnabled: appConfig.style.watermark.enabled,
-  watermarkText: appConfig.style.watermark.text,
+  baseOptions: {
+    imageFallbackSrc: appConfig.style.placeHolder.image,
+    cdnBaseUrl: appConfig.style.cdnBaseUrl,
+  },
+  features: [
+    // code
+    // createCodeMdxComponents(),
+
+    // math
+    // createMathMdxComponents(),
+
+    // npm, no need components render, just need source handler
+
+    // mermaid
+    createMermaidMdxComponents(appConfig.style.watermark.enabled, appConfig.style.watermark.text),
+
+    // type-table
+    // createTypeTableMdxComponents(),
+  ],
   additionalComponents: {
     ...globalLucideIcons,
   },

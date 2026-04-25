@@ -79,10 +79,6 @@ export async function homeNavLinks(locale: string): Promise<SiteNavItemConfig[]>
   const t1 = await getTranslations({ locale: locale, namespace: 'linkPreview' });
   return [
     {
-      text: t1('blog'),
-      url: getAsNeededLocalizedUrl(locale, '/blog', localePrefixAsNeeded, defaultLocale),
-    },
-    {
       text: t1('pricing'),
       url: getAsNeededLocalizedUrl(locale, '/pricing', localePrefixAsNeeded, defaultLocale),
     },
