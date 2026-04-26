@@ -19,7 +19,6 @@ export default async function Pricing({
   const { locale } =  await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const { initialBillingType } = resolvedSearchParams;
-  console.log(initialBillingType);
   const enabledBillingTypes = ['monthly', 'yearly', 'onetime'];
   const data = await buildMoneyPriceData({
     locale,
