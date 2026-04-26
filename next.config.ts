@@ -35,7 +35,13 @@ const nextConfig: NextConfig = {
     // Adjust the key if your API route path is different in the output structure
     '/api/blog/llm-content': ['./src/mdx/blog/**/*', './.source/**/*'],
     '/api/legal/llm-content': ['./src/mdx/legal/**/*', './.source/**/*'],
+    '/blog': ['./.source/**/*'],
+    '/blog/[[...slug]]': ['./.source/**/*'],
+    '/[locale]/blog': ['./.source/**/*'],
     '/[locale]/blog/[[...slug]]': ['./.source/**/*'],
+    '/legal': ['./.source/**/*'],
+    '/legal/[[...slug]]': ['./.source/**/*'],
+    '/[locale]/legal': ['./.source/**/*'],
     '/[locale]/legal/[[...slug]]': ['./.source/**/*'],
   }
 };
