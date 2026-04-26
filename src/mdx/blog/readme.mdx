@@ -2,7 +2,7 @@
 title: About Project Structure
 description: Show all source code directories and files
 icon: Gift
-date: 2026-04-25
+date: 2026-04-27
 ---
 
 ## Quick Started
@@ -13,6 +13,11 @@ date: 2026-04-25
       <ZiaFile name="config.json" anotion="" href="" />
       <ZiaFile name="d8-template.mdx" anotion="" href="" />
       <ZiaFile name="README.md" anotion="项目说明文档" href="" />
+    </ZiaFolder>
+    <ZiaFolder name=".source" anotion="" defaultOpen>
+      <ZiaFile name="blog.source.config.mjs" anotion="" href="" />
+      <ZiaFile name="index.ts" anotion="" href="" />
+      <ZiaFile name="legal.source.config.mjs" anotion="" href="" />
     </ZiaFolder>
     <ZiaFolder name="database" anotion="" defaultOpen>
       <ZiaFile name="create.sql" anotion="" href="" />
@@ -69,7 +74,6 @@ date: 2026-04-25
               </ZiaFolder>
               <ZiaFile name="layout.tsx" anotion="布局" href="" />
             </ZiaFolder>
-            <ZiaFile name="layout.tsx" anotion="布局" href="" />
           </ZiaFolder>
           <ZiaFolder name="(home)" anotion="首页" defaultOpen>
             <ZiaFolder name="[...catchAll]" anotion="全局404页面" defaultOpen>
@@ -83,12 +87,15 @@ date: 2026-04-25
             </ZiaFolder>
             <ZiaFolder name="pricing" anotion="" defaultOpen>
               <ZiaFile name="page.tsx" anotion="" href="" />
+              <ZiaFile name="pricing-client.tsx" anotion="" href="" />
             </ZiaFolder>
+            <ZiaFile name="layout.heavy.tsx" anotion="" href="" />
             <ZiaFile name="layout.tsx" anotion="布局" href="" />
             <ZiaFile name="page.tsx" anotion="" href="" />
           </ZiaFolder>
           <ZiaFile name="globals.css" anotion="全局样式" href="" />
           <ZiaFile name="layout.config.tsx" anotion="布局配置" href="" />
+          <ZiaFile name="layout.nav.tsx" anotion="" href="" />
           <ZiaFile name="layout.tsx" anotion="布局" href="" />
           <ZiaFile name="loading.tsx" anotion="全局加载组件" href="" />
         </ZiaFolder>
@@ -133,15 +140,17 @@ date: 2026-04-25
         <ZiaFile name="sitemap.ts" anotion="网站地图" href="" />
       </ZiaFolder>
       <ZiaFolder name="components" anotion="页面组件" defaultOpen>
+        <ZiaFile name="credit-popover-client.tsx" anotion="" href="" />
         <ZiaFile name="credit-popover.tsx" anotion="" href="" />
         <ZiaFile name="hero.tsx" anotion="首页大字组件" href="" />
-        <ZiaFile name="mdx-components.tsx" anotion="FumaMDX组件库(自定义)" href="" />
       </ZiaFolder>
       <ZiaFolder name="lib" anotion="工具包" defaultOpen>
         <ZiaFile name="appConfig.ts" anotion="应用全局配置" href="" />
-        <ZiaFile name="content-source.ts" anotion="" href="" />
         <ZiaFile name="fonts.ts" anotion="" href="" />
+        <ZiaFile name="i18n-base.ts" anotion="" href="" />
         <ZiaFile name="site-config.ts" anotion="网站图标配置" href="" />
+        <ZiaFile name="site-docs-base.ts" anotion="" href="" />
+        <ZiaFile name="site-docs.ts" anotion="" href="" />
       </ZiaFolder>
       <ZiaFolder name="mdx" anotion="FumaMDX文档" defaultOpen>
         <ZiaFolder name="blog" anotion="博客" defaultOpen>

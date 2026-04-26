@@ -1,10 +1,10 @@
 import { baseOptions } from '@/app/[locale]/layout.config';
-import { fingerprintConfig } from '@windrun-huaiin/backend-core/lib';
+import { fingerprintConfig } from '@windrun-huaiin/backend-core/config/fingerprint';
 import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
 import { SiteHomeLayout, type SiteHomeLayoutConfig } from '@windrun-huaiin/third-ui/fuma/base';
 import { ReactNode } from 'react';
 import { clerkPageBanner, localePrefixAsNeeded, defaultLocale } from '@/lib/appConfig';
-import { i18n } from '@/i18n';
+import { i18n } from '@/lib/i18n-base';
 import { appConfig } from '@/lib/appConfig';
 
 async function homeOptions(locale: string): Promise<SiteHomeLayoutConfig> {

@@ -1,15 +1,8 @@
 import { getRequestConfig } from 'next-intl/server';
 import path from 'path';
-import { appConfig } from "@/lib/appConfig";
+import { appConfig } from '@/lib/appConfig';
 import { loadMergedLocaleMessages, type RuntimeMessageSource } from '@windrun-huaiin/lib/i18n-server';
-import type { I18nConfig } from '@windrun-huaiin/fumadocs-local-md/server';
  
-export const i18n: I18nConfig = {
-  defaultLanguage: appConfig.i18n.defaultLocale,
-  languages: appConfig.i18n.locales as unknown as string[],
-  hideLocale: appConfig.i18n.localePrefixAsNeeded ? "default-locale" : "never",
-}
-
 // Can be imported from a shared config
 const locales = appConfig.i18n.locales;
 const messagesRoot = path.join(process.cwd(), 'messages');

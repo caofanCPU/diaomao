@@ -1,9 +1,9 @@
 
-import { Hero } from "@/components/hero";
-import { FingerprintStatus } from "@windrun-huaiin/third-ui/fingerprint";
-import { GradientButton } from "@windrun-huaiin/third-ui/fuma/mdx";
-import { CTA, FAQ, Features, SeoContent, Tips, Usage, Gallery } from "@windrun-huaiin/third-ui/main/server";
-import { getTranslations } from "next-intl/server";
+import { Hero } from '@/components/hero';
+import { FingerprintStatus } from '@windrun-huaiin/third-ui/fingerprint';
+import { GradientButton } from '@windrun-huaiin/third-ui/main/buttons';
+import { CTA, FAQ, Features, SeoContent, Tips, Usage, Gallery } from '@windrun-huaiin/third-ui/main/server';
+import { getTranslations } from 'next-intl/server';
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

@@ -1,4 +1,4 @@
-import { appConfig, generatedLocales, localePrefixAsNeeded, defaultLocale } from "@/lib/appConfig";
+import { appConfig, generatedLocales, localePrefixAsNeeded, defaultLocale } from '@/lib/appConfig';
 import { getFumaTranslations } from '@windrun-huaiin/third-ui/fuma/server';
 import { createLocalizedSiteMetadata } from '@windrun-huaiin/third-ui/lib/seo-metadata';
 import { NProgressBar } from '@windrun-huaiin/third-ui/main';
@@ -6,7 +6,7 @@ import { DocsRootProvider } from '@windrun-huaiin/third-ui/fuma/base';
 import { ClerkProviderClient } from '@windrun-huaiin/third-ui/clerk';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
-import { montserrat } from "@/lib/fonts";
+import { montserrat } from '@/lib/fonts';
 import { cn } from '@windrun-huaiin/lib';
 import './globals.css';
 import React from 'react';

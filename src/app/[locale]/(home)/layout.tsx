@@ -1,18 +1,21 @@
-import { baseOptions, homeNavLinks, levelNavLinks } from '@/app/[locale]/layout.config';
+import { baseOptions } from '@/app/[locale]/layout.config';
+import { levelNavLinks, primaryNavLinks } from '@/app/[locale]/layout.nav';
+import { homeHeavyItems } from './layout.heavy';
 import { showBanner, localePrefixAsNeeded, defaultLocale } from '@/lib/appConfig';
-import { i18n } from '@/i18n';
-import { fingerprintConfig } from '@windrun-huaiin/backend-core/lib';
+import { i18n } from '@/lib/i18n-base';
+import { fingerprintConfig } from '@windrun-huaiin/backend-core/config/fingerprint';
 import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
 import { SiteHomeLayout, type SiteHomeLayoutConfig } from '@windrun-huaiin/third-ui/fuma/base';
 import type { ReactNode } from 'react';
 
 async function homeOptions(locale: string): Promise<SiteHomeLayoutConfig> {
   return {
-    ...(await baseOptions(locale)),
-    links: [
-      ...(await levelNavLinks(locale)),
-      ...(await homeNavLinks(locale)),
-    ]
+      ...(await baseOptions(locale)),
+      links: [
+        ...(await primaryNavLinks(locale)),
+        ...(await levelNavLinks(locale)),
+        ...(await homeHeavyItems(locale)),
+      ]
   };
 }
 
@@ -59,4 +62,3 @@ export default async function Layout({
     </FingerprintProvider>
   );
 }
-

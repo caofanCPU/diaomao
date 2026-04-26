@@ -5,11 +5,11 @@
 };
 
 
-import { appConfig } from "@/lib/appConfig";
-import { buildProtectedPageRoutePatterns, handleAuthMiddleware } from "@windrun-huaiin/backend-core/auth/middleware";
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import createMiddleware from "next-intl/middleware";
-import { NextRequest, NextResponse } from "next/server";
+import { appConfig } from '@/lib/appConfig';
+import { buildProtectedPageRoutePatterns, handleAuthMiddleware } from '@windrun-huaiin/backend-core/auth/middleware';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import createMiddleware from 'next-intl/middleware';
+import { NextRequest, NextResponse } from 'next/server';
 
 const intlMiddleware = createMiddleware({
   locales: appConfig.i18n.locales,
