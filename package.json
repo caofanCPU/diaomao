@@ -60,7 +60,7 @@
     "@windrun-huaiin/contracts": "22.0.0",
     "@windrun-huaiin/fumadocs-local-md": "29.0.0",
     "@windrun-huaiin/lib": "29.0.0",
-    "@windrun-huaiin/third-ui": "29.0.0",
+    "@windrun-huaiin/third-ui": "29.0.1",
     "autoprefixer": "^10.4.27",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

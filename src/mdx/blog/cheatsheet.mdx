@@ -156,7 +156,7 @@ date: 2026-04-28
 
 项目注释里已经强调了数据库权限隔离的重要性这里建议把生产与本地环境严格分开，并避免把高权限连接串直接用于日常开发
 
-<TrophyCard title="结合上述流程, 从用户视角看, FumaDocs的扩展口" icon={<DatabaseZapIcon />}>
+<TrophyCard title="安全才是最大的豪华与自由, ⚠️🚨数据库配置" icon={<DatabaseZapIcon />}>
   - 本地: `DATABASE_URL="postgresql://YOURS_app:YOURS_PASSWORD@localhost:5432/postgres?sslmode=disable&schema=YOURS"`
   - 线上事务模式(推荐): `DATABASE_URL="postgresql://YOURS_app.PROJECT_ID:PASSWORD@SERVER_HOST.pooler.supabase.com:6543/postgres?sslmode=require&schema=YOURS&pgbouncer=true"`
   - 线上会话模式: `DATABASE_URL="postgresql://YOURS_app.PROJECT_ID:PASSWORD@SERVER_HOST.pooler.supabase.com:5432/postgres?sslmode=require&schema=YOURS"`
