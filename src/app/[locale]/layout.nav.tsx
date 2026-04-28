@@ -1,10 +1,10 @@
 import Preview from '@/../public/banner.webp';
 import { defaultLocale, localePrefixAsNeeded } from '@/lib/appConfig';
 import {
-  HighlighterIcon,
-  MmdIcon,
-  ShieldUserIcon,
-  SnippetsIcon
+  T3PIcon,
+  SettingsIcon,
+  ChartColumnStackedIcon,
+  BrainCircuitIcon
 } from '@windrun-huaiin/base-ui/icons';
 import { getAsNeededLocalizedUrl } from '@windrun-huaiin/lib/utils';
 import {
@@ -67,34 +67,34 @@ export async function levelNavLinks(locale: string): Promise<SiteNavItemConfig[]
   const blogsLinks: SiteMenuLeafConfig[] = [
     {
       text: 'async-architecture',
-      description: 'async-architecture',
+      description: '异步架构处理方案',
       path: '/blog/async-architecture',
       prefetch: false,
-      icon: <ShieldUserIcon />,
+      icon: <T3PIcon />,
       className: 'lg:col-start-2 lg:row-start-1',
     },
     {
-      text: 'Blog List',
-      description: 'MDX Snippets',
-      path: '/blog',
+      text: 'Config Sheet',
+      description: '配置速查',
+      path: '/blog/cheatsheet',
       prefetch: false,
-      icon: <SnippetsIcon />,
+      icon: <SettingsIcon />,
       className: 'lg:col-start-2 lg:row-start-2',
     },
     {
       text: 'IOC',
-      description: 'IOC',
+      description: 'IOC统计',
       path: '/blog/ioc',
       prefetch: false,
-      icon: <HighlighterIcon />,
+      icon: <ChartColumnStackedIcon />,
       className: 'lg:col-start-3 lg:row-start-1',
     },
     {
       text: 'Readme',
-      description: 'Who am I?',
+      description: 'Who am I',
       path: '/blog/readme',
       prefetch: false,
-      icon: <MmdIcon />,
+      icon: <BrainCircuitIcon />,
       className: 'lg:col-start-3 lg:row-start-2',
     },
   ];
@@ -107,7 +107,7 @@ export async function levelNavLinks(locale: string): Promise<SiteNavItemConfig[]
       landing: {
         text: 'I like Diaomao',
         description: 'Docs Driven as a Service.',
-        path: '/blog/readme',
+        path: '/blog',
         prefetch: false,
       },
       items: blogsLinks,

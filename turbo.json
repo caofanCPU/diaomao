@@ -52,6 +52,7 @@
       ]
     },
     "task:build:prod": {
+      "dependsOn": ["task:md:build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
         "NODE_ENV",
