@@ -1,3 +1,4 @@
+import '@/server/prisma';
 import { creditService, subscriptionService } from '@windrun-huaiin/backend-core/database';
 import { getOptionalServerAuthUser } from '@windrun-huaiin/backend-core/auth/server';
 import { viewLocalTime } from '@windrun-huaiin/lib/utils';
