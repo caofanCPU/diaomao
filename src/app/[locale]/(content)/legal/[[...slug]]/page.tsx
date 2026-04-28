@@ -1,8 +1,8 @@
 import { appConfig } from '@/lib/appConfig';
-import { SiteIcon } from '@/lib/site-config';
 import { siteDocs } from '@/lib/site-docs';
+import { SiteIcon } from '@/lib/site-config';
 import { NotFoundPage } from '@windrun-huaiin/base-ui/components';
-import { createFumaPage } from '@windrun-huaiin/third-ui/fuma/server';
+import { createFumaPage } from '@windrun-huaiin/third-ui/fuma/server/page-generator';
 
 const sourceKey = 'legal';
 const { Page, generateStaticParams, generateMetadata } = createFumaPage({
@@ -17,7 +17,7 @@ const { Page, generateStaticParams, generateMetadata } = createFumaPage({
   showBreadcrumb: false,
   showTableOfContent: true,
   showTableOfContentPopover: false,
-  tocRenderMode: 'fumadocs-clerk'
+  tocRenderMode: 'fumadocs-normal'
 });
 
 export default Page;

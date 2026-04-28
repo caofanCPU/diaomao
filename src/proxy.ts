@@ -1,15 +1,9 @@
-// Fix BigInt serialization issue globally
- 
-(BigInt.prototype as any).toJSON = function () {
-  return this.toString();
-};
-
 
 import { appConfig } from '@/lib/appConfig';
 import { buildProtectedPageRoutePatterns, handleAuthMiddleware } from '@windrun-huaiin/backend-core/auth/middleware';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import createMiddleware from 'next-intl/middleware';
-import { NextRequest, NextResponse } from 'next/server';
+import createMiddleware from "next-intl/middleware";
+import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware({
   locales: appConfig.i18n.locales,
@@ -58,9 +52,15 @@ export default clerkMiddleware(
   async (auth, req: NextRequest) => {
     const { defaultLocale, locales } = appConfig.i18n;
     const pathname = req.nextUrl.pathname;
+    const isWellKnownPath =
+      pathname === '/.well-known' || pathname.startsWith('/.well-known/');
     const hasLocalePrefix = locales.some(
       (loc) => pathname === `/${loc}` || pathname.startsWith(`/${loc}/`)
     );
+
+    if (isWellKnownPath) {
+      return NextResponse.next();
+    }
 
     const authResponse = await handleAuthMiddleware(auth, req, {
       protectedPageRoutes,

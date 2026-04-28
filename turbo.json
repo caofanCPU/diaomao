@@ -7,7 +7,7 @@
     "TURBO_TEAM"
   ],
   "tasks": {
-    "app:build": {
+    "task:build": {
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
         "NODE_ENV",
@@ -29,7 +29,7 @@
         "QSTASH_*"
       ]
     },
-    "app:build:dev": {
+    "task:build:dev": {
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
         "NODE_ENV",
@@ -51,8 +51,7 @@
         "QSTASH_*"
       ]
     },
-    "app:build:prod": {
-      "dependsOn": ["app:md-build"],
+    "task:build:prod": {
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
         "NODE_ENV",
@@ -74,7 +73,7 @@
         "QSTASH_*"
       ]
     },
-    "app:md-build": {
+    "task:md:build": {
       "inputs": [
         "src/mdx/**",
         "messages/**",
@@ -90,7 +89,7 @@
         "NEXT_PUBLIC_*"
       ]
     },
-    "app:dev": {
+    "task:dev": {
       "cache": false,
       "persistent": true,
       "env": [

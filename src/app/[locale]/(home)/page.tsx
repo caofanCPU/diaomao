@@ -2,18 +2,19 @@
 import { Hero } from '@/components/hero';
 import { FingerprintStatus } from '@windrun-huaiin/third-ui/fingerprint';
 import { GradientButton } from '@windrun-huaiin/third-ui/main/buttons';
-import { CTA, FAQ, Features, SeoContent, Tips, Usage, Gallery } from '@windrun-huaiin/third-ui/main/server';
-import { getTranslations } from 'next-intl/server';
+import { CTA, FAQ, Features, Gallery, SeoContent, Tips, Usage } from '@windrun-huaiin/third-ui/main/home/server';
+import { getTranslations } from "next-intl/server";
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
   const isDev = process.env.NODE_ENV !== 'production';
   const forceShow = process.env.SHOW_FINGERPRINT_STATUS === 'true'
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'gallery' });
+
   return (
     <>
-      { (forceShow || isDev) && <FingerprintStatus /> }
-      <Hero locale={locale} />
+      { (forceShow || isDev) && <FingerprintStatus />}
+      <Hero locale={locale}/>
       <Gallery
         locale={locale}
         button={
@@ -31,6 +32,5 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <SeoContent locale={locale} />
       <CTA locale={locale} />
     </>
-  )
+  );
 }
-

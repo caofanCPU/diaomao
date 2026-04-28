@@ -5,7 +5,7 @@ import { showBanner, localePrefixAsNeeded, defaultLocale } from '@/lib/appConfig
 import { i18n } from '@/lib/i18n-base';
 import { fingerprintConfig } from '@windrun-huaiin/backend-core/config/fingerprint';
 import { FingerprintProvider } from '@windrun-huaiin/third-ui/fingerprint';
-import { SiteHomeLayout, type SiteHomeLayoutConfig } from '@windrun-huaiin/third-ui/fuma/base';
+import { SiteHomeLayout, type SiteHomeLayoutConfig } from '@windrun-huaiin/third-ui/fuma/base/site-home-layout';
 import type { ReactNode } from 'react';
 
 async function homeOptions(locale: string): Promise<SiteHomeLayoutConfig> {

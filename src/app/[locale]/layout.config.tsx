@@ -1,11 +1,11 @@
 import { SiteIcon } from '@/lib/site-config';
 import { getTranslations } from 'next-intl/server';
 import { localePrefixAsNeeded, defaultLocale } from '@/lib/appConfig';
+import { HomeTitle } from '@windrun-huaiin/third-ui/fuma/base';
 import {
-  HomeTitle,
   createSiteBaseLayoutConfig,
   type SiteBaseLayoutConfig,
-} from '@windrun-huaiin/third-ui/fuma/base';
+} from '@windrun-huaiin/third-ui/fuma/base/site-layout-shared';
 import { getAsNeededLocalizedUrl } from '@windrun-huaiin/lib/utils';
 
 export async function baseOptions(locale: string): Promise<SiteBaseLayoutConfig> {

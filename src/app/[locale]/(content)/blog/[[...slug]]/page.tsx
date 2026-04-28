@@ -1,7 +1,7 @@
 import { appConfig } from '@/lib/appConfig';
-import { NotFoundPage } from '@windrun-huaiin/base-ui/components';
 import { siteDocs } from '@/lib/site-docs';
-import { createFumaPage } from '@windrun-huaiin/third-ui/fuma/server';
+import { NotFoundPage } from '@windrun-huaiin/base-ui/components';
+import { createFumaPage } from '@windrun-huaiin/third-ui/fuma/server/page-generator';
 import { SiteIcon } from '@/lib/site-config';
 import { LLMCopyButton } from '@windrun-huaiin/third-ui/fuma/mdx';
 

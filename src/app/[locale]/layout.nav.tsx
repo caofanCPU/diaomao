@@ -11,10 +11,12 @@ import {
   createLocalizedNavContext,
   createLocalizedNavGroup,
   createLocalizedNavLink,
+} from '@windrun-huaiin/third-ui/fuma/base/nav-config';
+import {
   type SiteMenuGroupConfig,
   type SiteMenuLeafConfig,
   type SiteNavItemConfig,
-} from '@windrun-huaiin/third-ui/fuma/base';
+} from '@windrun-huaiin/third-ui/fuma/base/site-layout-shared';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 

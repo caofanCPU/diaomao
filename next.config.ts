@@ -43,6 +43,35 @@ const nextConfig: NextConfig = {
     '/legal/[[...slug]]': ['./.source/**/*'],
     '/[locale]/legal': ['./.source/**/*'],
     '/[locale]/legal/[[...slug]]': ['./.source/**/*'],
+  },
+
+  outputFileTracingExcludes: {
+    '*': [
+      './tsconfig.tsbuildinfo',
+      './tsconfig.json',
+      './tsconfig.node.json',
+      './dev-scripts.config.json',
+      './components.json',
+      './eslint.config.js',
+      './postcss.config.mjs',
+      './next.config.ts',
+      './CHANGELOG.md',
+      './LICENSE',
+      './logs/**/*',
+      './github/**/*',
+      './changeset/**/*',
+      './database/**/*',
+      './docs/**/*',
+      './node_modules/.pnpm/@prisma+client*/node_modules/@prisma/client/runtime/query_engine_*',
+      './node_modules/.pnpm/@prisma+client*/node_modules/@prisma/client/runtime/query_compiler_bg.cockroachdb.*',
+      './node_modules/.pnpm/@prisma+client*/node_modules/@prisma/client/runtime/query_compiler_bg.mysql.*',
+      './node_modules/.pnpm/@prisma+client*/node_modules/@prisma/client/runtime/query_compiler_bg.sqlite.*',
+      './node_modules/.pnpm/@prisma+client*/node_modules/@prisma/client/runtime/query_compiler_bg.sqlserver.*',
+      './node_modules/.pnpm/@prisma+client*/node_modules/@prisma/client/runtime/query_compiler_bg.postgresql.js',
+      './node_modules/.pnpm/@prisma+client*/node_modules/@prisma/client/runtime/query_compiler_bg.postgresql.wasm-base64.js',
+      './node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/libquery_engine-*',
+      './node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/query_engine_*',
+    ],
   }
 };
 
