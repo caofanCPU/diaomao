@@ -15,8 +15,8 @@ importers:
         specifier: ^2.0.13
         version: 2.0.13
       '@windrun-huaiin/backend-core':
-        specifier: 29.0.0
-        version: 29.0.0(9edc905c98cc19688e0028defff98960)
+        specifier: 29.0.1
+        version: 29.0.1(9edc905c98cc19688e0028defff98960)
       '@windrun-huaiin/base-ui':
         specifier: 29.0.0
         version: 29.0.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(clsx@2.1.1)(next-intl@4.11.0(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(next-themes@0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tailwind-merge@3.5.0)(tailwindcss@4.2.4)
@@ -1915,11 +1915,11 @@ packages:
   '@upstash/redis@1.37.0':
     resolution: {integrity: sha512-LqOJ3+XWPLSZ2rGSed5DYG3ixybxb8EhZu3yQqF7MdZX1wLBG/FRcI6xcUZXHy/SS7mmXWyadrud0HJHkOc+uw==}
 
-  '@windrun-huaiin/backend-core@29.0.0':
-    resolution: {integrity: sha512-JHmjLd1NKDiVdrJb4o2Gb9RSSRgI0CH9sO22D4pai5GDAYCSFTIgjgQhx9rD0OYGEKKNzvF/IdQiRWLouOdrPA==}
+  '@windrun-huaiin/backend-core@29.0.1':
+    resolution: {integrity: sha512-CI491DrmFiNhPsC6TfUWHWAKtt51prbWomI4wNpXMq29o2HFld2Zx1+pcMrsX/6N7vcGpT6+3Nd3fjI/wANipA==}
     peerDependencies:
       '@clerk/nextjs': ^7.0.5
-      '@prisma/client': ^6.19.0
+      '@prisma/client': ^7.8.0
       '@windrun-huaiin/contracts': '>=22.0.0'
       next: 16.1.6
       stripe: 22.0.2
@@ -6607,7 +6607,7 @@ snapshots:
     dependencies:
       uncrypto: 0.1.3
 
-  '@windrun-huaiin/backend-core@29.0.0(9edc905c98cc19688e0028defff98960)':
+  '@windrun-huaiin/backend-core@29.0.1(9edc905c98cc19688e0028defff98960)':
     dependencies:
       '@clerk/nextjs': 7.2.7(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@prisma/client': 7.8.0(prisma@7.8.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
