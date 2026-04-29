@@ -1,5 +1,17 @@
 # @windrun-huaiin/diaomao
 
+## 29.0.0
+
+### Major Changes
+
+- feat(upgrade): `@windrun-huaiin/diaomao` architecture 2.0 major upgrade
+  - Upgrade Prisma from 6.x to 7.8.0
+  - Implicitly remove fumadocs / clerk / stripe dependencies, decouple architecture via underlying `@windrun-huaiin/*` packages
+  - Support MDX build pre-rendering and local real-time hot re-render
+  - Optimize Page Route & API Route bundle size: Page Route reduced from 34M+ to 5M, API Route from 35M+ to 6M
+  - Standardize UI icon usage specification
+  - Decouple UI components to avoid heavy entry coupling and reduce overall bundle volume
+
 ## 26.0.0
 
 ### Major Changes
