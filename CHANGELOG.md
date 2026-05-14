@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 31.1.0
+
+### Minor Changes
+
+- feat(dependency): pnpm upgrade `11.x`
+
 ## 31.0.1
 
 ### Patch Changes

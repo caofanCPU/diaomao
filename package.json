@@ -1,8 +1,8 @@
 {
   "name": "@windrun-huaiin/diaomao",
-  "version": "31.0.1",
+  "version": "31.1.0",
   "private": false,
-  "packageManager": "pnpm@10.33.4",
+  "packageManager": "pnpm@11.1.2",
   "publishConfig": {
     "access": "public"
   },
@@ -84,21 +84,6 @@
     "tailwindcss": "^4.2.1",
     "typescript": "^5.8.3"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@clerk/shared",
-      "@parcel/watcher",
-      "@prisma/client",
-      "@prisma/engines",
-      "@swc/core",
-      "@tailwindcss/oxide",
-      "core-js",
-      "esbuild",
-      "prisma",
-      "sharp",
-      "unrs-resolver"
-    ]
-  },
   "files": [
     ".changeset",
     "!.changeset/d8-template.mdx",
@@ -114,8 +99,9 @@
     "LICENSE",
     "next-env.d.ts",
     "next.config.ts",
+    "prisma.config.ts",
+    "pnpm-workspace.yaml",
     "postcss.config.mjs",
-    "tailwind.config.ts",
     "source.config.ts",
     "tsconfig.json",
     "tsconfig.node.json",
