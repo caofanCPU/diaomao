@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 31.0.1
+
+### Patch Changes
+
+- feat(docs): remove ZH text
+
 ## 31.0.0
 
 ### Major Changes

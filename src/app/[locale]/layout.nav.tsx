@@ -67,7 +67,7 @@ export async function levelNavLinks(locale: string): Promise<SiteNavItemConfig[]
   const blogsLinks: SiteMenuLeafConfig[] = [
     {
       text: 'async-architecture',
-      description: '异步架构处理方案',
+      description: 'Async handler',
       path: '/blog/async-architecture',
       prefetch: false,
       icon: <T3PIcon />,
@@ -75,7 +75,7 @@ export async function levelNavLinks(locale: string): Promise<SiteNavItemConfig[]
     },
     {
       text: 'Config Sheet',
-      description: '配置速查',
+      description: 'Quickstart config',
       path: '/blog/cheatsheet',
       prefetch: false,
       icon: <SettingsIcon />,
@@ -83,7 +83,7 @@ export async function levelNavLinks(locale: string): Promise<SiteNavItemConfig[]
     },
     {
       text: 'IOC',
-      description: 'IOC统计',
+      description: 'IOC Analysis',
       path: '/blog/ioc',
       prefetch: false,
       icon: <ChartColumnStackedIcon />,
