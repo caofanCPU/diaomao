@@ -1,24 +1,24 @@
 -- diaomao schema init
--- 适用场景：
--- 1. Supabase 托管 PostgreSQL
--- 2. Prisma 直连数据库
--- 3. 多工程共享同一个数据库，使用 schema 做隔离
+-- Usage Scenarios:
+-- 1. Supabase hosted PostgreSQL
+-- 2. Prisma direct database connection
+-- 3. Multiple projects sharing the same database, isolated by schema
 --
--- 说明：
--- 1. 业务运行时请使用 diaomao_app 连接，不要使用 postgres
--- 2. schema=diaomao 只是默认命名空间，不是安全边界
--- 3. 权限隔离依赖 diaomao_app 只被授予 diaomao schema 的最小权限
+-- Notes:
+-- 1. Use diaomao_app for runtime connections; do NOT use postgres
+-- 2. schema=diaomao is the default namespace only, NOT a security boundary
+-- 3. Permission isolation relies on granting diaomao_app minimal privileges to the diaomao schema
 
--- 危险操作保留注释，默认不要在共享环境执行
+-- Dangerous operation, keep commented; do NOT execute in shared environments by default
 -- DROP SCHEMA IF EXISTS diaomao CASCADE;
 
--- 第一步：创建 schema（重复执行安全）
+-- Step 1: Create schema (safe to run repeatedly)
 CREATE SCHEMA IF NOT EXISTS diaomao;
 
--- 第二步：把 schema 所有权交给 postgres
+-- Step 2: Assign schema ownership to postgres
 ALTER SCHEMA diaomao OWNER TO postgres;
 
--- 第三步：回收 PUBLIC 和 Supabase 公共角色的宽权限
+-- Step 3: Revoke broad privileges from PUBLIC and Supabase shared roles
 REVOKE ALL ON SCHEMA diaomao FROM PUBLIC;
 REVOKE ALL ON SCHEMA diaomao FROM anon, authenticated, service_role;
 REVOKE ALL ON ALL TABLES IN SCHEMA diaomao FROM PUBLIC;
@@ -28,7 +28,7 @@ REVOKE ALL ON ALL SEQUENCES IN SCHEMA diaomao FROM anon, authenticated, service_
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA diaomao FROM PUBLIC;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA diaomao FROM anon, authenticated, service_role;
 
--- 第四步：创建业务连接角色, 自行设置强密码
+-- Step 4: Create application role; set a strong password manually
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -41,18 +41,18 @@ BEGIN
 END
 $$;
 
--- 第五步：允许业务角色连接数据库
+-- Step 5: Grant database connection permission to the application role
 GRANT CONNECT ON DATABASE postgres TO diaomao_app;
 
--- 第六步：只允许业务角色使用 diaomao schema，不授予 CREATE
+-- Step 6: Allow the application role to use the diaomao schema only (no CREATE privilege)
 GRANT USAGE ON SCHEMA diaomao TO diaomao_app;
 
--- 第七步：授予 diaomao_app 对现有对象的最小必需权限
+-- Step 7: Grant minimal required permissions for existing objects to diaomao_app
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA diaomao TO diaomao_app;
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA diaomao TO diaomao_app;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA diaomao TO diaomao_app;
 
--- 第八步：配置默认权限，确保后续由 postgres 创建的新对象自动授权给 diaomao_app
+-- Step 8: Configure default privileges to auto-grant access for new objects created by postgres
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA diaomao
   REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
 

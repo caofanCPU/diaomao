@@ -87,9 +87,10 @@
   "files": [
     ".changeset",
     "!.changeset/d8-template.mdx",
-    "patches",
     "src",
     "public",
+    "database",
+    "prisma",
     ".gitignore",
     "messages",
     ".env.local.txt",
@@ -105,6 +106,7 @@
     "source.config.ts",
     "tsconfig.json",
     "tsconfig.node.json",
+    "turbo.json",
     "!**/scripts/**",
     "!**/*.test.{js,ts}",
     "!**/*.log"

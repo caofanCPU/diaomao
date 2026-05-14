@@ -1,4 +1,4 @@
--- 用户表
+-- USER
 CREATE TABLE IF NOT EXISTS diaomao.users (
     id                BIGSERIAL PRIMARY KEY,
     user_id           UUID           NOT NULL DEFAULT gen_random_uuid(),
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS diaomao.users (
     CONSTRAINT users_user_id_key UNIQUE (user_id),
     CONSTRAINT users_status_check CHECK (status::text = ANY (ARRAY['anonymous'::character varying, 'registered'::character varying, 'frozen'::character varying, 'deleted'::character varying]::text[]))
 );
--- 创建用户表的部分索引
+
 CREATE UNIQUE INDEX IF NOT EXISTS users_clerk_user_id_key 
 ON diaomao.users (clerk_user_id) 
 WHERE status <> 'deleted'; 
@@ -25,7 +25,7 @@ WHERE status <> 'deleted';
 
 CREATE INDEX IF NOT EXISTS idx_users_fingerprint_id ON diaomao.users (fingerprint_id);
 
--- 订阅表
+-- SUBSCRIPTIONS
 CREATE TABLE IF NOT EXISTS diaomao.subscriptions (
     id                   BIGSERIAL PRIMARY KEY,
     user_id              UUID        NOT NULL,
@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_pay_subscription_id ON diaomao.subs
 CREATE INDEX IF NOT EXISTS idx_subscriptions_order_id ON diaomao.subscriptions (order_id);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON diaomao.subscriptions (user_id);
 
--- 积分表
+-- CREDITS
 CREATE TABLE IF NOT EXISTS diaomao.credits (
     id                        BIGSERIAL PRIMARY KEY,
     user_id                   UUID        NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS diaomao.credits (
 
 CREATE INDEX IF NOT EXISTS idx_credits_user_id ON diaomao.credits (user_id);
 
--- 交易订单表
+-- ORDER
 CREATE TABLE IF NOT EXISTS diaomao.transactions (
     id                   BIGSERIAL PRIMARY KEY,
     user_id              UUID         NOT NULL,
@@ -121,7 +121,7 @@ CREATE INDEX IF NOT EXISTS idx_transactions_pay_subscription_id ON diaomao.trans
 CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON diaomao.transactions (user_id);
 
 
--- 积分使用审计表
+-- AUDIT_LOG
 CREATE TABLE IF NOT EXISTS diaomao.credit_audit_log (
     id               BIGSERIAL PRIMARY KEY,
     user_id          UUID         NOT NULL,
@@ -140,7 +140,7 @@ CREATE INDEX IF NOT EXISTS idx_credit_audit_log_operation_type ON diaomao.credit
 CREATE INDEX IF NOT EXISTS idx_credit_audit_log_user_id ON diaomao.credit_audit_log (user_id);
 
 
--- 用户信息备份表
+-- USER_BACKUP
 CREATE TABLE IF NOT EXISTS diaomao.user_backup (
     id                BIGSERIAL PRIMARY KEY,
     original_user_id  UUID         NOT NULL,
@@ -163,7 +163,7 @@ CREATE INDEX IF NOT EXISTS idx_user_backup_fingerprint_id ON diaomao.user_backup
 CREATE INDEX IF NOT EXISTS idx_user_backup_original_user_id ON diaomao.user_backup (original_user_id);
 
 
--- 第三方对接日志审计表
+-- API_LOG
 CREATE TABLE IF NOT EXISTS diaomao.apilog (
     id            BIGSERIAL PRIMARY KEY,
     api_type      VARCHAR(100)  NOT NULL,
