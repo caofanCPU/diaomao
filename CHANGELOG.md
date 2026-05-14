@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 31.1.1
+
+### Patch Changes
+
+- fix(pack): db schema file
+
 ## 31.1.0
 
 ### Minor Changes
