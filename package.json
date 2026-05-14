@@ -1,6 +1,6 @@
 {
   "name": "@windrun-huaiin/diaomao",
-  "version": "30.0.0",
+  "version": "31.0.0",
   "private": false,
   "packageManager": "pnpm@10.33.4",
   "publishConfig": {
@@ -43,14 +43,14 @@
     "whoareyou": "dev-scripts generate-nextjs-architecture -v"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.0.5",
+    "@clerk/nextjs": "^7.3.3",
     "@types/mdx": "^2.0.13",
-    "@windrun-huaiin/backend-core": "30.0.0",
-    "@windrun-huaiin/base-ui": "30.0.0",
-    "@windrun-huaiin/contracts": "30.0.0",
-    "@windrun-huaiin/fumadocs-local-md": "30.0.0",
-    "@windrun-huaiin/lib": "30.0.0",
-    "@windrun-huaiin/third-ui": "30.0.0",
+    "@windrun-huaiin/backend-core": "31.0.0",
+    "@windrun-huaiin/base-ui": "31.0.0",
+    "@windrun-huaiin/contracts": "31.0.0",
+    "@windrun-huaiin/fumadocs-local-md": "31.0.0",
+    "@windrun-huaiin/lib": "31.0.0",
+    "@windrun-huaiin/third-ui": "31.0.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
@@ -72,7 +72,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/parser": "^8.56.1",
-    "@windrun-huaiin/dev-scripts": "^30.0.0",
+    "@windrun-huaiin/dev-scripts": "^31.0.0",
     "baseline-browser-mapping": "^2.10.0",
     "dotenv": "^17.4.2",
     "eslint": "^9.39.1",

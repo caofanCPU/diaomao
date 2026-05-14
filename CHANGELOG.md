@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 31.0.0
+
+### Major Changes
+
+- feat(upgrade): `@windrun-huaiin/diaomao` upgrade for better UI components
+
 ## 30.0.0
 
 ### Major Changes

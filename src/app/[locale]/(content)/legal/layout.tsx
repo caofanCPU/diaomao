@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import { baseOptions } from '@/app/[locale]/layout.config';
 import { levelNavLinks, primaryNavLinks } from '@/app/[locale]/layout.nav';
-import { showBanner, localePrefixAsNeeded, defaultLocale } from '@/lib/appConfig';
+import { showBanner, localePrefixAsNeeded, defaultLocale, github } from '@/lib/appConfig';
+import { i18n } from '@/lib/i18n-base';
 import { siteDocs } from '@/lib/site-docs';
 import { SiteDocsLayout } from '@windrun-huaiin/third-ui/fuma/base/site-docs-layout';
 import { SiteHomeLayout, type SiteHomeLayoutConfig } from '@windrun-huaiin/third-ui/fuma/base/site-home-layout';
-import { appConfig } from '@/lib/appConfig';
 
 async function contentOptions(locale: string): Promise<SiteHomeLayoutConfig> {
   return {
@@ -29,7 +29,8 @@ export default async function Layout({
   const contentLayoutOptions = await contentOptions(locale);
   const homeLayoutOptions: SiteHomeLayoutConfig = {
     ...contentLayoutOptions,
-    githubUrl: appConfig.github,
+    i18n,
+    githubUrl: github,
     searchToggle: {
       enabled: false,
     },

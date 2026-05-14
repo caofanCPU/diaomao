@@ -1,4 +1,4 @@
-import { CreditPopoverClient } from '@/components/credit-popover-client';
+import { CreditOverviewNavClient } from '@windrun-huaiin/third-ui/main/credit';
 import { appConfig } from '@/lib/appConfig';
 import { ClerkUser } from '@windrun-huaiin/third-ui/clerk/server';
 import type { SiteNavItemConfig } from '@windrun-huaiin/third-ui/fuma/base/site-layout-shared';
@@ -9,7 +9,12 @@ export async function homeHeavyItems(locale: string): Promise<SiteNavItemConfig[
       type: 'custom',
       secondary: true,
       mobilePinned: true,
-      children: <CreditPopoverClient locale={locale} />,
+      children: (
+        <CreditOverviewNavClient
+          locale={locale}
+          endpoint="/api/user/credit-overview"
+        />
+      ),
     },
     {
       type: 'custom',
