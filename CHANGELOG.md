@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 31.1.2
+
+### Patch Changes
+
+- fix(page): pricing page `min-h-screen`
+
 ## 31.1.1
 
 ### Patch Changes
