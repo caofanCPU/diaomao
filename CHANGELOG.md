@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 31.1.3
+
+### Patch Changes
+
+- feat(UI): theme switch mode support env config
+
 ## 31.1.2
 
 ### Patch Changes
