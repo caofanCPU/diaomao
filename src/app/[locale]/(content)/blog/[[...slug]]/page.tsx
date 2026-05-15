@@ -8,7 +8,6 @@ const { Page, generateStaticParams, generateMetadata } = createFumaPage({
   sourceKey: sourceKey,
   mdxContentSource: () => siteDocs.getContentSource(sourceKey),
   getMDXComponents: siteDocs.getMDXComponents,
-  mdxSourceDir: appConfig.mdxSourceDir[sourceKey],
   githubBaseUrl: appConfig.githubBaseUrl,
   copyButtonComponent: <LLMCopyButton />,
   showBreadcrumb: false,

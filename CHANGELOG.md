@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 31.2.0
+
+### Minor Changes
+
+- feat(mdx): optimize mdx sourceKey
+
 ## 31.1.3
 
 ### Patch Changes

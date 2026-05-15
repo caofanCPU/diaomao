@@ -1,6 +1,6 @@
 {
   "name": "@windrun-huaiin/diaomao",
-  "version": "31.1.3",
+  "version": "31.2.0",
   "private": false,
   "packageManager": "pnpm@11.1.2",
   "publishConfig": {
@@ -49,8 +49,8 @@
     "@windrun-huaiin/base-ui": "31.0.0",
     "@windrun-huaiin/contracts": "31.0.0",
     "@windrun-huaiin/fumadocs-local-md": "31.0.0",
-    "@windrun-huaiin/lib": "31.0.1",
-    "@windrun-huaiin/third-ui": "31.2.0",
+    "@windrun-huaiin/lib": "31.0.2",
+    "@windrun-huaiin/third-ui": "31.3.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
