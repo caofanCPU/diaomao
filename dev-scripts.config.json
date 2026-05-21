@@ -112,6 +112,7 @@
       "tailwindcss-animate",
       "ts-morph",
       "ts-node",
+      "turbo",
       "typescript",
       "unist-util-visit",
       "uuid",

@@ -1,6 +1,6 @@
 import { appConfig, generatedLocales, localePrefixAsNeeded, defaultLocale, themeMode } from '@/lib/appConfig';
 import { getFumaTranslations } from '@windrun-huaiin/third-ui/fuma/fuma-translate-util';
-import { createLocalizedSiteMetadata } from '@windrun-huaiin/third-ui/lib/seo-metadata';
+import { createLocalizedPageMetadata, createLocalizedSiteMetadata } from '@windrun-huaiin/third-ui/lib/seo-metadata';
 import { NProgressBar } from '@windrun-huaiin/third-ui/main';
 import { DocsRootProvider } from '@windrun-huaiin/third-ui/fuma/base/docs-root-provider';
 import { ClerkProviderClient } from '@windrun-huaiin/third-ui/clerk';
@@ -19,12 +19,24 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await paramsPromise;
-  return createLocalizedSiteMetadata({
+  const siteMetadata = await createLocalizedSiteMetadata({
     locale,
     baseUrl: appConfig.baseUrl,
     locales: appConfig.i18n.locales,
-    defaultLocale,
-    localePrefixAsNeeded,
+    defaultLocale: appConfig.i18n.defaultLocale,
+    localePrefixAsNeeded: appConfig.i18n.localePrefixAsNeeded,
+  });
+
+  return createLocalizedPageMetadata({
+    url: {
+      locale,
+      pathname: '/',
+      baseUrl: appConfig.baseUrl,
+      locales: appConfig.i18n.locales,
+      defaultLocale: appConfig.i18n.defaultLocale,
+      localePrefixAsNeeded: appConfig.i18n.localePrefixAsNeeded,
+    },
+    site: siteMetadata,
   });
 }
 

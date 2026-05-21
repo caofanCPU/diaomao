@@ -1,10 +1,30 @@
 
 import { appConfig } from '@/lib/appConfig';
+import { createLocalizedMetadata } from '@windrun-huaiin/third-ui/lib/seo-metadata';
 import { moneyPriceConfig } from '@windrun-huaiin/backend-core/config/money-price';
 import { FingerprintStatus } from '@windrun-huaiin/third-ui/fingerprint';
 import { buildMoneyPriceData } from '@windrun-huaiin/third-ui/main/money-price/server';
 import { cn } from '@windrun-huaiin/lib/utils';
 import { PricingClient } from './pricing-client';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  return createLocalizedMetadata({
+    namespace: 'metadata.pricing',
+    url: {
+      locale,
+      pathname: '/pricing',
+      baseUrl: appConfig.baseUrl,
+      locales: appConfig.i18n.locales,
+      defaultLocale: appConfig.i18n.defaultLocale,
+      localePrefixAsNeeded: appConfig.i18n.localePrefixAsNeeded,
+    },
+  });
+}
 
 export default async function Pricing({
   params,
