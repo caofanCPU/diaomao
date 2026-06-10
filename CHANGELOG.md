@@ -1,5 +1,11 @@
 # @windrun-huaiin/diaomao
 
+## 31.3.1
+
+### Patch Changes
+
+- feat(isr): use isr for vercel page cache
+
 ## 31.3.0
 
 ### Minor Changes
