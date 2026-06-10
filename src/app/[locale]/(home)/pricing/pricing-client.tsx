@@ -3,6 +3,7 @@
 import { MoneyPriceInteractive } from '@windrun-huaiin/third-ui/main/money-price';
 import type { InitUserContext, MoneyPriceConfig, MoneyPriceData } from '@windrun-huaiin/third-ui/main/money-price';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface PricingClientProps {
   data: MoneyPriceData;
@@ -12,7 +13,6 @@ interface PricingClientProps {
   enableClerkModal: boolean;
   enabledBillingTypes: string[];
   enableSubscriptionUpgrade: boolean;
-  initialBillingType?: string;
 }
 
 export function PricingClient({
@@ -22,9 +22,9 @@ export function PricingClient({
   customerPortalApiEndpoint,
   enableClerkModal,
   enabledBillingTypes,
-  enableSubscriptionUpgrade,
-  initialBillingType,
+  enableSubscriptionUpgrade
 }: PricingClientProps) {
+  const searchParams = useSearchParams();
   const [initUserContext, setInitUserContext] = useState<InitUserContext>({
     fingerprintId: null,
     xUser: null,
@@ -33,7 +33,7 @@ export function PricingClient({
     isClerkAuthenticated: false,
   });
   const [isPricingContextLoading, setIsPricingContextLoading] = useState(true);
-
+  const initialBillingType = searchParams.get('initialBillingType') ?? undefined;
   useEffect(() => {
     const controller = new AbortController();
 

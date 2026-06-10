@@ -11,7 +11,12 @@ import { cn } from '@windrun-huaiin/lib/utils';
 import './globals.css';
 import React from 'react';
 
-export const dynamic = 'force-dynamic'
+// 7 days
+export const revalidate = 604800;
+
+export function generateStaticParams() {
+  return appConfig.i18n.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params: paramsPromise
@@ -72,6 +77,7 @@ export default async function RootLayout({
             </DocsRootProvider>
           </ClerkProviderClient>
         </body>
+        {/* GoogleAnalysisScript Or MicrosoftAnalysisScript */}
       </NextIntlClientProvider>
     </html>
   )
